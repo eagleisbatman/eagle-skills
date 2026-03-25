@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{APP_NAME}} — UX Review</title>
+<style>
+  :root {
+    --critical: #dc2626;
+    --high: #ea580c;
+    --medium: #ca8a04;
+    --low: #2563eb;
+    --bg: #fafaf9;
+    --text: #1c1917;
+    --muted: #78716c;
+    --border: #d6d3d1;
+    --surface: #ffffff;
+    --green: #16a34a;
+    --green-bg: #f0fdf4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* --- SECTION LAYOUT --- */
+  section {
+    min-height: 100vh;
+    padding: 80px 40px;
+    border-bottom: 1px solid var(--border);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  section.hero {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 120px 40px;
+  }
+
+  /* --- TYPOGRAPHY --- */
+  h1 { font-size: 3.5rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 24px; }
+  h2 { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 32px; padding-bottom: 16px; border-bottom: 3px solid var(--text); }
+  h3 { font-size: 1.35rem; font-weight: 700; margin-bottom: 16px; }
+  h4 { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+  p { margin-bottom: 16px; max-width: 720px; }
+  .subtitle { font-size: 1.25rem; color: var(--muted); max-width: 640px; margin-bottom: 48px; }
+
+  /* --- SEVERITY BADGES --- */
+  .badge { display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: white; }
+  .badge.critical { background: var(--critical); }
+  .badge.high { background: var(--high); }
+  .badge.medium { background: var(--medium); }
+  .badge.low { background: var(--low); }
+
+  /* --- CONTEXT GRID --- */
+  .context-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin: 32px 0; }
+  .context-card { background: var(--surface); border: 1px solid var(--border); padding: 24px; border-radius: 8px; }
+  .context-card .label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; margin-bottom: 8px; }
+  .context-card .value { font-size: 1.15rem; font-weight: 700; }
+
+  /* --- THESIS BOX --- */
+  .thesis-box { background: var(--text); color: white; padding: 48px; border-radius: 8px; margin: 48px 0; }
+  .thesis-box h3 { color: white; font-size: 1.5rem; margin-bottom: 16px; }
+  .thesis-box p { color: #d6d3d1; font-size: 1.1rem; max-width: 100%; }
+
+  /* --- STATS ROW --- */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 32px 0; }
+  .stat-card { text-align: center; padding: 24px; background: var(--surface); border: 2px solid var(--border); border-radius: 8px; }
+  .stat-card .number { font-size: 2.5rem; font-weight: 800; line-height: 1; }
+  .stat-card .number.critical { color: var(--critical); }
+  .stat-card .number.high { color: var(--high); }
+  .stat-card .number.medium { color: var(--medium); }
+  .stat-card .number.low { color: var(--low); }
+  .stat-card .label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-top: 8px; }
+
+  /* --- FINDINGS --- */
+  .finding { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 32px; margin-bottom: 32px; border-left: 5px solid transparent; }
+  .finding.critical-border { border-left-color: var(--critical); }
+  .finding.high-border { border-left-color: var(--high); }
+  .finding.medium-border { border-left-color: var(--medium); }
+  .finding.low-border { border-left-color: var(--low); }
+  .finding-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .finding-title { font-size: 1.2rem; font-weight: 700; }
+  .law-tag { display: inline-block; padding: 3px 10px; background: #f5f5f4; border: 1px solid var(--border); border-radius: 4px; font-size: 0.75rem; font-weight: 600; color: var(--muted); }
+
+  .evidence-row { display: grid; grid-template-columns: 180px 1fr; gap: 24px; margin: 20px 0; align-items: start; }
+  .evidence-row img { width: 180px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+
+  .recommendation { background: var(--green-bg); border: 1px solid #bbf7d0; padding: 16px 20px; border-radius: 6px; margin-top: 16px; }
+  .recommendation h4 { color: var(--green); font-size: 0.8rem; margin-bottom: 8px; }
+
+  /* --- TABLE --- */
+  table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 0.9rem; }
+  th { text-align: left; padding: 12px 16px; background: var(--text); color: white; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) { background: #fafaf9; }
+
+  /* --- FLOW MAP --- */
+  .flow-map { display: flex; gap: 8px; overflow-x: auto; padding: 24px 0; align-items: flex-start; }
+  .flow-step { flex-shrink: 0; text-align: center; width: 120px; }
+  .flow-step img { width: 100px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 8px; }
+  .flow-step .time { font-size: 0.7rem; color: var(--muted); font-weight: 600; }
+  .flow-step .label { font-size: 0.75rem; font-weight: 600; }
+  .flow-arrow { flex-shrink: 0; display: flex; align-items: center; padding-top: 40px; color: var(--muted); font-size: 1.2rem; }
+
+  /* --- DESIGN RECS (MOCKUPS) --- */
+  .design-rec { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin: 32px 0; padding: 32px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+  .mockup { background: #f5f5f4; border: 2px solid var(--border); border-radius: 24px; padding: 16px; max-width: 280px; margin: 0 auto; min-height: 500px; position: relative; overflow: hidden; }
+  .mockup.current-mock { border-color: var(--critical); }
+  .mockup.proposed-mock { border-color: var(--green); }
+
+  /* --- TIMELINE --- */
+  .timeline { position: relative; padding-left: 40px; margin: 32px 0; }
+  .timeline::before { content: ''; position: absolute; left: 15px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+  .timeline-item { position: relative; margin-bottom: 24px; padding-left: 24px; }
+  .timeline-item::before { content: ''; position: absolute; left: -29px; top: 6px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--muted); background: white; }
+  .timeline-item.problem::before { background: var(--critical); border-color: var(--critical); }
+
+  /* --- PRD VALIDATION --- */
+  .prd-check { display: flex; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); align-items: flex-start; }
+  .prd-check .status { font-size: 1.2rem; flex-shrink: 0; }
+  .prd-check .detail { font-size: 0.9rem; }
+  .prd-check .detail strong { display: block; margin-bottom: 4px; }
+
+  /* --- FOOTER --- */
+  footer { padding: 48px 40px; text-align: center; color: var(--muted); font-size: 0.85rem; max-width: 1200px; margin: 0 auto; }
+
+  @media (max-width: 768px) {
+    section { padding: 48px 20px; }
+    h1 { font-size: 2.2rem; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .evidence-row { grid-template-columns: 1fr; }
+    .design-rec { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!--
+  EAGLE UX REVIEW — HTML REPORT TEMPLATE
+  =======================================
+  This template defines the section structure and CSS for UX review reports.
+  When generating a report, replace {{PLACEHOLDERS}} and populate sections.
+
+  REQUIRED SECTIONS:
+  1. Hero / Cover (context cards)
+  2. Central Thesis
+  3. Executive Summary (severity counts + flow map)
+  4. PRD Validation (if PRD provided)
+  5. Detailed Findings (ordered by severity × north star impact)
+  6. Priority Matrix (table)
+  7. Visual Design Recommendations (current vs proposed mockups)
+  8. Time to First Value Analysis (timeline)
+  9. UX Laws Violated Summary (table)
+  10. Footer
+
+  CONTEXT CARDS TO INCLUDE:
+  - North Star Metric
+  - Target User
+  - Reference App(s)
+  - App Identity
+  - Device/Connectivity Context
+  - PRD Status (if provided)
+
+  FINDING STRUCTURE:
+  <div class="finding {{severity}}-border">
+    <div class="finding-header">
+      <span class="badge {{severity}}">{{SEVERITY}}</span>
+      <span class="finding-title">F#: {{Title}}</span>
+      <span class="law-tag">{{UX Law}}</span>
+    </div>
+    <div class="evidence-row">
+      <img src="frames/frame_XXX.jpg" alt="{{description}}">
+      <div class="evidence-text">
+        <h4>What Happens</h4>
+        <p>{{observation}}</p>
+        <h4>Why This Matters</h4>
+        <p>{{UX law connection + north star impact}}</p>
+        <div class="recommendation">
+          <h4>Recommendation</h4>
+          <p>{{actionable fix}}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  PRD VALIDATION STRUCTURE (if PRD provided):
+  <div class="prd-check">
+    <div class="status">{{✅ or ❌ or ⚠️}}</div>
+    <div class="detail">
+      <strong>{{PRD requirement / hypothesis}}</strong>
+      {{Evidence of pass/fail from the video/screenshots}}
+    </div>
+  </div>
+-->
+
+<!-- Populate sections below when generating report -->
+
+</body>
+</html>
