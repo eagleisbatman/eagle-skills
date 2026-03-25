@@ -391,28 +391,28 @@ Low-literacy users understand concrete, real-world representations better than a
 - **Key question:** Are visual elements realistic (photographic) rather than abstract (iconographic)?
 - **Audit:** Inventory all icons and images: realistic/photographic or abstract/stylized? Check if metaphors require prior digital literacy (gear = settings, cloud = storage, hamburger = menu). Verify images match the user's local context.
 - **Common violations:** Abstract icons for concepts with real-world equivalents, metaphors requiring cultural knowledge, stylized illustrations instead of photographs.
-- **Design principle:** Use photographs of actual crops, pests, equipment matching the user's local context. Localize images as well as text. Avoid abstract icons for core functionality.
+- **Design principle:** Use photographs of real objects matching the user's local context (e.g., local foods, familiar tools, recognizable landmarks). Localize images as well as text. Avoid abstract icons for core functionality.
 
 ### Minimal Text, Maximum Meaning
 Every word must earn its place. Use the shortest possible text that conveys the full meaning. Support text with visuals.
 - **Key question:** Is every text element as short as it can be while remaining clear?
 - **Audit:** Check reading level of all UI text (target: grade 3-5). Count words per label/instruction (aim for 1-3 words). Verify every text element has visual support.
 - **Common violations:** Long sentences where short phrases suffice, technical vocabulary, complex grammar, paragraph-format instructions, text without visual support.
-- **Design principle:** Write for a 3rd-grade reading level in the local language. Use active voice, short sentences. "Take a photo of the sick leaf" not "Please capture an image of the affected foliage for analysis."
+- **Design principle:** Write for a 3rd-grade reading level in the local language. Use active voice, short sentences. "Take a photo of the problem" not "Please capture an image of the affected item for analysis."
 
 ### Guided Linear Flows
 Low-literacy users perform better with step-by-step linear flows than with open-ended interfaces requiring wayfinding decisions. — Medhi et al., 2011
 - **Key question:** Does the interface guide the user through a clear sequence of steps, or require them to figure out where to go?
 - **Audit:** Map the core flow: is it linear (Step 1 → Step 2 → Step 3) or branching? Check for clear "what to do next" signals on every screen. Verify the user never reaches a dead-end.
 - **Common violations:** Dashboard/hub screens with multiple equal options, non-linear navigation requiring wayfinding, flows that branch based on user decisions, interfaces that assume the user knows what to do next.
-- **Design principle:** The ideal flow: open app → single input (voice or photo) → get answer → optional follow-up → done. Avoid hub-and-spoke patterns. Make the most common path visually dominant.
+- **Design principle:** The ideal flow: open app → single input → get result → optional follow-up → done. Avoid hub-and-spoke patterns. Make the most common path visually dominant.
 
 ### Meaningful Defaults
 Pre-select the most common or safest option so the user can proceed with minimal decisions.
 - **Key question:** Are intelligent defaults set for every configurable option?
 - **Audit:** Check every selection/input: is the most common option pre-selected? Check language auto-detection, location auto-detection, and relevant content based on user history.
 - **Common violations:** Empty dropdowns, no pre-selected options, settings with no defaults, language selection with no auto-detection, requiring manual input when the system has the data.
-- **Design principle:** Auto-detect everything possible: language, location, crop season, relevant content. Every decision removed is one less point of confusion.
+- **Design principle:** Auto-detect everything possible: language, location, time zone, preferences from usage patterns, relevant content. Every decision removed is one less point of confusion.
 
 ### Error Tolerance & Forgiveness
 The interface should be extraordinarily forgiving of user errors, especially for users unfamiliar with digital interfaces.
@@ -423,10 +423,10 @@ The interface should be extraordinarily forgiving of user errors, especially for
 
 ### Familiar Metaphors from Daily Life
 Use interaction patterns from apps the user already knows (WhatsApp, YouTube, phone dialer) rather than novel patterns.
-- **Key question:** Would a user whose only apps are WhatsApp and YouTube understand this interface immediately?
+- **Key question:** Would a user whose only apps are WhatsApp, YouTube, and a basic phone dialer understand this interface immediately?
 - **Audit:** List the top 3 apps used by the target audience. For each pattern in the reviewed app, check: does it match one of those reference apps? Flag every pattern that requires learning something new.
 - **Common violations:** Novel navigation patterns, custom gesture vocabularies, unfamiliar content layouts, interaction models from desktop software.
-- **Design principle:** WhatsApp is the dominant reference for most emerging market users. Its patterns ARE "the internet" for this audience: bottom input field, send button, voice message via hold-to-record, conversations flow upward, green = connected, blue = read.
+- **Design principle:** Identify the dominant reference app for the target audience (e.g., WhatsApp for emerging markets, Instagram for younger demographics, Slack for knowledge workers). Those patterns ARE "how apps work" for that audience. For WhatsApp-dominant audiences: bottom input field, send button, voice message via hold-to-record, conversations flow upward, green = connected, blue = read.
 
 ---
 
@@ -442,7 +442,7 @@ Use interaction patterns from apps the user already knows (WhatsApp, YouTube, ph
 | **Time on Task** | Seconds to complete core task | Varies (shorter = better) | Doherty Threshold, Parkinson's, Fitts's |
 | **Error Rate** | Errors per task attempt | <0.5 per task | Error Prevention, Postel's Law, Error Tolerance |
 | **Taps to Complete** | Number of taps for core task | <5 for simple tasks | Hick's Law, Occam's Razor, Guided Linear Flows |
-| **Time to First Value** | Seconds from first open to first valuable interaction | <30s for chat apps | Goal Gradient, Doherty Threshold |
+| **Time to First Value** | Seconds from first open to first valuable interaction | <30s (varies by complexity) | Goal Gradient, Doherty Threshold |
 | **Learnability** | Improvement in task time across sessions | Plateau by session 3 | Jakob's Law, Recognition vs Recall |
 
 ### Engagement Metrics
@@ -453,7 +453,7 @@ Use interaction patterns from apps the user already knows (WhatsApp, YouTube, ph
 | **Session Length** | Average time per session | Varies by app type | Peak-End Rule, Content-First Mobile |
 | **Session Frequency** | Sessions per user per week | >3 for retention | Hook Model, Loss Aversion, Social Proof |
 | **D1/D7/D30 Retention** | % of users returning at day 1/7/30 | D1>40%, D7>20%, D30>10% | Endowment Effect, Hook Model, Commitment |
-| **Queries per Session** | (For AI/chat apps) questions asked per session | >2 | Zeigarnik, Suggestion Chips |
+| **Core Actions per Session** | Primary actions completed per session (e.g., searches, messages sent, items viewed, tasks completed) | >2 | Zeigarnik, Suggestion Chips |
 
 ### Satisfaction Metrics
 
@@ -486,6 +486,6 @@ Use interaction patterns from apps the user already knows (WhatsApp, YouTube, ph
 **Low-Literacy Audience Additional Checks:**
 1. Cover-the-text test: can you understand the screen without reading? (Tests Visual Primacy)
 2. Voice-only test: can the core task be completed entirely by voice? (Tests Audio/Voice)
-3. Familiar-app test: does this feel like WhatsApp/YouTube? (Tests Familiar Metaphors)
+3. Familiar-app test: does this feel like the user's daily apps (WhatsApp, YouTube, etc.)? (Tests Familiar Metaphors)
 4. One-path test: is there exactly one obvious thing to do next? (Tests Guided Linear Flows)
 5. Wrong-tap test: what happens if you tap the wrong thing? (Tests Error Tolerance)

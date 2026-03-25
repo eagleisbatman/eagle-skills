@@ -20,19 +20,19 @@ Fill out one section per feature/flow you want to validate. The more specific th
 | [e.g., time to complete] | [e.g., 90s] | [e.g., 30s] | [e.g., median] |
 | [e.g., D7 retention of users who used feature] | [e.g., 8%] | [e.g., 25%] | [e.g., cohort] |
 
-**North Star Connection:** [How does this feature's success connect to the overall product metric? e.g., "More completed queries → higher queries/user → better retention"]
+**North Star Connection:** [How does this feature's success connect to the overall product metric? e.g., "More completed checkouts → higher revenue/user → better LTV" or "More searches performed → higher content engagement → better retention"]
 
 **Happy Path (Expected User Flow):**
 1. [Step 1 — e.g., User opens app]
-2. [Step 2 — e.g., User taps chat input]
-3. [Step 3 — e.g., User types or speaks question]
-4. [Step 4 — e.g., AI responds]
-5. [Step 5 — e.g., User asks follow-up]
+2. [Step 2 — e.g., User navigates to feature]
+3. [Step 3 — e.g., User performs core action]
+4. [Step 4 — e.g., System responds / action completes]
+5. [Step 5 — e.g., User takes follow-up action or exits]
 
 **Known Risks / Assumptions:**
-- [e.g., "Assumes user knows what to ask"]
+- [e.g., "Assumes user discovers the feature organically"]
 - [e.g., "Depends on network connectivity"]
-- [e.g., "Voice input may not work for all dialects"]
+- [e.g., "Onboarding may not cover this flow"]
 
 ---
 

@@ -66,10 +66,10 @@ The skill asks for structured context before analyzing anything. This context sh
 
 | Input | What it is | Why it matters |
 |-------|-----------|---------------|
-| **North Star Metric** | The single number that defines success for this product. Examples: queries per user, conversion rate, D7 retention, revenue per user. | Every finding in the report connects to this metric. Without it, findings are just opinions. With it, they're business cases. |
-| **Target User** | Who uses this app? Demographics, tech literacy, device types, connectivity conditions, daily app habits. | A banking app for urban professionals is reviewed completely differently from a farming assistant for rural users on 2G. The same screen can be "fine" for one audience and "broken" for another. |
-| **Reference Apps** | The 2-3 apps your target user opens every day. For rural East Africa, that's WhatsApp. For US teens, that's TikTok and Instagram. | These apps define the user's mental model. Users don't learn your app from scratch — they expect it to work like the apps they already know. Every departure from those patterns is friction. |
-| **App Identity** | One-word category: chat, content, marketplace, tool, social, utility. | The skill checks whether your UI actually matches this identity. If you say "chat" but your home screen is a content feed, that's the foundational problem — and it gets flagged before anything else. |
+| **North Star Metric** | The single number that defines success for this product. Examples: conversion rate, D7 retention, tasks completed per session, revenue per user, time to first value. | Every finding in the report connects to this metric. Without it, findings are just opinions. With it, they're business cases. |
+| **Target User** | Who uses this app? Demographics, tech literacy, device types, connectivity conditions, daily app habits. | A banking app for urban professionals is reviewed completely differently from a fitness tracker for casual users. The same screen can be "fine" for one audience and "broken" for another. |
+| **Reference Apps** | The 2-3 apps your target user opens every day. Examples: WhatsApp, Instagram, Amazon, Spotify, YouTube. | These apps define the user's mental model. Users don't learn your app from scratch — they expect it to work like the apps they already know. Every departure from those patterns is friction. |
+| **App Identity** | One-word category: chat, content, marketplace, tool, social, utility. | The skill checks whether your UI actually matches this identity. If the stated category doesn't match the UI patterns, that mismatch gets flagged as a foundational issue. |
 
 **Extended inputs (optional, but dramatically improve the review):**
 
@@ -78,7 +78,7 @@ The skill asks for structured context before analyzing anything. This context sh
 | **PRD / Hypothesis Document** | Adds a full "PRD Validation" section to the report. Each product requirement is checked against what actually appears in the UI: pass, fail, or partial. |
 | **User Personas** | Findings get evaluated from each persona's perspective. A feature that works for tech-savvy users may completely fail for low-literacy users. |
 | **Analytics Data** | Drop-off rates, session duration, funnel completion. Lets findings reference real numbers instead of estimates. |
-| **Competitive Screenshots** | Enables direct side-by-side comparisons: "WhatsApp does X here; your app does Y." |
+| **Competitive Screenshots** | Enables direct side-by-side comparisons: "Competitor X does this here; your app does that." |
 | **Known Pain Points** | Focuses the review on what the team already suspects, while still covering everything else. |
 | **Business Model** | Affects which engagement patterns are recommended. Ad-supported apps need session length; transaction apps need conversion. |
 | **Technical Constraints** | Prevents recommending things that can't be built. |
@@ -94,7 +94,7 @@ If you provide a video and say "just review it" without answering any of these q
 
 The skill presents all required questions in a single message. No drip-feeding questions across 10 back-and-forth turns. You answer once, and the analysis begins.
 
-If you provide a PRD, the skill extracts every testable hypothesis from it: user flow assumptions ("users will go from A to B to C"), success criteria ("80% should complete onboarding in under 60 seconds"), and feature specifications ("the chat supports text, voice, and image input"). Each one becomes a validation item in the report.
+If you provide a PRD, the skill extracts every testable hypothesis from it: user flow assumptions ("users will go from A to B to C"), success criteria ("80% should complete onboarding in under 60 seconds"), and feature specifications ("the search supports text, voice, and filter input"). Each one becomes a validation item in the report.
 
 ### Phase 2: Processing the Input
 
@@ -119,8 +119,8 @@ The skill then views **every single frame** sequentially. No sampling, no skippi
 After processing, it constructs a flow map:
 
 ```
-App Open → Home Screen → Mode Select → Chat → AI Response → Follow-up
- [3s load]   [5 choices]   [gate]      [no input]  [wall of text]  [dead end]
+App Open → Home Screen → Feature Gate → Core Action → Result → Follow-up
+ [3s load]   [5 choices]    [barrier]    [friction]   [slow render]  [dead end]
 ```
 
 ### Phase 3: Analysis Against 65+ UX Laws
@@ -142,7 +142,7 @@ This is the core of the review. Every screen gets evaluated against a systematic
 
 | Check | What it measures |
 |-------|-----------------|
-| **Time to First Value** | Seconds and taps from app open to first meaningful interaction. For a chat app, this is the first AI response. For e-commerce, the first product viewed. |
+| **Time to First Value** | Seconds and taps from app open to first meaningful interaction. For e-commerce, this is the first product viewed. For a productivity tool, it's the first task completed. For a social app, the first content consumed. |
 | **Decision Accumulation** | Total number of choices across the entire flow. Each choice adds friction (Hick's Law compounds). |
 | **Emotional Curve** | Map the peak moment and the ending. People judge experiences by the best moment and the last moment, not the average (Peak-End Rule). |
 | **Open Loops** | At the end of the flow, is there a reason to come back? Incomplete tasks drive return visits (Zeigarnik Effect). |
@@ -155,7 +155,7 @@ This is the core of the review. Every screen gets evaluated against a systematic
 - Voice-only test: can the core task be completed entirely by voice?
 - Reading level check: is all UI text at grade 3-5?
 - Icon check: are all icons paired with labels (not icon-only)?
-- Familiar-app test: does this feel like WhatsApp or YouTube?
+- Familiar-app test: does this feel like apps the target audience already uses daily?
 
 ### Phase 4: Report Generation
 
@@ -168,8 +168,8 @@ Every finding follows the same structure:
 3. **UX law tags** — which principles are violated
 4. **Evidence screenshot** — the exact frame showing the problem
 5. **What happens** — observed behavior, specifically
-6. **Why this matters** — how the UX law connects to the north star metric (not just "this violates Hick's Law" but "this violates Hick's Law, meaning the user faces 5 competing options at the exact moment they need to ask their first question, directly suppressing queries per user")
-7. **Reference app comparison** — "WhatsApp shows a text input at the bottom; this app has no visible input field"
+6. **Why this matters** — how the UX law connects to the north star metric (not just "this violates Hick's Law" but "this violates Hick's Law, meaning the user faces 5 competing options at the exact moment they need to take the core action, directly suppressing conversion rate")
+7. **Reference app comparison** — "Competitor X surfaces this action prominently; this app buries it three taps deep"
 8. **Recommendation** — actionable fix, often with three levels: quick fix (ship this week), proper fix (next sprint), ideal state (if unconstrained)
 
 Findings are ordered by severity multiplied by north star impact — not chronologically. The most damaging problem leads the report.
@@ -194,7 +194,7 @@ The HTML report has 9 required sections (10 if a PRD is provided):
 | Section | What's in it |
 |---------|-------------|
 | **1. Hero / Cover** | App name, subtitle, context cards in a grid: north star metric, target user, reference apps, app identity, device/connectivity, PRD status, launch stage |
-| **2. Central Thesis** | Dark box. 1-2 sentences identifying the single most fundamental problem. Example: "FarmerChat is a content app pretending to be a chat app — the UI trains passive browsing when the north star requires active querying." |
+| **2. Central Thesis** | Dark box. 1-2 sentences identifying the single most fundamental problem. This is the structural issue that, if not fixed, makes all other improvements marginal. |
 | **3. Executive Summary** | Four stat cards (critical/high/medium/low counts). Horizontal scroll of frame thumbnails showing the user journey with timing labels. Time-to-first-value metric. |
 | **4. PRD Validation** | *(Only if PRD provided.)* Checklist of each hypothesis with pass/fail/warning icon, the hypothesis statement, observed behavior, evidence frame, and gap analysis. |
 | **5. Detailed Findings** | The bulk of the report. Each finding is a left-bordered card (border color = severity) with the full evidence → analysis → recommendation structure described above. |
@@ -233,9 +233,9 @@ The review draws from 65+ laws organized into these categories. The full referen
 
 ## The Problem Product Diagnostics Solves
 
-A UX review tells you: "This screen probably causes drop-off because the input field is missing."
+A UX review tells you: "This screen probably causes drop-off because the primary action is buried."
 
-But *probably* isn't proof. Maybe users found a workaround. Maybe the drop-off happens for a completely different reason. Maybe the screen is fine and the real problem is that the AI responses aren't useful.
+But *probably* isn't proof. Maybe users found a workaround. Maybe the drop-off happens for a completely different reason. Maybe the screen is fine and the real problem is that the feature itself doesn't deliver enough value.
 
 Product Diagnostics takes your actual data — analytics events from your app and outcomes from your database — and validates each UX finding against reality. The result is not "we think this is broken" but "this IS broken, here's the funnel that proves it, and here's how much it costs."
 
@@ -301,10 +301,10 @@ Step                 Event                     Actual Rate    Expected    Gap
 ────────────────────────────────────────────────────────────────────────────────
 1. App Open          app_open                  100%           100%        —
 2. Home Screen       screen_view:home          92%            >95%        -3%
-3. Mode Selection    screen_view:mode_select   68%            (skip)      GATE
-4. Chat Started      chat_started              28%            >60%        -32% !!
-5. First Query       user_message_sent         18%            >48%        -30% !!
-6. AI Response       ai_response_displayed     16%            >45%        -29%
+3. Category Select   screen_view:category      68%            >85%        -17% !
+4. Feature Entry     feature_started           28%            >60%        -32% !!
+5. Core Action       action_completed          18%            >48%        -30% !!
+6. Result Screen     result_displayed          16%            >45%        -29%
 ```
 
 For each step, it calculates:
@@ -314,37 +314,37 @@ For each step, it calculates:
 - **Time between events** (if timestamps are available — long gaps signal confusion or technical issues)
 - **Comparison to expected rates** (from your goal definitions)
 
-The biggest drops get flagged. In the example above, the 68% → 28% drop between mode selection and chat is where most users are lost — 40% of users who see the mode gate never start a chat.
+The biggest drops get flagged. In the example above, the 68% → 28% drop between category selection and feature entry is where most users are lost — the intermediate step loses 40% of traffic.
 
 ### Phase 3: Triangulate
 
 For each feature/goal, the skill produces a three-layer verdict:
 
 ```
-FEATURE: Ask a farming question
-GOAL: User sends a query AND returns within 7 days
+FEATURE: Complete a purchase
+GOAL: User adds item to cart AND completes checkout
 
 ┌─────────────────────────────────────────────────────────────────────────┐
 │ Layer 1 — DESIGN INTENT                                         FAIL  │
-│ UX review found: no visible text input on home screen, mode           │
-│ selection gate blocks 40% of users, AI responses are 300+ word        │
-│ walls of text with no follow-up suggestions.                          │
+│ UX review found: primary CTA below the fold, 6-step checkout          │
+│ with no progress indicator, mandatory account creation blocks          │
+│ 40% of users before payment.                                          │
 ├─────────────────────────────────────────────────────────────────────────┤
 │ Layer 2 — INSTRUMENTED BEHAVIOR                                 FAIL  │
-│ Firebase events confirm: only 28% of users who see the home           │
-│ screen ever start a chat. 60% drop-off at mode selection gate.        │
-│ Users who reach the AI response screen have 0.3 follow-up rate.       │
+│ Analytics events confirm: only 28% of product viewers add to          │
+│ cart. 60% drop-off at account creation step. Users who reach          │
+│ the payment screen have 0.3 completion rate.                          │
 ├─────────────────────────────────────────────────────────────────────────┤
 │ Layer 3 — OUTCOME TRUTH                                         FAIL  │
-│ Database shows: median queries/session = 1.1 (target: 3+).           │
-│ D7 retention = 8% (target: 20%). 68% of users never send a           │
-│ single query.                                                         │
+│ Database shows: conversion rate = 1.2% (target: 4%). Average          │
+│ order value is healthy at $47, but volume is suppressed.              │
+│ 68% of cart creators never complete payment.                          │
 ├─────────────────────────────────────────────────────────────────────────┤
 │ DIAGNOSIS: All three layers agree. This is a clear UX problem.        │
-│ The interface suppresses the core action.                              │
+│ The checkout flow suppresses the core conversion action.              │
 │                                                                        │
-│ VALIDATED IMPACT: ~2,400 missed queries/month, ~$X in unrealized      │
-│ engagement. Fixing the mode gate alone could recover 40% of users.    │
+│ VALIDATED IMPACT: ~2,400 missed conversions/month, ~$112K in          │
+│ unrealized revenue. Removing mandatory signup could recover 40%.      │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -369,8 +369,8 @@ The output is an HTML report (matching the brutalist style of the UX review) con
 
 - **Let the data speak.** If the numbers tell a different story than the UX review predicted, the data wins.
 - **Flag uncertainty.** Small sample sizes, missing events, and single-source verdicts get called out explicitly.
-- **Distinguish correlation from causation.** "Users who skip the mode gate have 3x retention" is strong evidence, not proof.
-- **Quantify everything.** "Drop-off is high" is weak. "47% of users abandon at mode selection, costing an estimated 2,400 queries/month" is actionable.
+- **Distinguish correlation from causation.** "Users who skip step 3 have 3x retention" is strong evidence, not proof.
+- **Quantify everything.** "Drop-off is high" is weak. "47% of users abandon at step 3, costing an estimated 2,400 conversions/month" is actionable.
 - **Challenge the hypothesis.** If data says UX is fine but the metric is failing, say so. The problem might be content quality, market fit, or technical reliability.
 
 ---
@@ -381,11 +381,11 @@ The power of three-layer validation is in the combinations. Here's what each pat
 
 | UX | Events | DB | What it means | Real-world example | What to do |
 |----|--------|----|--------------|--------------------|-----------|
-| FAIL | FAIL | FAIL | **Clear UX problem.** The interface is broken, users are struggling, and the metric is suffering. All evidence agrees. | No text input field → users can't start a chat → queries/session is 1.1 instead of 3+ | Fix the UX. Highest confidence, highest priority. |
+| FAIL | FAIL | FAIL | **Clear UX problem.** The interface is broken, users are struggling, and the metric is suffering. All evidence agrees. | Checkout button hidden below fold → users can't complete purchase → conversion rate is 12% instead of target 40% | Fix the UX. Highest confidence, highest priority. |
 | FAIL | PASS | PASS | **Users adapted.** The UX looks bad but users found a workaround and the metric is fine. | Confusing settings menu, but users learned the path after 2 sessions and retention is healthy | Monitor but lower priority. Consider fixing for new user onboarding. |
 | PASS | FAIL | FAIL | **Hidden problem.** The UX looks fine in review but something else is causing failure — slow APIs, bad content, wrong audience segment, device-specific bugs. | Clean checkout flow, but 30% of payments silently fail on Android due to a payment SDK bug | Investigate technical and content layers. The UX isn't the bottleneck. |
 | PASS | PASS | FAIL | **Value proposition problem.** Users find and use the feature successfully, but the business goal still isn't met. This is a strategy issue, not a design issue. | Users complete onboarding smoothly, ask questions daily, but D30 retention is 3% because the AI answers aren't useful enough | Don't blame UX. Investigate content quality, product-market fit, or whether the goal target is realistic. |
-| FAIL | FAIL | PASS | **Power users compensating.** The UX has friction and most users struggle, but the ones who push through are highly engaged. You're leaving the mass market on the table. | Expert farmers navigate a complex interface and love the app, but 80% of new users never get past onboarding | Fix the UX to unlock the mass market. Current users succeed despite the interface, not because of it. |
+| FAIL | FAIL | PASS | **Power users compensating.** The UX has friction and most users struggle, but the ones who push through are highly engaged. You're leaving the mass market on the table. | Power users navigate a complex interface and love the tool, but 80% of new users never get past onboarding | Fix the UX to unlock the mass market. Current users succeed despite the interface, not because of it. |
 | PASS | FAIL | PASS | **Measurement problem.** UX is fine, outcomes are fine, but events show drop-off. Likely a tracking issue — missing events, misconfigured funnels, or users taking an untracked path. | Funnel shows 50% drop at step 3, but DB shows 90% of users complete the action. Users are using a different path than the one instrumented. | Fix the instrumentation before drawing conclusions. |
 | FAIL | PASS | FAIL | **Delayed damage.** UX problems don't cause immediate drop-off (users push through) but erode long-term retention or satisfaction. | Users complete their first session despite confusing navigation, but don't come back on Day 7. | Fix UX for retention. Short-term funnels look fine but the experience doesn't earn a return visit. |
 | PASS | PASS | PASS | **Working as intended.** Feature is well-designed, well-used, and achieving its goals. | Onboarding is clean, completion rate is 85%, D7 retention for onboarded users is 35%. | Protect this. Don't redesign what works. Document the patterns for reuse. |
@@ -401,26 +401,26 @@ To run Product Diagnostics, provide three inputs. Templates are included in the 
 Define what "success" means for each feature you want to validate:
 
 ```
-Feature: Ask a farming question
-User Story: As a farmer, I want to ask about my sick crop so I get treatment advice.
-Success: User sends a query AND gets a useful response AND returns within 7 days.
+Feature: Complete first purchase
+User Story: As a new user, I want to find and buy a product so I get value from the app.
+Success: User adds item to cart AND completes checkout AND returns within 7 days.
 
 Metric              Current    Target     Window
 ─────────────────────────────────────────────────
-Queries/session     1.1        3+         per session
+Conversion rate     12%        40%        per session
 D7 retention        8%         20%        cohort
 Task completion     35%        70%        per attempt
 
 Happy Path:
   1. User opens app
-  2. User taps chat input
-  3. User types or speaks question
-  4. AI responds with advice
-  5. User asks follow-up
+  2. User browses or searches for product
+  3. User selects product and adds to cart
+  4. User completes checkout
+  5. User receives confirmation and returns
 
 Known Risks:
-  - Assumes user knows what to ask
-  - Voice input may not work for all dialects
+  - Assumes user discovers products organically
+  - Payment options may not cover all regions
   - Depends on network connectivity
 ```
 
@@ -433,12 +433,12 @@ Event Name              Trigger                    Screen
 ──────────────────────────────────────────────────────────
 app_open                App launched               --
 screen_view:home        Home screen displayed       Home
-chat_started            User enters chat            Chat
-user_message_sent       User sends message          Chat
-ai_response_displayed   AI response shown           Chat
+product_viewed          User views product detail   Product
+add_to_cart             User adds item to cart      Product
+checkout_completed      Purchase confirmed          Checkout
 
-Funnel: First Query
-  app_open → screen_view:home → chat_started → user_message_sent → ai_response_displayed
+Funnel: First Purchase
+  app_open → screen_view:home → product_viewed → add_to_cart → checkout_completed
   Expected: 100% → 95% → 60% → 80% → 95%
   Actual:   100% → 92% → 28% → 65% → 89%
 ```
@@ -452,26 +452,26 @@ Provide ground truth — what actually happened vs. what should have happened:
 ```sql
 SELECT
   COUNT(DISTINCT user_id) as users,
-  AVG(queries_per_session) as avg_queries,
+  AVG(purchases_per_session) as avg_purchases,
   AVG(CASE WHEN returned_day_7 THEN 1 ELSE 0 END) as d7_retention
 FROM user_metrics
 WHERE signup_date BETWEEN '2026-01-01' AND '2026-03-25';
 
--- Result: 8,200 users, 1.1 avg queries, 8% D7 retention
--- Target: 3+ queries, 20% D7 retention
+-- Result: 8,200 users, 0.3 avg purchases, 8% D7 retention
+-- Target: 1+ purchases per session, 20% D7 retention
 ```
 
 **Cohort comparisons are the most powerful input.** If you can split users into groups based on a UX condition, the diagnosis becomes conclusive:
 
 ```
-                    Hit mode gate    Direct to chat    Difference
-────────────────────────────────────────────────────────────────
-Queries/session     0.8              3.4               +325%
-D7 retention        4%               22%               +18pp
-Session duration    45s              4m 20s            +478%
+                    Complex checkout    Streamlined checkout    Difference
+─────────────────────────────────────────────────────────────────────────
+Conversion rate     12%                 41%                     +242%
+D7 retention        4%                  22%                     +18pp
+Session duration    45s                 4m 20s                  +478%
 ```
 
-This proves the mode gate isn't just a UX problem — it's a retention problem with a measurable cost.
+This proves a UX bottleneck isn't just a design problem — it's a retention problem with a measurable cost.
 
 ---
 

@@ -21,16 +21,16 @@ For each feature/goal in your goal definition, provide the actual measured outco
 
 | Metric | Target | Actual | Sample Size | Confidence |
 |--------|--------|--------|-------------|-----------|
-| [e.g., queries per user per session] | [3+] | [1.1] | [8,200 sessions] | [High — large sample] |
-| [e.g., D7 retention] | [20%] | [8%] | [3,400 cohort] | [High] |
 | [e.g., task completion rate] | [70%] | [35%] | [1,200 attempts] | [Medium — 4 weeks data] |
+| [e.g., D7 retention] | [20%] | [8%] | [3,400 cohort] | [High] |
+| [e.g., actions per user per session] | [3+] | [1.1] | [8,200 sessions] | [High — large sample] |
 
 **Data source / query:**
 ```sql
 -- Paste the SQL query or describe how you got these numbers
 SELECT
   COUNT(DISTINCT user_id) as users,
-  AVG(queries_per_session) as avg_queries,
+  AVG(actions_per_session) as avg_actions,
   AVG(CASE WHEN returned_day_7 THEN 1 ELSE 0 END) as d7_retention
 FROM user_metrics
 WHERE signup_date BETWEEN '2026-01-01' AND '2026-03-25';
@@ -44,20 +44,20 @@ WHERE signup_date BETWEEN '2026-01-01' AND '2026-03-25';
 
 The most powerful analysis compares users who experienced a specific UX condition vs. those who didn't.
 
-### Cohort: [Description — e.g., "Users who hit mode selection gate vs. direct-to-chat"]
+### Cohort: [Description — e.g., "Users who completed onboarding vs. skipped", "Free users vs. trial users", "Users from organic vs. paid acquisition"]
 
-| Metric | Cohort A: [e.g., Hit mode gate] | Cohort B: [e.g., Direct to chat] | Difference |
+| Metric | Cohort A: [e.g., Completed onboarding] | Cohort B: [e.g., Skipped onboarding] | Difference |
 |--------|------|------|------------|
 | Sample size | [n] | [n] | -- |
-| Queries per session | [X] | [Y] | [+/-Z%] |
+| Actions per session | [X] | [Y] | [+/-Z%] |
 | D7 retention | [X%] | [Y%] | [+/-Z pp] |
 | Session duration | [Xs] | [Ys] | [+/-Zs] |
 | Revenue per user | [$X] | [$Y] | [+/-$Z] |
 
 **How cohorts were defined:**
 ```sql
--- Example: users who viewed mode_select screen vs those who went directly to chat
--- Cohort A: EXISTS (SELECT 1 FROM events WHERE event = 'screen_view' AND screen = 'mode_select' AND user_id = u.id)
+-- Example: users who completed onboarding vs those who skipped
+-- Cohort A: EXISTS (SELECT 1 FROM events WHERE event = 'onboarding_complete' AND user_id = u.id)
 -- Cohort B: NOT EXISTS (...)
 ```
 
@@ -67,7 +67,7 @@ The most powerful analysis compares users who experienced a specific UX conditio
 
 If available, provide a sample of individual user journeys. This helps identify patterns.
 
-| User ID | Signup Date | Total Sessions | Total Queries | D7 Return | D30 Return | Last Active |
+| User ID | Signup Date | Total Sessions | Core Actions | D7 Return | D30 Return | Last Active |
 |---------|-----------|---------------|--------------|-----------|-----------|-------------|
 | u_001 | 2026-01-15 | 1 | 0 | No | No | 2026-01-15 |
 | u_002 | 2026-01-15 | 3 | 5 | Yes | No | 2026-01-22 |
@@ -80,7 +80,7 @@ If available, provide a sample of individual user journeys. This helps identify 
 Provide whatever ground truth you have:
 
 - **Spreadsheet export** — from any admin panel or dashboard
-- **Manual counts** — "We have ~500 active users, about 50 use the chat feature"
+- **Manual counts** — "We have ~500 active users, about 50 use feature X regularly"
 - **Revenue numbers** — "Monthly revenue was $X before feature launch, $Y after"
 - **Support volume** — "We get ~30 tickets/week about this feature"
 - **App store reviews** — star rating trend, common complaints

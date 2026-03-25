@@ -70,11 +70,10 @@ Screen/Step              Event(s)                    Expected Behavior
 ---------------------------------------------------------------------
 App Open                 app_open, session_start     100% (baseline)
 Home Screen              screen_view:home            High (>90%)
-Mode Selection           screen_view:mode_select     Should be skipped or >80%
-Chat Started             chat_started                Target: >60% of home viewers
-First Query Sent         user_message_sent           Target: >80% of chat starters
-AI Response Received     ai_response_displayed       Should be ~100% of queries
-Follow-up Query          user_message_sent (2nd)     Target: >40%
+Feature Entry            screen_view:feature_entry   Target: >60% of home viewers
+Core Action Started      core_action_started         Target: >80% of feature entrants
+Core Action Completed    core_action_completed       Should be ~100% of starts
+Follow-up / Repeat       core_action_started (2nd)   Target: >40%
 ```
 
 For each step, calculate:
@@ -126,8 +125,8 @@ For each feature/goal, produce a three-layer verdict:
 
 - **Let the data speak.** Don't force a UX narrative if the numbers tell a different story.
 - **Flag uncertainty.** Small sample sizes, missing events, and single-source verdicts should be called out.
-- **Distinguish correlation from causation.** "Users who skip the mode gate have 3x retention" does not prove the mode gate causes churn — but it's strong evidence.
-- **Quantify everything.** "Drop-off is high" is weak. "47% of users abandon at mode selection, costing an estimated 2,400 queries/month" is actionable.
+- **Distinguish correlation from causation.** "Users who skip step X have 3x retention" does not prove step X causes churn — but it's strong evidence.
+- **Quantify everything.** "Drop-off is high" is weak. "47% of users abandon at step 3, costing an estimated 2,400 conversions/month" is actionable.
 - **Challenge the hypothesis.** If the data says the UX is fine but the metric is failing, say so. The problem might be content quality, market fit, or technical reliability.
 - **Connect to money/impact.** Every validated finding should estimate business impact where possible.
 

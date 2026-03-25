@@ -23,14 +23,14 @@ List all tracked events relevant to the features being validated. Include event 
 | `screen_view` | Screen displayed | `screen_name`, `screen_class` | varies |
 | `onboarding_start` | First onboarding screen shown | `variant` | Onboarding |
 | `onboarding_complete` | Last onboarding step done | `duration_seconds`, `steps_completed` | Onboarding |
-| `chat_started` | User enters chat | `entry_point` (home/suggestion/menu) | Chat |
-| `user_message_sent` | User sends a message | `input_type` (text/voice/image), `char_count` | Chat |
-| `ai_response_displayed` | AI response shown to user | `response_time_ms`, `token_count` | Chat |
-| `suggestion_chip_tapped` | User taps a follow-up suggestion | `chip_text`, `position` | Chat |
+| `feature_entry` | User enters a key feature | `entry_point`, `feature_name` | varies |
+| `core_action_started` | User initiates the primary action | `action_type`, `context` | varies |
+| `core_action_completed` | Primary action completes successfully | `duration_ms`, `result_status` | varies |
+| `cta_tapped` | User taps a call-to-action | `cta_label`, `position`, `screen_name` | varies |
 | `error_displayed` | Error shown to user | `error_type`, `error_code` | varies |
-| `session_end` | Session terminated | `session_duration`, `screens_viewed`, `queries_sent` | -- |
+| `session_end` | Session terminated | `session_duration`, `screens_viewed`, `actions_completed` | -- |
 
-*(Add or remove rows as needed. The above is an example for an AI chat app.)*
+*(Add or remove rows as needed. The above is a generic starting point — adapt event names to your product.)*
 
 ---
 
@@ -38,17 +38,17 @@ List all tracked events relevant to the features being validated. Include event 
 
 Define the key funnels (ordered event sequences) you want analyzed.
 
-### Funnel 1: [Name — e.g., "First Query Funnel"]
+### Funnel 1: [Name — e.g., "First Purchase Funnel", "Onboarding Completion", "Search-to-Result"]
 
-**Goal:** [What this funnel measures — e.g., "Can a new user successfully ask their first question?"]
+**Goal:** [What this funnel measures — e.g., "Can a new user complete their first purchase?", "Do users finish onboarding?", "Do searches produce useful results?"]
 
 | Step | Event | Expected Conversion |
 |------|-------|-------------------|
 | 1 | `app_open` | 100% (baseline) |
 | 2 | `screen_view` (home) | >95% |
-| 3 | `chat_started` | >60% |
-| 4 | `user_message_sent` | >80% of step 3 |
-| 5 | `ai_response_displayed` | >95% of step 4 |
+| 3 | `feature_entry` | >60% |
+| 4 | `core_action_started` | >80% of step 3 |
+| 5 | `core_action_completed` | >95% of step 4 |
 
 **Actual conversion rates (if known):**
 - Step 1→2: [X%]

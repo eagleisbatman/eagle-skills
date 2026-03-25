@@ -7,7 +7,7 @@ description: "This skill should be used when the user asks to conduct a UX revie
 
 ## Overview
 
-Expert-level UX reviews grounded in 50+ established UX laws and principles. Produces structured, severity-rated findings tied to a north star metric, with evidence from screenshots/video frames, actionable recommendations, and visual design mockups.
+Expert-level UX reviews grounded in 65+ established UX laws and principles across 12 categories. Produces structured, severity-rated findings tied to a north star metric, with evidence from screenshots/video frames, actionable recommendations, and visual design mockups.
 
 The review is **brutal and honest** — its value comes from surfacing problems the team may not want to hear, not from validating existing decisions.
 
@@ -20,9 +20,9 @@ Output is always an **HTML report** with embedded screenshots, current-vs-propos
 Before analyzing screens, collect structured input. Present all questions in one message:
 
 **Required Inputs:**
-- **North Star Metric** — single metric defining success (queries/user, conversion, D7 retention, revenue/user). Help the user pick one if they don't know.
+- **North Star Metric** — single metric defining success (conversion rate, D7 retention, revenue/user, task completion rate, DAU/MAU). Help the user pick one if they don't know.
 - **Target User** — demographics, tech/reading literacy, device types, connectivity conditions, daily app habits
-- **Reference Apps** — 2-3 apps the target user opens daily. These set the mental model. Infer if the user doesn't specify (e.g., rural East Africa → WhatsApp dominant).
+- **Reference Apps** — 2-3 apps the target user opens daily. These set the mental model. Infer if the user doesn't specify (e.g., gen Z social users → Instagram/TikTok; business professionals → Slack/LinkedIn; general consumers → WhatsApp/Amazon).
 - **App Identity** — one-word category (chat, content, marketplace, tool, social, utility). Then verify: does the UI match?
 
 **Extended Inputs (ask for these — they dramatically improve review quality):**
@@ -129,7 +129,7 @@ Copy key frames to a `frames/` directory alongside the HTML file for relative im
 - **Be brutal.** Value comes from honesty, not diplomacy.
 - **Every finding connects to the north star.** "This violates Hick's Law" is incomplete. Must explain how it suppresses the metric.
 - **Be specific.** Reference exact screens, exact elements, exact timing.
-- **Compare to reference apps.** "WhatsApp shows X; this app does Y" beats "the input should be at the bottom."
+- **Compare to reference apps.** "WhatsApp/Spotify/Amazon does X; this app does Y" beats vague advice like "the input should be at the bottom."
 - **Offer fixes, not just diagnoses.** Every finding gets an actionable recommendation.
 - **Present options for strategic decisions.** Don't prescribe when the team needs to choose.
 - **Challenge the premise.** If the UI contradicts stated identity, that's the foundational issue.
@@ -138,21 +138,21 @@ Copy key frames to a `frames/` directory alongside the HTML file for relative im
 ## Key Anti-Patterns
 
 Check every review for these recurring issues:
-1. **Identity Crisis** — name/description says one thing, UI says another
-2. **Content Masquerading as Chat** — image cards, view counts, "Read More" in a conversational app
-3. **Mode Selection Gates** — forcing mode choice (photo/voice/text) before acting
+1. **Identity Crisis** — name/description says one thing, UI says another (e.g., a "marketplace" that's actually a blog, a "tool" that's actually a content feed)
+2. **Content/Feature Mismatch** — UI elements that contradict the app's stated identity (e.g., image cards and view counts in a chat app, social features in a utility, gamification in a professional tool)
+3. **Mode Selection Gates** — forcing a mode choice before acting (e.g., photo/voice/text input selection, category picker before search, account type selection before signup)
 4. **UX Theater** — screens that look functional but serve no purpose
-5. **Essay Responses in Chat** — AI generating walls of text instead of conversational messages
-6. **Missing Conversation Hooks** — no suggestion chips, follow-up prompts, or continuation signals
-7. **Invisible Input** — no persistent text field where text input is primary
+5. **Response Overload** — AI or system generating walls of text/data instead of digestible, contextual responses
+6. **Dead-End Interactions** — no suggestion chips, follow-up prompts, related items, or continuation signals after completing an action
+7. **Invisible Primary Action** — the core interaction (input field, CTA, search bar) is hidden, buried, or not persistent
 8. **Dead Screens** — loading states, spinners, transitions adding time without value
-9. **No History/State** — every session starts fresh
-10. **Literacy Mismatch** — formal language for low-literacy users
+9. **No History/State** — every session starts fresh, no memory of past interactions or preferences
+10. **Literacy Mismatch** — language complexity doesn't match the target user's reading level
 
 ## Resources
 
 ### Reference Files
-- **`references/ux-laws.md`** — Complete catalog of 50+ UX laws organized by category with audit checklists. **Read before every review.**
+- **`references/ux-laws.md`** — Complete catalog of 65+ UX laws organized by category with audit checklists. **Read before every review.**
 - **`references/methodology.md`** — Full evaluation framework, severity system, PRD validation process, deliverable format specs.
 
 ### Assets

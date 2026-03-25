@@ -3,7 +3,7 @@
 ## Phase 1: Context Gathering
 
 ### Required Context
-1. **North Star Metric** — single metric defining success (queries/user, conversion, DAU, session length, D7 retention, revenue/user)
+1. **North Star Metric** — single metric defining success (conversion rate, DAU, session length, D7 retention, revenue/user, task completion rate)
 2. **Target User Profile** — demographics, tech literacy, device types, connectivity, daily app habits, reading level
 3. **App Identity** — category (chat, content, marketplace, tool, social, utility). What does the user THINK they're downloading?
 4. **Reference Apps** — 2-3 apps the target audience uses most. These define the mental model.
@@ -24,7 +24,7 @@
 When a PRD is provided, extract:
 - **User flow hypotheses** — "the user will go from A → B → C"
 - **Success criteria** — "80% of users should complete onboarding in <60s"
-- **Feature specifications** — "the chat input supports text, voice, and image"
+- **Feature specifications** — "the input supports text, voice, and image"
 - **Target metrics** — "D7 retention of 40%"
 
 For each, create a validation entry:
@@ -184,7 +184,7 @@ When competitive analysis inputs are provided:
 #### Section 3: Executive Summary
 - Severity stat cards (4-column grid: Critical/High/Medium/Low counts)
 - User journey flow map: horizontal scroll of frame thumbnails with labels and timing
-- Key metric: time from app open to first AI response / first value
+- Key metric: time from app open to first meaningful value
 
 #### Section 4: PRD Validation (if PRD provided)
 - For each PRD hypothesis/requirement:
@@ -213,7 +213,7 @@ When competitive analysis inputs are provided:
 - Side-by-side mockups: Current (red border) vs. Proposed (green border)
 - Phone-shaped containers with HTML/CSS mockup UI
 - Key changes listed below each comparison
-- Cover at minimum: home screen, primary interaction, AI response format
+- Cover at minimum: home screen, primary interaction, key result/response screen
 
 #### Section 8: Time to First Value Analysis
 - Two timelines: Current (with problem markers) and Target
@@ -233,7 +233,7 @@ When competitive analysis inputs are provided:
 3. **Be specific** — "CTA is 24x24pt, below 44pt minimum" not "button is small"
 4. **Provide evidence** — reference specific frame number/screenshot
 5. **Offer actionable fixes** — every finding gets a recommendation
-6. **Compare to reference apps** — "WhatsApp places input at bottom; this app has no visible input"
+6. **Compare to reference apps** — "[Reference app] does X; this app does Y" (e.g., "Spotify shows playback controls persistently; this app hides them")
 7. **Present options for strategic decisions** — don't prescribe when the team needs to choose
 8. **Challenge the premise** — if UI contradicts stated identity, flag it as foundational
 9. **Don't pad with praise** — brief mention of wins, depth on problems
@@ -248,7 +248,7 @@ Select 10-15 key frames that tell the story:
 - Home screen (fully loaded)
 - Primary interaction screen
 - Loading / waiting states
-- AI response / result screen
+- Result / response / output screen
 - Any error or confusion states
 - Flow endpoints
 
@@ -295,7 +295,7 @@ Before delivering the report:
 - [ ] All icons paired with labels (not icon-only)
 - [ ] Images are realistic/photographic, not abstract
 - [ ] Linear flow with clear "next step" on every screen
-- [ ] WhatsApp/YouTube pattern alignment verified
+- [ ] Reference app pattern alignment verified (e.g., WhatsApp, YouTube, or other daily apps)
 - [ ] Error recovery possible in 1-2 taps
 - [ ] Meaningful defaults set for all selections
 - [ ] Local language and dialect supported
