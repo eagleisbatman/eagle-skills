@@ -114,12 +114,56 @@ For apps targeting low-literacy users:
 
 ### Severity Ratings
 
-| Level | Definition | North Star Impact |
-|-------|-----------|-------------------|
-| **Critical** | Directly suppresses the north star metric. Structural/architectural issue. | >20% estimated impact |
-| **High** | Significant experience degradation. Measurable drop-off likely. | 10-20% estimated impact |
-| **Medium** | Suboptimal but functional. Clear improvement opportunity. | 5-10% estimated impact |
-| **Low** | Polish item. Nice-to-have. | <5% estimated impact |
+| Level | Definition | North Star Impact | Action Required |
+|-------|-----------|-------------------|-----------------|
+| **Critical** | Directly suppresses the north star metric. Structural/architectural issue. | >20% estimated impact | Fix before next release |
+| **High** | Significant experience degradation. Measurable drop-off likely. | 10-20% estimated impact | Fix in current sprint |
+| **Medium** | Suboptimal but functional. Clear improvement opportunity. | 5-10% estimated impact | Fix in next quarter |
+| **Low** | Polish item. Nice-to-have. | <5% estimated impact | Backlog |
+
+**Rating factors** (consider all three per Nielsen):
+1. **Frequency:** How often does the problem occur? (Common vs. rare)
+2. **Impact:** How difficult is it for users to overcome? (Easy vs. impossible)
+3. **Persistence:** Is it a one-time or repeated problem? (Users learn to work around it, or it bothers them every time)
+
+### Prioritization: RICE + UX Severity
+
+Combine RICE framework with UX severity to rank implementation order:
+
+| Factor | Definition | Scoring |
+|--------|-----------|---------|
+| **Reach** | How many users encounter this issue? | % of users per time period |
+| **Impact** | How much does it affect each user? | 3=massive, 2=high, 1=medium, 0.5=low |
+| **Confidence** | How sure are you of the impact estimate? | 100%=high, 80%=medium, 50%=low |
+| **Effort** | How much work to fix? | Person-weeks (lower = better) |
+
+```
+RICE Score = (Reach × Impact × Confidence) / Effort
+```
+
+### Business Impact Statement Template
+
+For each critical/high finding, quantify business impact:
+
+```
+Finding: [Brief description]
+Who is affected: [User segment + estimated % or count]
+How often: [Every session / weekly / edge case]
+What happens: [Abandons, contacts support, workaround]
+Estimated impact: [Revenue/retention/support cost with calculation]
+If fixed: [Expected improvement in metric + payback period]
+```
+
+### Competitive UX Benchmarking
+
+When competitive analysis inputs are provided:
+
+1. **Select 3-5 competitors** (direct + aspirational)
+2. **Choose 5-10 comparable tasks** across products
+3. **Create standardized rubric**: task completion, steps required, error handling, heuristic scores
+4. **Execute parallel evaluations**: same evaluator, same tasks, same device
+5. **Compile comparison matrix**: score each dimension per competitor
+6. **Gap analysis**: where behind, where ahead, what competitors do that you don't
 
 ### HTML Report Structure
 
@@ -210,6 +254,23 @@ Select 10-15 key frames that tell the story:
 
 Copy selected frames to a `frames/` directory alongside the HTML file. Reference with relative paths: `src="frames/frame_037.jpg"`.
 
+### Three-Level Recommendations
+
+For high-severity findings, provide three tiers:
+1. **Quick fix** (can ship this week): Minimum change to reduce the pain
+2. **Proper fix** (next sprint): Correct solution with design thinking
+3. **Ideal state** (future): Best possible experience if unconstrained
+
+This respects that teams have different timelines and resource levels.
+
+### Implementation Roadmap
+
+Structure recommendations by timeline:
+- **Immediate (1-2 weeks):** Critical severity issues, quick wins
+- **Short-term (1-3 months):** Major severity issues, flow improvements
+- **Medium-term (3-6 months):** Structural changes, IA improvements
+- **Long-term (6-12 months):** Strategic redesigns, platform changes
+
 ## Phase 5: Quality Checks
 
 Before delivering the report:
@@ -225,3 +286,16 @@ Before delivering the report:
 - [ ] All referenced frames exist in the frames/ directory
 - [ ] HTML renders correctly with frame images
 - [ ] If PRD provided: every testable hypothesis is validated
+
+### Low-Literacy Audience Additional Checks
+
+- [ ] Cover-the-text test passed: screens understandable without reading
+- [ ] Voice-only test: core task completable entirely by voice
+- [ ] Reading level of all UI text at grade 3-5
+- [ ] All icons paired with labels (not icon-only)
+- [ ] Images are realistic/photographic, not abstract
+- [ ] Linear flow with clear "next step" on every screen
+- [ ] WhatsApp/YouTube pattern alignment verified
+- [ ] Error recovery possible in 1-2 taps
+- [ ] Meaningful defaults set for all selections
+- [ ] Local language and dialect supported

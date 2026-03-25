@@ -75,7 +75,7 @@ Screen 1 (name) → Screen 2 (name) → Screen 3 (name)
 
 ### Phase 3: Analyze
 
-**Read `references/ux-laws.md` before this step.** It contains 50+ laws organized by category with audit checklists.
+**Read `references/ux-laws.md` before this step.** It contains 65+ laws organized by 12 categories with audit checklists, including Low-Literacy & Emerging Market Design principles and UX Metrics.
 
 **Read `references/methodology.md`** for the full evaluation framework, severity rating system, and PRD validation process.
 

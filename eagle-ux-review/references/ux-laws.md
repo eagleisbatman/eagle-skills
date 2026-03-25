@@ -1,6 +1,6 @@
 # UX Laws & Principles Reference
 
-Comprehensive catalog of 55+ UX laws organized by category. For every review, scan every law against every screen/flow. Not every law applies — but every law must be considered.
+Comprehensive catalog of 65+ UX laws organized by 12 categories. For every review, scan every law against every screen/flow. Not every law applies — but every law must be considered.
 
 ---
 
@@ -368,6 +368,104 @@ When AI doesn't know, it should fail helpfully.
 
 ---
 
+## 11. LOW-LITERACY & EMERGING MARKET DESIGN
+
+*Sources: Medhi et al. (2011) "Designing Mobile Interfaces for Novice and Low-Literacy Users" (ACM TOCHI), GSMA Mobile for Development design guidelines, Indrani Medhi-Thies (Microsoft Research India), Kentaro Toyama "Geek Heresy" (2015)*
+
+### Visual Primacy
+Low-literacy users rely on images, icons, and colors as their primary means of navigation and comprehension, rather than text.
+- **Key question:** Can a user who cannot read navigate and use this app purely through visual elements?
+- **Audit:** Cover all text on each screen: can you still understand what to do? Check that every navigation item has a recognizable, realistic icon. Verify content has supporting imagery (photographs > illustrations > icons).
+- **Common violations:** Text-only navigation, abstract icon-only interfaces, reliance on text labels, text-heavy content screens, menus with no visual differentiation.
+- **Design principle:** Text should confirm what visuals already communicate, not carry the primary information load. Use photographs of real objects. Use color-coding consistently. Use spatial layout to convey meaning.
+
+### Audio/Voice as Primary Interface
+For users who cannot read well, audio (both input and output) should be a first-class interaction mode, not an afterthought.
+- **Key question:** Can the user complete the core task flow entirely through voice/audio?
+- **Audit:** Map the core task flow: can each step be completed via voice? Check text-to-speech availability. Check voice input quality, error handling, and language support. Verify voice recording UI is discoverable with clear start/stop/cancel states.
+- **Common violations:** Voice input as a hidden feature, no text-to-speech for content, voice features require reading instructions to activate.
+- **Design principle:** The voice input button should be the MOST prominent interaction element, not a small microphone icon. Provide audio playback for all content. Support the user's local language/dialect.
+
+### Concrete Over Abstract
+Low-literacy users understand concrete, real-world representations better than abstract symbols or metaphors. — Medhi et al., 2011
+- **Key question:** Are visual elements realistic (photographic) rather than abstract (iconographic)?
+- **Audit:** Inventory all icons and images: realistic/photographic or abstract/stylized? Check if metaphors require prior digital literacy (gear = settings, cloud = storage, hamburger = menu). Verify images match the user's local context.
+- **Common violations:** Abstract icons for concepts with real-world equivalents, metaphors requiring cultural knowledge, stylized illustrations instead of photographs.
+- **Design principle:** Use photographs of actual crops, pests, equipment matching the user's local context. Localize images as well as text. Avoid abstract icons for core functionality.
+
+### Minimal Text, Maximum Meaning
+Every word must earn its place. Use the shortest possible text that conveys the full meaning. Support text with visuals.
+- **Key question:** Is every text element as short as it can be while remaining clear?
+- **Audit:** Check reading level of all UI text (target: grade 3-5). Count words per label/instruction (aim for 1-3 words). Verify every text element has visual support.
+- **Common violations:** Long sentences where short phrases suffice, technical vocabulary, complex grammar, paragraph-format instructions, text without visual support.
+- **Design principle:** Write for a 3rd-grade reading level in the local language. Use active voice, short sentences. "Take a photo of the sick leaf" not "Please capture an image of the affected foliage for analysis."
+
+### Guided Linear Flows
+Low-literacy users perform better with step-by-step linear flows than with open-ended interfaces requiring wayfinding decisions. — Medhi et al., 2011
+- **Key question:** Does the interface guide the user through a clear sequence of steps, or require them to figure out where to go?
+- **Audit:** Map the core flow: is it linear (Step 1 → Step 2 → Step 3) or branching? Check for clear "what to do next" signals on every screen. Verify the user never reaches a dead-end.
+- **Common violations:** Dashboard/hub screens with multiple equal options, non-linear navigation requiring wayfinding, flows that branch based on user decisions, interfaces that assume the user knows what to do next.
+- **Design principle:** The ideal flow: open app → single input (voice or photo) → get answer → optional follow-up → done. Avoid hub-and-spoke patterns. Make the most common path visually dominant.
+
+### Meaningful Defaults
+Pre-select the most common or safest option so the user can proceed with minimal decisions.
+- **Key question:** Are intelligent defaults set for every configurable option?
+- **Audit:** Check every selection/input: is the most common option pre-selected? Check language auto-detection, location auto-detection, and relevant content based on user history.
+- **Common violations:** Empty dropdowns, no pre-selected options, settings with no defaults, language selection with no auto-detection, requiring manual input when the system has the data.
+- **Design principle:** Auto-detect everything possible: language, location, crop season, relevant content. Every decision removed is one less point of confusion.
+
+### Error Tolerance & Forgiveness
+The interface should be extraordinarily forgiving of user errors, especially for users unfamiliar with digital interfaces.
+- **Key question:** If the user taps the wrong thing or enters wrong information, how quickly and painlessly can they recover?
+- **Audit:** Test every possible error path: wrong taps, wrong inputs, back-button, home-button, accidental dismissals. Verify all errors are recoverable in 1-2 taps. Check that no user data is lost on error.
+- **Common violations:** Destructive actions without undo, one-way flows with no back option, error states requiring technical knowledge, form data lost on error.
+- **Design principle:** Assume the user WILL tap the wrong thing. Design so wrong taps are harmless and reversible. Use confirmation for destructive actions with visual (not text-heavy) dialogs. Auto-save everything.
+
+### Familiar Metaphors from Daily Life
+Use interaction patterns from apps the user already knows (WhatsApp, YouTube, phone dialer) rather than novel patterns.
+- **Key question:** Would a user whose only apps are WhatsApp and YouTube understand this interface immediately?
+- **Audit:** List the top 3 apps used by the target audience. For each pattern in the reviewed app, check: does it match one of those reference apps? Flag every pattern that requires learning something new.
+- **Common violations:** Novel navigation patterns, custom gesture vocabularies, unfamiliar content layouts, interaction models from desktop software.
+- **Design principle:** WhatsApp is the dominant reference for most emerging market users. Its patterns ARE "the internet" for this audience: bottom input field, send button, voice message via hold-to-record, conversations flow upward, green = connected, blue = read.
+
+---
+
+## 12. UX METRICS & KPIs
+
+*Use these metrics to quantify UX quality, set targets, and measure improvement. Each metric maps to specific UX principles.*
+
+### Efficiency Metrics
+
+| Metric | What It Measures | Target | Related Principles |
+|--------|-----------------|--------|-------------------|
+| **Task Success Rate** | % of users who complete a core task | >85% | Hick's Law, Error Prevention, User Control |
+| **Time on Task** | Seconds to complete core task | Varies (shorter = better) | Doherty Threshold, Parkinson's, Fitts's |
+| **Error Rate** | Errors per task attempt | <0.5 per task | Error Prevention, Postel's Law, Error Tolerance |
+| **Taps to Complete** | Number of taps for core task | <5 for simple tasks | Hick's Law, Occam's Razor, Guided Linear Flows |
+| **Time to First Value** | Seconds from first open to first valuable interaction | <30s for chat apps | Goal Gradient, Doherty Threshold |
+| **Learnability** | Improvement in task time across sessions | Plateau by session 3 | Jakob's Law, Recognition vs Recall |
+
+### Engagement Metrics
+
+| Metric | What It Measures | Target | Related Principles |
+|--------|-----------------|--------|-------------------|
+| **DAU/MAU Ratio** | Daily active / monthly active users | >20% for utility apps | Hook Model, Zeigarnik, Variable Reward |
+| **Session Length** | Average time per session | Varies by app type | Peak-End Rule, Content-First Mobile |
+| **Session Frequency** | Sessions per user per week | >3 for retention | Hook Model, Loss Aversion, Social Proof |
+| **D1/D7/D30 Retention** | % of users returning at day 1/7/30 | D1>40%, D7>20%, D30>10% | Endowment Effect, Hook Model, Commitment |
+| **Queries per Session** | (For AI/chat apps) questions asked per session | >2 | Zeigarnik, Suggestion Chips |
+
+### Satisfaction Metrics
+
+| Metric | How to Measure | Related Principles |
+|--------|---------------|-------------------|
+| **SUS (System Usability Scale)** | 10-question standardized survey (0-100) | All heuristics |
+| **NPS (Net Promoter Score)** | "How likely to recommend?" (0-10) | Aesthetic-Usability, Peak-End |
+| **CES (Customer Effort Score)** | "How easy was it?" (1-7 scale) | Tesler's Law, Hick's, Cognitive Load |
+| **CSAT (Customer Satisfaction)** | Post-interaction rating (1-5 stars) | Error Recovery, Doherty Threshold |
+
+---
+
 ## HOW TO USE THIS REFERENCE
 
 **Per-Screen Process:**
@@ -384,3 +482,10 @@ When AI doesn't know, it should fail helpfully.
 4. Verify identity consistency (Jakob's Law at app level)
 5. Count decisions per step (cumulative Hick's Law)
 6. Assess behavioral mode: is the app training active or passive behavior?
+
+**Low-Literacy Audience Additional Checks:**
+1. Cover-the-text test: can you understand the screen without reading? (Tests Visual Primacy)
+2. Voice-only test: can the core task be completed entirely by voice? (Tests Audio/Voice)
+3. Familiar-app test: does this feel like WhatsApp/YouTube? (Tests Familiar Metaphors)
+4. One-path test: is there exactly one obvious thing to do next? (Tests Guided Linear Flows)
+5. Wrong-tap test: what happens if you tap the wrong thing? (Tests Error Tolerance)
