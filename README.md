@@ -485,13 +485,13 @@ This proves a UX bottleneck isn't just a design problem — it's a retention pro
 
 # Eagle Ad Review
 
-**Strategy-first advertising creative review grounded in Meta ABCD, Kantar, System1, and Nielsen frameworks.**
+**Strategy-first advertising creative review grounded in Meta ABCD, Kantar, System1, and Nielsen frameworks. Works across any medium.**
 
-Most ad feedback is subjective: "I don't like the colors," "make the logo bigger," "this doesn't feel right." This skill produces the opposite — a structured evaluation where every creative is scored against the marketing strategy it's supposed to serve, the platform it runs on, and the research on what actually drives ad performance.
+Most ad feedback is subjective: "I don't like the colors," "make the logo bigger," "this doesn't feel right." This skill produces the opposite — a structured evaluation where every creative is scored against the marketing strategy it's supposed to serve, the medium it runs in, and the research on what actually drives ad performance.
 
-Point Claude at a folder of ad images and videos (any size — 10 or 500), provide your campaign context, and receive a complete HTML report: 10-dimension scoring, per-market breakdowns, best/worst performer galleries, cross-cutting findings with evidence thumbnails, platform compliance audit, and a creative brief for the next production round.
+Point Claude at a folder of ad files — images, videos, audio, PDFs, scripts — across **any advertising medium**: social, display, video, radio, podcast, billboard, transit, print, TV, or experiential. Provide your campaign context and receive a complete HTML report: 10-dimension scoring, per-market breakdowns, best/worst performer galleries, cross-cutting findings with evidence, format compliance audit, and a creative brief for the next production round.
 
-The review evaluates creatives against their **marketing job**, not just visual aesthetics. An ugly ad that stops the scroll and converts is better than a beautiful ad nobody notices.
+The review evaluates creatives against their **marketing job**, not just visual aesthetics. An ugly ad that stops the scroll and converts is better than a beautiful ad nobody notices. A simple billboard that communicates in 3 seconds beats an elaborate one nobody can read at 60mph.
 
 ---
 
@@ -702,10 +702,13 @@ review these ad creatives — here's the folder
 audit our campaign creatives for Meta and TikTok
 ```
 ```
+critique our radio spots and billboard designs
+```
+```
 ad creative review — I'll provide the campaign context and performance data
 ```
 ```
-what's wrong with our ads? here are the files
+review our TV commercial and print ads for the new campaign
 ```
 
 Skills activate automatically when Claude detects matching intent.

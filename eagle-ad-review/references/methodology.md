@@ -231,6 +231,12 @@ Rating:
 - **Multi-market campaigns:** Increase Cultural to 12%, decrease System to 3%
 - **Brand campaigns:** Increase Brand to 15%, increase Emotion to 12%, decrease Platform to 7%
 
+**Weight adjustments by medium** (see `references/ad-formats.md` for full table):
+- **Radio/Audio:** Visual Quality becomes Production Quality (voice talent, mixing, sound design). Single-listen clarity is critical.
+- **OOH/Billboard:** Attention (20%) and Message Clarity (20%) dominate. CTA drops to 3%. Three-second viewing window.
+- **Print:** Format Compliance matters more (bleed, CMYK, resolution). Longer dwell time allows emotional resonance.
+- **Television:** Production Quality (18%) and Emotional Resonance (15%) peak. TV is the storytelling medium with the highest production bar.
+
 ---
 
 ## Anti-Pattern Catalog

@@ -1,17 +1,17 @@
 ---
 name: eagle-ad-review
-description: "This skill should be used when the user asks to review ad creatives, audit advertising campaigns, evaluate marketing collateral, critique ad designs, or assess creative performance. Trigger phrases include: 'review these ads', 'ad creative review', 'audit my ads', 'critique these creatives', 'what's wrong with my ads', 'ad review', 'creative review', 'evaluate these campaigns', 'review my marketing materials', 'ad teardown', 'creative audit', 'are these ads effective'. Also trigger when the user provides a folder of ad images/videos and asks for feedback, or mentions ad platforms (Meta, Google, TikTok, etc.) in the context of evaluating creative quality. This skill handles bulk image folders, video ads, mixed-format campaign sets, and multi-market creative libraries."
+description: "This skill should be used when the user asks to review ad creatives, audit advertising campaigns, evaluate marketing collateral, critique ad designs, or assess creative performance across any medium. Trigger phrases include: 'review these ads', 'ad creative review', 'audit my ads', 'critique these creatives', 'what's wrong with my ads', 'ad review', 'creative review', 'evaluate these campaigns', 'review my marketing materials', 'ad teardown', 'creative audit', 'are these ads effective', 'review this radio ad', 'critique our billboard', 'evaluate our TV commercial', 'review this jingle', 'audit our print ads', 'review our podcast ad'. Also trigger when the user provides ad files (images, videos, audio, PDFs, scripts) and asks for feedback, or mentions ad platforms or channels (Meta, Google, TikTok, radio, OOH, print, TV, podcast, etc.) in the context of evaluating creative quality. This skill handles digital ads, audio ads (radio, podcast, jingles), out-of-home (billboards, transit), print (newspaper, magazine, flyers), television commercials, and any other advertising format."
 ---
 
 # Eagle Ad Review
 
 ## Overview
 
-Strategy-first advertising creative review grounded in established frameworks (Meta ABCD, Kantar Creative Effectiveness, System1, Nielsen) and platform-specific best practices. Evaluates ad creatives not just for visual quality, but for whether they do their marketing job — stopping the scroll, communicating value, driving action, and building brand.
+Strategy-first advertising creative review grounded in established frameworks (Meta ABCD, Kantar Creative Effectiveness, System1, Nielsen) and medium-specific best practices. Evaluates ad creatives across **any medium** — digital (social, display, video), audio (radio, podcast, jingles), out-of-home (billboards, transit, DOOH), print (newspaper, magazine, flyers, direct mail), television, and experiential — not just for production quality, but for whether they do their marketing job.
 
 The review is **brutal and honest**. Creative is the single largest driver of ad performance (47% of sales lift per Nielsen), so honest feedback here has direct ROI impact.
 
-Output is always an **HTML report** with embedded thumbnails, per-creative scoring, cross-cutting analysis, and prioritized recommendations. The report template is at `assets/report-template.html`.
+Output is always an **HTML report** with embedded thumbnails/transcripts, per-creative scoring, cross-cutting analysis, and prioritized recommendations. The report template is at `assets/report-template.html`.
 
 ## Process
 
@@ -20,11 +20,17 @@ Output is always an **HTML report** with embedded thumbnails, per-creative scori
 Before looking at a single creative, collect the marketing strategy. Present all questions in one message — the answers fundamentally change what "good" looks like.
 
 **Required — Campaign Strategy:**
-- **Campaign Objective** — What is this campaign optimizing for? (Awareness / App installs / Conversions / Retargeting / Re-engagement / Lead generation). An awareness ad and a conversion ad have completely different success criteria.
+- **Campaign Objective** — What is this campaign optimizing for? (Awareness / App installs / Conversions / Retargeting / Re-engagement / Lead generation / Brand building). An awareness ad and a conversion ad have completely different success criteria.
 - **Funnel Stage** — Where do these ads sit? Top-of-funnel (cold audience, first exposure), mid-funnel (consideration, familiar with brand), or bottom-funnel (retargeting, ready to act)?
 - **Target Audience** — Demographics, psychographics, media habits, pain points. Tech literacy and device context if relevant. Per-market if multi-market campaign.
-- **Platforms & Placements** — Where are these running? (Meta Feed, Stories, Reels; Google Display, YouTube; TikTok; LinkedIn; X; Pinterest). Each has different specs, safe zones, and creative norms.
-- **Primary KPI** — What metric defines success? (CTR, CPA, ROAS, install rate, video completion rate, brand lift). The KPI determines which creative elements matter most.
+- **Medium & Channels** — What advertising formats and channels? This fundamentally shapes the evaluation:
+  - **Digital**: Social (Meta Feed/Stories/Reels, TikTok, LinkedIn, X, Pinterest), Display (GDN, programmatic), Video (YouTube, OTT/CTV), Search (text ads)
+  - **Audio**: Radio spots, podcast ads, streaming audio (Spotify), jingles/sonic branding
+  - **Out-of-Home (OOH)**: Billboards, transit (bus/metro/taxi wraps), street furniture, digital OOH (DOOH), kiosks
+  - **Print**: Newspaper, magazine, flyers/brochures, direct mail, point-of-sale
+  - **Television**: TV commercials (15s/30s/60s), connected TV (CTV), infomercials
+  - **Experiential**: Event booths, pop-ups, ambient/guerrilla
+- **Primary KPI** — What metric defines success? (CTR, CPA, ROAS, install rate, video completion rate, brand lift, recall, footfall, coupon redemption). The KPI determines which creative elements matter most.
 
 **Required — Brand & Product:**
 - **Product/Service** — What is being advertised? One sentence.
@@ -49,19 +55,20 @@ If the user provides a folder and says "just review these," make reasonable infe
 Use `scripts/catalog-ads.sh` or manually scan the folder:
 
 ```bash
-# Scan and catalog all ad files
+# Scan and catalog all ad files (images, videos, audio, PDFs)
 bash scripts/catalog-ads.sh /path/to/ads/folder
 
 # Output: file inventory grouped by type, dimensions, aspect ratio
 ```
 
-**For image ads:** View every image. Group by:
+**For image ads (digital, print, OOH):** View every image. Group by:
 - Market/language (from folder structure or visual inspection)
-- Aspect ratio / format (square, portrait 9:16, landscape 16:9)
+- Aspect ratio / format (square, portrait 9:16, landscape 16:9, billboard ratios)
 - Creative concept / angle (group similar-looking variations)
 - Campaign vintage (if dateable from folder names or content)
+- Medium (social, display, print, OOH — affects evaluation criteria)
 
-**For video ads:** Extract key frames and view:
+**For video ads (digital, TV):** Extract key frames and view:
 ```bash
 # Extract first frame, middle frame, and last frame (hook, body, CTA)
 ffmpeg -i VIDEO -vf "select=eq(n\,0)+eq(n\,floor(total/2))+eq(n\,total-1)" -vsync vfq -q:v 2 thumb_%02d.jpg
@@ -70,13 +77,27 @@ ffmpeg -i VIDEO -vf "select=eq(n\,0)+eq(n\,floor(total/2))+eq(n\,total-1)" -vsyn
 mkdir -p ./ad-frames && ffmpeg -y -i VIDEO -vf "fps=1/2" -q:v 2 ./ad-frames/frame_%03d.jpg
 ```
 
-**For both:** Build a creative inventory map:
+**For audio ads (radio, podcast, jingle):**
+- Listen to the full audio file
+- Note: duration, voice talent quality, script structure (hook → body → CTA → tag)
+- Check: sonic branding (jingle, sound logo), memorability, clarity at single listen
+- If script/transcript is provided instead of audio, evaluate the written script
+
+**For print/OOH materials (PDFs, high-res images):**
+- View at intended scale context (billboard = viewed at 200+ feet, magazine = handheld)
+- Check readability at viewing distance — fewer than 7 words for billboards
+- Evaluate physical production considerations (CMYK color, bleed margins, paper stock if known)
+
+**For all formats:** Build a creative inventory map:
 ```
-Market/Region → Format → Concept → Variations
-  Brazil      → Square  → Photo Diagnosis → 3 variations
-              → 9:16   → Value Prop      → 2 variations
-  Kenya       → Square  → Testimonial     → 4 variations
-              → Video   → Demo            → 6 variations (3 aspect ratios × 2 edits)
+Market/Region → Medium  → Format → Concept → Variations
+  Brazil      → Social  → Square → Product Demo  → 3 variations
+              → Social  → 9:16  → Value Prop     → 2 variations
+  Kenya       → Social  → Square → Testimonial   → 4 variations
+              → Radio   → 30s   → Problem-Hook   → 2 variations
+              → OOH     → Billboard → Brand       → 1 variation
+  National    → TV      → 30s   → Brand Story    → 1 variation
+              → Print   → A4    → Product Launch  → 3 variations
 ```
 
 ### Phase 3: Analyze
@@ -162,8 +183,9 @@ Check every review for these recurring issues:
 ## Resources
 
 ### Reference Files
-- **`references/methodology.md`** — Full 10-dimension scoring framework with rubrics, creative effectiveness research, anti-pattern catalog, scoring calculations, and industry benchmarks.
-- **`references/ad-platforms.md`** — Platform-specific specs (Meta, Google, TikTok, LinkedIn, X, Pinterest), aspect ratios, safe zones, text limits, video length guidelines, and platform-native creative best practices.
+- **`references/methodology.md`** — Full 10-dimension scoring framework with rubrics, creative effectiveness research, anti-pattern catalog, scoring calculations, and industry benchmarks. Includes format-specific dimension adjustments.
+- **`references/ad-platforms.md`** — Digital platform specs (Meta, Google, TikTok, LinkedIn, X, Pinterest). Aspect ratios, safe zones, text limits, video length guidelines.
+- **`references/ad-formats.md`** — Non-digital format guidelines: radio/audio (structure, duration, production), OOH/billboards (viewing distance, readability, size specs), print (bleed, CMYK, typography), TV (storytelling arc, production values, regulatory), experiential, and format-specific evaluation criteria.
 
 ### Assets
 - **`assets/report-template.html`** — HTML/CSS template for the ad review report. Brutalist styling matching eagle-ux-review aesthetic.
@@ -174,8 +196,10 @@ Check every review for these recurring issues:
 ## Notes
 
 - This skill evaluates creative effectiveness, not media buying strategy. It doesn't review targeting, bidding, or budget allocation.
-- Video ads get deeper analysis than static (timing, hook quality, pacing, sound design).
+- **Multi-format campaigns** should be evaluated per-medium AND for cross-medium consistency (does the radio ad reinforce the same message as the social ad?).
+- **Audio ads** without audio files can still be reviewed via scripts/transcripts — evaluate script structure, messaging, and CTA clarity.
+- **OOH/Billboard** evaluation focuses on the "3-second rule" — if the message isn't clear in 3 seconds at driving speed, it fails.
+- **TV commercials** get the deepest analysis — storytelling arc, production values, brand reveal timing, emotional build, and format compliance (15s/30s/60s structure).
 - Multi-market campaigns should be evaluated both per-market AND for cross-market consistency.
 - If performance data is available, always correlate creative observations with actual metrics. The data wins.
-- The skill works for any advertising medium: social, display, video, print, OOH. Adjust platform compliance checks accordingly.
 - For brands with formal brand guidelines, evaluate adherence. For brands without, flag the absence as a structural issue.
