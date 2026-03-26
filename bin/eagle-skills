@@ -19,6 +19,27 @@ declare -a SKILL_DESCS=(
   "Three-layer data validation: design intent + behavior + outcomes"
   "Strategy-first ad creative review across any medium"
 )
+declare -a SKILL_COMMANDS=("/eagle-ux-review" "/eagle-product-diagnostics" "/eagle-ad-review")
+declare -a SKILL_TRIGGERS=(
+  "ux review, ux audit, usability review, heuristic evaluation, critique this design, what's wrong with this UI"
+  "validate these findings, product diagnostics, funnel analysis, why isn't this metric moving, triangulate UX and data"
+  "review these ads, ad creative review, audit my ads, critique these creatives, ad teardown"
+)
+declare -a SKILL_INPUTS=(
+  "North star metric|Target user profile (demographics, tech literacy, device/connectivity)|2-3 reference apps the target user opens daily|App identity (chat, marketplace, tool, social, etc.)|Screen recording (video) or a folder of screenshots|Optional: PRD or hypothesis document|Optional: User personas, analytics data, competitive screenshots"
+  "Goal definitions (success metrics per feature)|Event taxonomy (analytics events mapped to screens and funnels)|Database outcomes (actual vs. target metrics)|Optional: UX review report from Eagle UX Review"
+  "Campaign strategy (objective, funnel stage, audience, medium/channels, KPI)|Brand context (value proposition, positioning, competitive landscape)|Creative files — images, video, audio, PDFs, scripts (any format, any medium)"
+)
+declare -a SKILL_OUTPUTS=(
+  "HTML report with severity-rated findings, embedded evidence, before/after CSS mockups, priority matrix, UX law citations"
+  "HTML report with goal scorecard (PASS/FAIL/PARTIAL), funnel visualizations, three-layer diagnosis, business impact estimates"
+  "HTML report with 10-dimension scoring, per-creative breakdowns, platform compliance audit, creative brief for next round"
+)
+declare -a SKILL_EXAMPLES=(
+  "UX review this app — here's a screen recording of the onboarding flow"
+  "Why isn't our retention improving? Here's our Firebase events and DB metrics"
+  "Review these ad creatives — folder is ./ads/. Campaign is awareness on Meta and radio"
+)
 
 # ─── Colors ──────────────────────────────────────────────────
 RED='\033[0;31m'
@@ -316,6 +337,105 @@ skill_display_name() {
   echo "$dir"
 }
 
+# ─── Usage command ──────────────────────────────────────────
+
+print_skill_usage() {
+  local i="$1"
+  echo -e "  ${BOLD}${MAGENTA}${SKILL_NAMES[$i]}${RESET}"
+  echo ""
+  echo -e "    ${BOLD}Slash command:${RESET}  ${CYAN}${SKILL_COMMANDS[$i]}${RESET}"
+  echo -e "    ${BOLD}Trigger with:${RESET}   ${DIM}${SKILL_TRIGGERS[$i]}${RESET}"
+  echo ""
+  echo -e "    ${BOLD}Required inputs:${RESET}"
+  local shown_optional=false
+  IFS='|' read -ra items <<< "${SKILL_INPUTS[$i]}"
+  for item in "${items[@]}"; do
+    item=$(echo "$item" | sed 's/^ *//')
+    if [[ "$item" == Optional:* ]]; then
+      if [ "$shown_optional" = false ]; then
+        echo ""
+        echo -e "    ${BOLD}Optional inputs:${RESET}"
+        shown_optional=true
+      fi
+      item="${item#Optional: }"
+      echo -e "      ${DIM}-${RESET} $item"
+    else
+      echo -e "      ${DIM}-${RESET} $item"
+    fi
+  done
+  echo ""
+  echo -e "    ${BOLD}Output:${RESET}"
+  echo -e "      ${SKILL_OUTPUTS[$i]}"
+  echo ""
+  echo -e "    ${BOLD}Example:${RESET}"
+  echo -e "      ${DIM}You:${RESET} ${SKILL_EXAMPLES[$i]}"
+  echo ""
+}
+
+cmd_usage() {
+  local filter="${1:-}"
+
+  header "Eagle Skills — How to Use"
+
+  # Determine which skills to show
+  local -a show_indices=()
+  local showing_installed=false
+
+  if [ -n "$filter" ]; then
+    # User asked for a specific skill
+    local found=false
+    for i in "${!SKILL_DIRS[@]}"; do
+      if [ "${SKILL_DIRS[$i]}" = "$filter" ] || [ "${SKILL_COMMANDS[$i]}" = "/$filter" ] || [ "${SKILL_COMMANDS[$i]}" = "$filter" ]; then
+        show_indices+=("$i")
+        found=true
+        break
+      fi
+    done
+    if [ "$found" = false ]; then
+      err "Unknown skill: $filter"
+      echo -e "  ${DIM}Available: ${SKILL_DIRS[*]}${RESET}"
+      echo ""
+      return 1
+    fi
+  else
+    # Show installed skills, or all if none installed
+    for i in "${!SKILL_DIRS[@]}"; do
+      local dst="$SKILLS_DIR/${SKILL_DIRS[$i]}"
+      if [ -L "$dst" ] && [ -d "$dst" ]; then
+        show_indices+=("$i")
+        showing_installed=true
+      elif [ -d "$dst" ]; then
+        show_indices+=("$i")
+        showing_installed=true
+      fi
+    done
+
+    if [ ${#show_indices[@]} -eq 0 ]; then
+      echo -e "  ${DIM}No skills installed. Showing all available skills.${RESET}"
+      echo -e "  ${DIM}Run ${RESET}eagle-skills install${DIM} to get started.${RESET}"
+      echo ""
+      for i in "${!SKILL_DIRS[@]}"; do
+        show_indices+=("$i")
+      done
+    else
+      echo -e "  ${DIM}Showing your ${#show_indices[@]} installed skill(s). Run ${RESET}eagle-skills usage <skill-name>${DIM} for one skill.${RESET}"
+      echo ""
+    fi
+  fi
+
+  for i in "${show_indices[@]}"; do
+    print_skill_usage "$i"
+  done
+
+  echo -e "  ${DIM}────────────────────────────────────────────────${RESET}"
+  echo ""
+  echo -e "  ${BOLD}Tips:${RESET}"
+  echo -e "    ${DIM}-${RESET} Skills activate automatically when Claude detects matching intent"
+  echo -e "    ${DIM}-${RESET} You can also invoke directly: type the slash command in Claude Code"
+  echo -e "    ${DIM}-${RESET} Output is always an HTML report saved in your working directory"
+  echo ""
+}
+
 cmd_help() {
   echo ""
   echo -e "${BOLD}Eagle Skills${RESET} v${VERSION}"
@@ -328,6 +448,7 @@ cmd_help() {
   echo "  install     Select and install skills for Claude Code"
   echo "  update      Pull latest changes (symlinked skills update automatically)"
   echo "  status      Show installed skills and check for updates"
+  echo "  usage       Show how to use installed skills (inputs, outputs, examples)"
   echo "  uninstall   Remove installed skills"
   echo "  help        Show this help message"
   echo ""
@@ -347,6 +468,7 @@ main() {
     install)   cmd_install ;;
     update)    cmd_update ;;
     status)    cmd_status ;;
+    usage)     cmd_usage "${2:-}" ;;
     uninstall) cmd_uninstall ;;
     help|--help|-h) cmd_help ;;
     version|--version|-v) echo "eagle-skills v${VERSION}" ;;

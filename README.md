@@ -172,33 +172,79 @@ Update with `git pull`. Symlinks mean installed skills update automatically.
 
 ## Usage
 
-Trigger skills with natural language in Claude Code:
+Skills activate automatically when Claude detects matching intent. You can also invoke them directly with slash commands:
 
-**UX Review:**
 ```
-ux review this screen recording
-```
-```
-UX audit — I'll provide a PRD and video walkthrough
+/eagle-ux-review
+/eagle-product-diagnostics
+/eagle-ad-review
 ```
 
-**Product Diagnostics:**
+### Eagle UX Review
+
+**Required inputs** (Claude will ask for these):
+- North star metric (e.g., D7 retention, conversion rate)
+- Target user profile (demographics, tech literacy, device/connectivity)
+- 2-3 reference apps the target user opens daily
+- App identity (chat, marketplace, tool, social, etc.)
+- Screen recording (video) OR a folder of screenshots
+
+**Optional inputs** (improve review quality significantly):
+- PRD or hypothesis document
+- User personas
+- Analytics data or competitive screenshots
+
+**Output:** Self-contained HTML report in your working directory with severity-rated findings, embedded evidence screenshots, before/after CSS mockups, priority matrix, and UX law citations.
+
+**Example session:**
 ```
-validate these UX findings against our Firebase events
-```
-```
-why isn't our retention metric moving? here's the event data and DB export
+You:   UX review this app — here's a screen recording of the onboarding flow
+Claude: [asks for north star metric, target user, reference apps, app identity]
+You:   North star is D7 retention. Target users are smallholder farmers in India,
+       low-tech literacy, Android devices on 2G/3G. Reference apps: WhatsApp, YouTube.
+       It's a chat app.
+Claude: [extracts frames at 1fps, analyzes against 65+ UX laws, generates HTML report]
 ```
 
-**Ad Review:**
+### Eagle Product Diagnostics
+
+**Required inputs:**
+- Goal definitions (success metrics per feature)
+- Event taxonomy (analytics events mapped to screens and funnels)
+- Database outcomes (actual vs. target metrics)
+
+**Optional inputs:**
+- A UX review report (from Eagle UX Review) for per-finding validation
+
+**Output:** HTML report with goal scorecard (PASS/FAIL/PARTIAL per layer), funnel visualizations, three-layer diagnosis per feature, disagreement analysis, and prioritized actions.
+
+**Example session:**
 ```
-review these ad creatives — here's the folder
-```
-```
-critique our radio spots and billboard designs
+You:   Why isn't our onboarding completion rate improving? Here's our Firebase
+       events export and the DB metrics.
+Claude: [asks for goal definitions, event-to-screen mapping, target metrics]
+You:   [provides event taxonomy CSV, DB query results, and links the UX review]
+Claude: [triangulates design intent vs. behavior vs. outcomes, generates HTML report]
 ```
 
-Skills activate automatically when Claude detects matching intent.
+### Eagle Ad Review
+
+**Required inputs:**
+- Campaign strategy (objective, funnel stage, audience, medium/channels, KPI)
+- Brand context (value proposition, positioning, competitive landscape)
+- Creative files (images, videos, audio, PDFs, scripts — any format, any medium)
+
+**Output:** HTML report with 10-dimension scoring (weighted by campaign type and medium), per-creative breakdowns, best/worst performer galleries, cross-cutting findings, platform compliance audit, and a creative brief for the next round.
+
+**Example session:**
+```
+You:   Review these ad creatives — folder is ./ads/. Campaign is awareness for
+       rural farmers in UP, running on Meta and local radio.
+Claude: [asks for campaign objective, funnel stage, audience details, brand context]
+You:   [provides strategy and brand positioning]
+Claude: [catalogs all files, scores against Meta ABCD + Kantar + medium-specific
+        best practices, generates HTML report]
+```
 
 ---
 
