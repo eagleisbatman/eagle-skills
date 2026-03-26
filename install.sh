@@ -29,4 +29,4 @@ else
 fi
 
 # Run the full CLI installer
-exec "$INSTALL_DIR/bin/eagle-skills.sh" install
+exec "$INSTALL_DIR/bin/eagle-skills" install
