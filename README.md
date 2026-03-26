@@ -122,7 +122,7 @@ Or without npm:
 curl -fsSL https://raw.githubusercontent.com/eagleisbatman/eagle-skills/main/install.sh | bash
 ```
 
-The installer clones the repo to `~/.eagle-skills` and symlinks your selected skills into `~/.claude/skills/`. Symlinked skills update in place when you run `eagle-skills update`.
+The installer clones the repo to `~/.eagle-skills` and symlinks your selected skills into `~/.claude/skills/`. Symlinked skills update in place when you run `npx eagle-skills update`.
 
 ### Managing your installation
 
