@@ -1,0 +1,181 @@
+---
+name: eagle-ad-review
+description: "This skill should be used when the user asks to review ad creatives, audit advertising campaigns, evaluate marketing collateral, critique ad designs, or assess creative performance. Trigger phrases include: 'review these ads', 'ad creative review', 'audit my ads', 'critique these creatives', 'what's wrong with my ads', 'ad review', 'creative review', 'evaluate these campaigns', 'review my marketing materials', 'ad teardown', 'creative audit', 'are these ads effective'. Also trigger when the user provides a folder of ad images/videos and asks for feedback, or mentions ad platforms (Meta, Google, TikTok, etc.) in the context of evaluating creative quality. This skill handles bulk image folders, video ads, mixed-format campaign sets, and multi-market creative libraries."
+---
+
+# Eagle Ad Review
+
+## Overview
+
+Strategy-first advertising creative review grounded in established frameworks (Meta ABCD, Kantar Creative Effectiveness, System1, Nielsen) and platform-specific best practices. Evaluates ad creatives not just for visual quality, but for whether they do their marketing job — stopping the scroll, communicating value, driving action, and building brand.
+
+The review is **brutal and honest**. Creative is the single largest driver of ad performance (47% of sales lift per Nielsen), so honest feedback here has direct ROI impact.
+
+Output is always an **HTML report** with embedded thumbnails, per-creative scoring, cross-cutting analysis, and prioritized recommendations. The report template is at `assets/report-template.html`.
+
+## Process
+
+### Phase 1: Gather Strategic Context
+
+Before looking at a single creative, collect the marketing strategy. Present all questions in one message — the answers fundamentally change what "good" looks like.
+
+**Required — Campaign Strategy:**
+- **Campaign Objective** — What is this campaign optimizing for? (Awareness / App installs / Conversions / Retargeting / Re-engagement / Lead generation). An awareness ad and a conversion ad have completely different success criteria.
+- **Funnel Stage** — Where do these ads sit? Top-of-funnel (cold audience, first exposure), mid-funnel (consideration, familiar with brand), or bottom-funnel (retargeting, ready to act)?
+- **Target Audience** — Demographics, psychographics, media habits, pain points. Tech literacy and device context if relevant. Per-market if multi-market campaign.
+- **Platforms & Placements** — Where are these running? (Meta Feed, Stories, Reels; Google Display, YouTube; TikTok; LinkedIn; X; Pinterest). Each has different specs, safe zones, and creative norms.
+- **Primary KPI** — What metric defines success? (CTR, CPA, ROAS, install rate, video completion rate, brand lift). The KPI determines which creative elements matter most.
+
+**Required — Brand & Product:**
+- **Product/Service** — What is being advertised? One sentence.
+- **Value Proposition** — What is the single most compelling reason someone should care?
+- **Brand Positioning** — How should the brand be perceived? (Affordable, premium, trustworthy, innovative, friendly, expert?)
+- **Competitive Landscape** — Who is competing for the same audience's attention? What do their ads look like?
+
+**Extended Inputs (ask for these — they transform the review):**
+- **Performance Data** — CTR, CPA, ROAS, install rate by creative. If available, this lets the review correlate creative choices with actual results.
+- **Brand Guidelines** — Logo usage rules, color palette, typography, tone of voice. Enables brand consistency scoring.
+- **Creative Testing History** — What hooks/angles/formats have worked before? What's been tried and failed?
+- **Budget & Resources** — Affects recommendation feasibility. Don't recommend $50K shoots for a $500/month budget.
+- **Creative Testing Framework** — Is the team doing structured hook/body/CTA testing, or producing ad-hoc batches?
+- **Fatigue Indicators** — Current ad frequency, how long creatives have been running, performance trend direction.
+
+If the user provides a folder and says "just review these," make reasonable inferences and **explicitly flag every assumption** so they can correct.
+
+### Phase 2: Process Input
+
+#### Catalog Ad Files
+
+Use `scripts/catalog-ads.sh` or manually scan the folder:
+
+```bash
+# Scan and catalog all ad files
+bash scripts/catalog-ads.sh /path/to/ads/folder
+
+# Output: file inventory grouped by type, dimensions, aspect ratio
+```
+
+**For image ads:** View every image. Group by:
+- Market/language (from folder structure or visual inspection)
+- Aspect ratio / format (square, portrait 9:16, landscape 16:9)
+- Creative concept / angle (group similar-looking variations)
+- Campaign vintage (if dateable from folder names or content)
+
+**For video ads:** Extract key frames and view:
+```bash
+# Extract first frame, middle frame, and last frame (hook, body, CTA)
+ffmpeg -i VIDEO -vf "select=eq(n\,0)+eq(n\,floor(total/2))+eq(n\,total-1)" -vsync vfq -q:v 2 thumb_%02d.jpg
+
+# For longer videos, extract at 2-second intervals
+mkdir -p ./ad-frames && ffmpeg -y -i VIDEO -vf "fps=1/2" -q:v 2 ./ad-frames/frame_%03d.jpg
+```
+
+**For both:** Build a creative inventory map:
+```
+Market/Region → Format → Concept → Variations
+  Brazil      → Square  → Photo Diagnosis → 3 variations
+              → 9:16   → Value Prop      → 2 variations
+  Kenya       → Square  → Testimonial     → 4 variations
+              → Video   → Demo            → 6 variations (3 aspect ratios × 2 edits)
+```
+
+### Phase 3: Analyze
+
+**Read `references/methodology.md` before this step.** It contains the full 10-dimension scoring framework, rubrics, and anti-pattern catalog.
+
+**Read `references/ad-platforms.md`** for platform-specific specs, safe zones, and creative guidelines.
+
+**Three-Level Analysis:**
+
+**Level 1 — Strategic Fit (most important)**
+Does each creative do the job the campaign needs?
+- Does the hook earn attention in the first 1-3 seconds / first visual impression?
+- Does the message match the funnel stage? (Education for cold, urgency for warm)
+- Is the value proposition clear within 5 seconds?
+- Does the CTA match the campaign objective?
+- Is the creative-to-landing-page promise consistent?
+
+**Level 2 — Execution Quality**
+Is the creative well-made?
+- Brand presence: logo visible, brand colors used, distinctive assets present?
+- Visual hierarchy: clear focal point, readable text, CTA prominence?
+- Platform compliance: correct aspect ratio, safe zones respected, text overlay limits?
+- Production quality: resolution, composition, lighting, authentic vs. AI-generated?
+- Localization quality: proper translation, cultural appropriateness, no mixed languages?
+
+**Level 3 — Creative System Health**
+Does the creative set work as a testing/scaling system?
+- Is there a structured testing framework (hook/body/CTA variations)?
+- Is there meaningful variation across creatives, or are they near-duplicates?
+- Is brand consistency maintained across markets and formats?
+- Is there creative for each funnel stage, or only one stage?
+- Are there signs of creative fatigue (same concepts recycled)?
+
+### Phase 4: Generate HTML Report
+
+**Always produce an HTML file.** Use the structure from `assets/report-template.html`.
+
+Copy representative ad thumbnails to a `thumbnails/` directory alongside the HTML file.
+
+**Required Report Sections:**
+
+1. **Cover** — Campaign/brand name, context cards (objective, audience, platforms, KPI, markets, creative count)
+2. **Overall Verdict** — Score out of 10 with 1-2 sentence thesis. Dark box.
+3. **Creative Inventory** — What was reviewed: counts by market, format, concept, medium
+4. **Scoring Dashboard** — 10-dimension radar chart scores with overall weighted score
+5. **Best & Worst Performers** — Gallery of top 3 and bottom 3 creatives with explanations
+6. **Per-Market / Per-Campaign Breakdown** — Score and key findings per market or campaign group
+7. **Cross-Cutting Findings** — Issues that appear across the entire creative set (ordered by impact)
+   - Each finding: evidence thumbnails, what's wrong, why it matters for the KPI, recommendation
+8. **Platform Compliance Audit** — Pass/fail per creative against platform specs
+9. **Creative System Assessment** — Testing framework evaluation, variation analysis, fatigue risk
+10. **Recommended Actions** — Prioritized by expected KPI impact. Three levels: quick fix, next sprint, strategic shift.
+11. **Creative Brief for Next Round** — Based on findings, what should the next batch of creatives focus on?
+
+### Phase 5: Writing Principles
+
+- **Strategy over aesthetics.** An ugly ad that converts beats a beautiful ad that doesn't. Always evaluate against the marketing objective first.
+- **Show the math.** "This ad has weak brand presence" is vague. "Brand logo appears at 0:12 — 80% of viewers have already scrolled past by 0:03" connects to real behavior.
+- **Compare to what works.** Reference winning ad patterns from the platform, category, or the brand's own history.
+- **Be specific about what to change.** "Improve the hook" is useless. "Replace the logo animation opener with a problem-agitation statement in the first frame, set in 48px+ text within the Stories safe zone" is actionable.
+- **Respect the budget.** Recommendations must be feasible within the team's resources. Flag when a structural problem requires investment vs. when it's a simple creative swap.
+- **Quantify when possible.** If performance data is available, tie findings to actual numbers. If not, reference industry benchmarks.
+- **Don't confuse personal taste with effectiveness.** The review is about what works for the target audience, not what looks good to the reviewer.
+
+## Key Anti-Patterns
+
+Check every review for these recurring issues:
+
+1. **No Hook** — Ad opens with logo animation, slow pan, or generic imagery instead of earning attention in 1-3 seconds
+2. **Message Overload** — Trying to communicate 3+ ideas in one creative. Best ads say one thing clearly.
+3. **Format Mismatch** — Running landscape video in vertical placements (40% screen waste) or vice versa
+4. **Ghost CTA** — No call-to-action, or CTA buried/invisible. Every ad needs a clear next step.
+5. **Stock Photo Syndrome** — Generic stock imagery that could be for any brand. Authentic > polished.
+6. **AI Uncanny Valley** — AI-generated people/scenes that feel synthetic and erode trust
+7. **Translation, Not Transcreation** — Direct word-for-word translation that loses cultural meaning, humor, or emotional tone
+8. **Identical Twins** — 10 "variations" that are the same layout with different photos. No meaningful testing surface.
+9. **Funnel Blindness** — Same creative for cold and warm audiences. Different funnel stages need different creative jobs.
+10. **Brand Amnesia** — No consistent visual identity across the set. Different typography, colors, logo treatments across markets.
+11. **Silent Video** — Video with important audio content but no captions/text overlays (85% watch on mute)
+12. **Safe Zone Violations** — Text/CTA placed in platform UI overlay zones where it gets obscured
+
+## Resources
+
+### Reference Files
+- **`references/methodology.md`** — Full 10-dimension scoring framework with rubrics, creative effectiveness research, anti-pattern catalog, scoring calculations, and industry benchmarks.
+- **`references/ad-platforms.md`** — Platform-specific specs (Meta, Google, TikTok, LinkedIn, X, Pinterest), aspect ratios, safe zones, text limits, video length guidelines, and platform-native creative best practices.
+
+### Assets
+- **`assets/report-template.html`** — HTML/CSS template for the ad review report. Brutalist styling matching eagle-ux-review aesthetic.
+
+### Scripts
+- **`scripts/catalog-ads.sh`** — Scans an ad folder, catalogs all files by type/dimensions/aspect ratio, groups by directory structure, and outputs a structured inventory. Usage: `catalog-ads.sh <folder_path> [output_dir]`
+
+## Notes
+
+- This skill evaluates creative effectiveness, not media buying strategy. It doesn't review targeting, bidding, or budget allocation.
+- Video ads get deeper analysis than static (timing, hook quality, pacing, sound design).
+- Multi-market campaigns should be evaluated both per-market AND for cross-market consistency.
+- If performance data is available, always correlate creative observations with actual metrics. The data wins.
+- The skill works for any advertising medium: social, display, video, print, OOH. Adjust platform compliance checks accordingly.
+- For brands with formal brand guidelines, evaluate adherence. For brands without, flag the absence as a structural issue.
