@@ -1,6 +1,6 @@
 {
   "name": "eagle-skills",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Custom skills for Claude Code — UX Review, Product Diagnostics, and Ad Review",
   "bin": {
     "eagle-skills": "bin/eagle-skills"
