@@ -108,9 +108,33 @@ Predictive                     Validated                          Acquisition
 
 ## Installation
 
-Install any or all skills. Symlink is recommended for automatic updates.
+### Quick install (recommended)
 
-### Option A: Symlink (recommended)
+Interactive installer — choose which skills to install:
+
+```bash
+npx eagle-skills install
+```
+
+Or without npm:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/eagleisbatman/eagle-skills/main/install.sh | bash
+```
+
+The installer clones the repo to `~/.eagle-skills` and symlinks your selected skills into `~/.claude/skills/`. Symlinked skills update in place when you run `eagle-skills update`.
+
+### Managing your installation
+
+```bash
+npx eagle-skills update      # Pull latest changes
+npx eagle-skills status      # Show installed skills, check for updates
+npx eagle-skills uninstall   # Remove skills and optionally the repo
+```
+
+### Manual install
+
+If you prefer to manage it yourself:
 
 ```bash
 git clone https://github.com/eagleisbatman/eagle-skills.git
@@ -120,18 +144,7 @@ ln -sf "$(pwd)/eagle-product-diagnostics" ~/.claude/skills/eagle-product-diagnos
 ln -sf "$(pwd)/eagle-ad-review" ~/.claude/skills/eagle-ad-review
 ```
 
-Updates automatically when you `git pull`. Breaks if you move the cloned repo.
-
-### Option B: Copy
-
-```bash
-git clone https://github.com/eagleisbatman/eagle-skills.git
-cp -r eagle-skills/eagle-ux-review ~/.claude/skills/
-cp -r eagle-skills/eagle-product-diagnostics ~/.claude/skills/
-cp -r eagle-skills/eagle-ad-review ~/.claude/skills/
-```
-
-Standalone. Requires manual re-copy to get updates.
+Update with `git pull`. Symlinks mean installed skills update automatically.
 
 ---
 

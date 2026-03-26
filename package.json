@@ -1,0 +1,24 @@
+{
+  "name": "eagle-skills",
+  "version": "1.0.0",
+  "description": "Custom skills for Claude Code — UX Review, Product Diagnostics, and Ad Review",
+  "bin": {
+    "eagle-skills": "./bin/eagle-skills.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eagleisbatman/eagle-skills.git"
+  },
+  "keywords": [
+    "claude-code",
+    "claude",
+    "skills",
+    "ux-review",
+    "product-diagnostics",
+    "ad-review",
+    "anthropic"
+  ],
+  "author": "eagleisbatman",
+  "license": "MIT",
+  "homepage": "https://github.com/eagleisbatman/eagle-skills#readme"
+}
