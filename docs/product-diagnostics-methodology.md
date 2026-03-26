@@ -1,0 +1,243 @@
+# Eagle Product Diagnostics — Methodology
+
+## The Problem Product Diagnostics Solves
+
+A UX review tells you: "This screen probably causes drop-off because the primary action is buried."
+
+But *probably* isn't proof. Maybe users found a workaround. Maybe the drop-off happens for a completely different reason. Maybe the screen is fine and the real problem is that the feature itself doesn't deliver enough value.
+
+Product Diagnostics takes your actual data — analytics events from your app and outcomes from your database — and validates each UX finding against reality. The result is not "we think this is broken" but "this IS broken, here's the funnel that proves it, and here's how much it costs."
+
+It also catches the reverse: situations where the data shows a problem that the UX review didn't predict. These are often the most important discoveries — they point to issues invisible from the interface alone (server errors, slow APIs, content quality, wrong audience targeting).
+
+---
+
+## The Three-Layer Model
+
+Product Diagnostics works by triangulating three independent sources of evidence:
+
+```
+LAYER 1: DESIGN INTENT                    LAYER 2: INSTRUMENTED BEHAVIOR           LAYER 3: OUTCOME TRUTH
+"We believe users will do X"              "Users actually did Y"                    "The database shows Z"
+─────────────────────────────             ─────────────────────────────             ─────────────────────────────
+Source: UX review findings,               Source: Firebase, Mixpanel,               Source: Database queries,
+PRD, product hypotheses                   Amplitude, Segment, PostHog,             transaction logs, revenue
+                                          CleverTap, Moengage, Heap,               data, retention cohorts
+                                          session recordings
+
+Answers: Is the feature well-             Answers: Did users reach it?              Answers: Did the goal
+designed? Are there visible               Did they complete the flow?               actually get achieved?
+friction points?                          Where did they drop off?                  Did the purchase go through?
+                                                                                    Did the user come back?
+
+Nature: Predictive.                       Nature: Observational.                    Nature: Ground truth.
+Identifies potential problems.            Shows what happened but                   Shows the final result but
+May not reflect real behavior.            not why, and not whether                  not the journey that led
+                                          outcomes succeeded.                       to it.
+```
+
+**Why all three are necessary:**
+
+- **Design Intent alone** is just theory. You might optimize for problems that don't actually occur.
+- **Events alone** show the "what" but not the "why." You see drop-off but can't diagnose the cause.
+- **DB outcomes alone** show the result but not the journey. You know revenue dropped but have no idea where to intervene.
+- **Any two** still have a blind spot. Design + Events misses whether completed flows actually produced real outcomes. Design + DB can't see the journey. Events + DB has no framework for *why* things fail — fixes become guesswork.
+
+All three together create a closed loop: **hypothesize** (design intent) → **observe** (behavior) → **verify** (outcome).
+
+---
+
+## How Diagnostics Works, Step by Step
+
+### Phase 1: Gather Inputs
+
+The skill asks for three types of data. Input templates are provided at `eagle-product-diagnostics/assets/input-templates/` — copy them, fill in your numbers, and hand them over.
+
+**Input 1: Goal Definitions** — what "success" means for each feature, with specific target metrics.
+
+**Input 2: Event Data** — your analytics events mapped to screens, plus funnel definitions with conversion rates. Works with any platform. Accepted formats: CSV export, JSON schema, dashboard screenshots, BigQuery query results, or even a plain-text event list with approximate numbers.
+
+**Input 3: Database Outcomes** — actual metric values vs. targets. The most powerful variant is a **cohort comparison**: users who hit a specific UX condition vs. those who didn't.
+
+If a UX review report from `eagle-ux-review` is also provided, the skill maps each UX finding directly to event data and DB outcomes for per-finding validation.
+
+### Phase 2: Map Events to Flows
+
+The skill builds an event-to-screen mapping that connects every analytics event to a specific point in the user journey:
+
+```
+Step                 Event                     Actual Rate    Expected    Gap
+────────────────────────────────────────────────────────────────────────────────
+1. App Open          app_open                  100%           100%        —
+2. Home Screen       screen_view:home          92%            >95%        -3%
+3. Category Select   screen_view:category      68%            >85%        -17% !
+4. Feature Entry     feature_started           28%            >60%        -32% !!
+5. Core Action       action_completed          18%            >48%        -30% !!
+6. Result Screen     result_displayed          16%            >45%        -29%
+```
+
+For each step, it calculates:
+- **Absolute conversion** from baseline (what percentage of all users reach this point)
+- **Step-to-step conversion** (what percentage of the previous step proceeds)
+- **Drop-off magnitude** (how many users are lost here)
+- **Time between events** (if timestamps are available — long gaps signal confusion or technical issues)
+- **Comparison to expected rates** (from your goal definitions)
+
+The biggest drops get flagged. In the example above, the 68% → 28% drop between category selection and feature entry is where most users are lost — the intermediate step loses 40% of traffic.
+
+### Phase 3: Triangulate
+
+For each feature/goal, the skill produces a three-layer verdict:
+
+```
+FEATURE: Complete a purchase
+GOAL: User adds item to cart AND completes checkout
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ Layer 1 — DESIGN INTENT                                         FAIL  │
+│ UX review found: primary CTA below the fold, 6-step checkout          │
+│ with no progress indicator, mandatory account creation blocks          │
+│ 40% of users before payment.                                          │
+├─────────────────────────────────────────────────────────────────────────┤
+│ Layer 2 — INSTRUMENTED BEHAVIOR                                 FAIL  │
+│ Analytics events confirm: only 28% of product viewers add to          │
+│ cart. 60% drop-off at account creation step. Users who reach          │
+│ the payment screen have 0.3 completion rate.                          │
+├─────────────────────────────────────────────────────────────────────────┤
+│ Layer 3 — OUTCOME TRUTH                                         FAIL  │
+│ Database shows: conversion rate = 1.2% (target: 4%). Average          │
+│ order value is healthy at $47, but volume is suppressed.              │
+│ 68% of cart creators never complete payment.                          │
+├─────────────────────────────────────────────────────────────────────────┤
+│ DIAGNOSIS: All three layers agree. This is a clear UX problem.        │
+│ The checkout flow suppresses the core conversion action.              │
+│                                                                        │
+│ VALIDATED IMPACT: ~2,400 missed conversions/month, ~$112K in          │
+│ unrealized revenue. Removing mandatory signup could recover 40%.      │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Phase 4: Generate Report
+
+The output is an HTML report (matching the brutalist style of the UX review) containing:
+
+| Section | What's in it |
+|---------|-------------|
+| **1. Cover** | Product name, data sources used, date range, sample sizes |
+| **2. Input Summary** | What data was provided, what's missing, overall confidence level |
+| **3. Goal Scorecard** | Table with every feature, its goal, and three PASS/FAIL/PARTIAL verdicts |
+| **4. Funnel Analysis** | Visual funnel bars showing conversion and drop-off at each step |
+| **5. Finding Validation** | Each UX review finding mapped to events and DB outcomes |
+| **6. Diagnosis by Feature** | Deep dive for each feature with all three layers, interpretation, and action |
+| **7. Disagreement Analysis** | Where layers contradict — and what that means |
+| **8. Metric Impact** | Business impact estimates with calculations showing revenue/retention/cost |
+| **9. Recommended Actions** | Prioritized by validated impact (not just UX severity) |
+| **10. Data Gaps** | Missing events, missing instrumentation, what to add for better diagnosis next time |
+
+### Phase 5: Writing Principles
+
+- **Let the data speak.** If the numbers tell a different story than the UX review predicted, the data wins.
+- **Flag uncertainty.** Small sample sizes, missing events, and single-source verdicts get called out explicitly.
+- **Distinguish correlation from causation.** "Users who skip step 3 have 3x retention" is strong evidence, not proof.
+- **Quantify everything.** "Drop-off is high" is weak. "47% of users abandon at step 3, costing an estimated 2,400 conversions/month" is actionable.
+- **Challenge the hypothesis.** If data says UX is fine but the metric is failing, say so. The problem might be content quality, market fit, or technical reliability.
+
+---
+
+## The Verdict Matrix
+
+The power of three-layer validation is in the combinations. Here's what each pattern means:
+
+| UX | Events | DB | What it means | Real-world example | What to do |
+|----|--------|----|--------------|--------------------|-----------|
+| FAIL | FAIL | FAIL | **Clear UX problem.** The interface is broken, users are struggling, and the metric is suffering. All evidence agrees. | Checkout button hidden below fold → users can't complete purchase → conversion rate is 12% instead of target 40% | Fix the UX. Highest confidence, highest priority. |
+| FAIL | PASS | PASS | **Users adapted.** The UX looks bad but users found a workaround and the metric is fine. | Confusing settings menu, but users learned the path after 2 sessions and retention is healthy | Monitor but lower priority. Consider fixing for new user onboarding. |
+| PASS | FAIL | FAIL | **Hidden problem.** The UX looks fine in review but something else is causing failure — slow APIs, bad content, wrong audience segment, device-specific bugs. | Clean checkout flow, but 30% of payments silently fail on Android due to a payment SDK bug | Investigate technical and content layers. The UX isn't the bottleneck. |
+| PASS | PASS | FAIL | **Value proposition problem.** Users find and use the feature successfully, but the business goal still isn't met. This is a strategy issue, not a design issue. | Users complete onboarding smoothly, ask questions daily, but D30 retention is 3% because the AI answers aren't useful enough | Don't blame UX. Investigate content quality, product-market fit, or whether the goal target is realistic. |
+| FAIL | FAIL | PASS | **Power users compensating.** The UX has friction and most users struggle, but the ones who push through are highly engaged. You're leaving the mass market on the table. | Power users navigate a complex interface and love the tool, but 80% of new users never get past onboarding | Fix the UX to unlock the mass market. Current users succeed despite the interface, not because of it. |
+| PASS | FAIL | PASS | **Measurement problem.** UX is fine, outcomes are fine, but events show drop-off. Likely a tracking issue — missing events, misconfigured funnels, or users taking an untracked path. | Funnel shows 50% drop at step 3, but DB shows 90% of users complete the action. Users are using a different path than the one instrumented. | Fix the instrumentation before drawing conclusions. |
+| FAIL | PASS | FAIL | **Delayed damage.** UX problems don't cause immediate drop-off (users push through) but erode long-term retention or satisfaction. | Users complete their first session despite confusing navigation, but don't come back on Day 7. | Fix UX for retention. Short-term funnels look fine but the experience doesn't earn a return visit. |
+| PASS | PASS | PASS | **Working as intended.** Feature is well-designed, well-used, and achieving its goals. | Onboarding is clean, completion rate is 85%, D7 retention for onboarded users is 35%. | Protect this. Don't redesign what works. Document the patterns for reuse. |
+
+---
+
+## Input Templates
+
+To run Product Diagnostics, provide three inputs. Templates are included in the skill at `eagle-product-diagnostics/assets/input-templates/`:
+
+### 1. Goal Definition (`goal-definition.md`)
+
+Define what "success" means for each feature you want to validate:
+
+```
+Feature: Complete first purchase
+User Story: As a new user, I want to find and buy a product so I get value from the app.
+Success: User adds item to cart AND completes checkout AND returns within 7 days.
+
+Metric              Current    Target     Window
+─────────────────────────────────────────────────
+Conversion rate     12%        40%        per session
+D7 retention        8%         20%        cohort
+Task completion     35%        70%        per attempt
+
+Happy Path:
+  1. User opens app
+  2. User browses or searches for product
+  3. User selects product and adds to cart
+  4. User completes checkout
+  5. User receives confirmation and returns
+
+Known Risks:
+  - Assumes user discovers products organically
+  - Payment options may not cover all regions
+  - Depends on network connectivity
+```
+
+### 2. Event Taxonomy (`event-taxonomy.md`)
+
+Map your analytics events to screens and define the funnels you care about:
+
+```
+Event Name              Trigger                    Screen
+──────────────────────────────────────────────────────────
+app_open                App launched               --
+screen_view:home        Home screen displayed       Home
+product_viewed          User views product detail   Product
+add_to_cart             User adds item to cart      Product
+checkout_completed      Purchase confirmed          Checkout
+
+Funnel: First Purchase
+  app_open → screen_view:home → product_viewed → add_to_cart → checkout_completed
+  Expected: 100% → 95% → 60% → 80% → 95%
+  Actual:   100% → 92% → 28% → 65% → 89%
+```
+
+Works with any analytics platform: Firebase, Mixpanel, Amplitude, Segment, CleverTap, Moengage, PostHog, Heap, or custom. Provide data as CSV, JSON, BigQuery exports, dashboard screenshots, or even plain-text approximations.
+
+### 3. Database Outcomes (`db-schema.md`)
+
+Provide ground truth — what actually happened vs. what should have happened:
+
+```sql
+SELECT
+  COUNT(DISTINCT user_id) as users,
+  AVG(purchases_per_session) as avg_purchases,
+  AVG(CASE WHEN returned_day_7 THEN 1 ELSE 0 END) as d7_retention
+FROM user_metrics
+WHERE signup_date BETWEEN '2026-01-01' AND '2026-03-25';
+
+-- Result: 8,200 users, 0.3 avg purchases, 8% D7 retention
+-- Target: 1+ purchases per session, 20% D7 retention
+```
+
+**Cohort comparisons are the most powerful input.** If you can split users into groups based on a UX condition, the diagnosis becomes conclusive:
+
+```
+                    Complex checkout    Streamlined checkout    Difference
+─────────────────────────────────────────────────────────────────────────
+Conversion rate     12%                 41%                     +242%
+D7 retention        4%                  22%                     +18pp
+Session duration    45s                 4m 20s                  +478%
+```
+
+This proves a UX bottleneck isn't just a design problem — it's a retention problem with a measurable cost.
