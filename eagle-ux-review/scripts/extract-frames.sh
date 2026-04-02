@@ -38,9 +38,10 @@ echo "Resolution: ${RESOLUTION}"
 echo "Interval: ${INTERVAL}s"
 
 # Save metadata to file
+SOURCE_NAME=$(basename "$VIDEO_PATH" | python3 -c "import sys,json; print(json.dumps(sys.stdin.read().strip()))" 2>/dev/null || basename "$VIDEO_PATH" | sed 's/"/\\"/g')
 cat > "${OUTPUT_DIR}/metadata.json" <<METAEOF
 {
-  "source": "$(basename "$VIDEO_PATH")",
+  "source": $SOURCE_NAME,
   "duration_seconds": $DURATION,
   "resolution": "$RESOLUTION",
   "frame_interval_seconds": $INTERVAL,

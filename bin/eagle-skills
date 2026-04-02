@@ -6,39 +6,49 @@ set -euo pipefail
 # https://github.com/eagleisbatman/eagle-skills
 # ─────────────────────────────────────────────────────────────
 
-VERSION="1.1.0"
+VERSION="1.2.0"
 REPO_URL="https://github.com/eagleisbatman/eagle-skills.git"
 INSTALL_DIR="${EAGLE_SKILLS_DIR:-$HOME/.eagle-skills}"
 SKILLS_DIR="$HOME/.claude/skills"
 
 # Available skills (directory name → display name)
-declare -a SKILL_DIRS=("eagle-ux-review" "eagle-product-diagnostics" "eagle-ad-review")
-declare -a SKILL_NAMES=("Eagle UX Review" "Eagle Product Diagnostics" "Eagle Ad Review")
+declare -a SKILL_DIRS=("eagle-ux-review" "eagle-product-diagnostics" "eagle-ad-review" "eagle-clean-doc" "eagle-clean-sheet")
+declare -a SKILL_NAMES=("Eagle UX Review" "Eagle Product Diagnostics" "Eagle Ad Review" "Eagle Clean Doc" "Eagle Clean Sheet")
 declare -a SKILL_DESCS=(
   "Expert-level UX audits grounded in 65+ UX laws"
   "Three-layer data validation: design intent + behavior + outcomes"
   "Strategy-first ad creative review across any medium"
+  "Modern Word document generation — Helvetica, monochrome, clean"
+  "Modern Excel spreadsheet generation — clean tables, monochrome"
 )
-declare -a SKILL_COMMANDS=("/eagle-ux-review" "/eagle-product-diagnostics" "/eagle-ad-review")
+declare -a SKILL_COMMANDS=("/eagle-ux-review" "/eagle-product-diagnostics" "/eagle-ad-review" "/eagle-clean-doc" "/eagle-clean-sheet")
 declare -a SKILL_TRIGGERS=(
   "ux review, ux audit, usability review, heuristic evaluation, critique this design, what's wrong with this UI"
   "validate these findings, product diagnostics, funnel analysis, why isn't this metric moving, triangulate UX and data"
   "review these ads, ad creative review, audit my ads, critique these creatives, ad teardown"
+  "word doc, docx, create a document, write a report, generate a Word file"
+  "spreadsheet, excel, xlsx, create a spreadsheet, export to Excel"
 )
 declare -a SKILL_INPUTS=(
-  "North star metric|Target user profile (demographics, tech literacy, device/connectivity)|2-3 reference apps the target user opens daily|App identity (chat, marketplace, tool, social, etc.)|Screen recording (video) or a folder of screenshots|Optional: PRD or hypothesis document|Optional: User personas, analytics data, competitive screenshots"
-  "Goal definitions (success metrics per feature)|Event taxonomy (analytics events mapped to screens and funnels)|Database outcomes (actual vs. target metrics)|Optional: UX review report from Eagle UX Review"
-  "Campaign strategy (objective, funnel stage, audience, medium/channels, KPI)|Brand context (value proposition, positioning, competitive landscape)|Creative files — images, video, audio, PDFs, scripts (any format, any medium)"
+  "North star metric|Target user profile (demographics, tech literacy, device/connectivity)|2-3 reference apps the target user opens daily|App identity (chat, marketplace, tool, social, etc.)|Output format: HTML, Word, or both|Screen recording (video) or a folder of screenshots|Optional: PRD or hypothesis document|Optional: User personas, analytics data, competitive screenshots"
+  "Goal definitions (success metrics per feature)|Event taxonomy (analytics events mapped to screens and funnels)|Database outcomes (actual vs. target metrics)|Output format: HTML, Word, Excel, or a combination|Optional: UX review report from Eagle UX Review"
+  "Campaign strategy (objective, funnel stage, audience, medium/channels, KPI)|Brand context (value proposition, positioning, competitive landscape)|Output format: HTML, Word, or both|Creative files — images, video, audio, PDFs, scripts (any format, any medium)"
+  "Content for the document (text, data, or instructions)|Optional: document type (report, memo, letter, spec)"
+  "Data to populate the spreadsheet (text, CSV, JSON, or instructions)|Optional: sheet structure preferences"
 )
 declare -a SKILL_OUTPUTS=(
-  "HTML report with severity-rated findings, embedded evidence, before/after CSS mockups, priority matrix, UX law citations"
-  "HTML report with goal scorecard (PASS/FAIL/PARTIAL), funnel visualizations, three-layer diagnosis, business impact estimates"
-  "HTML report with 10-dimension scoring, per-creative breakdowns, platform compliance audit, creative brief for next round"
+  "HTML and/or Word report with severity-rated findings, embedded evidence, before/after mockups, priority matrix, UX law citations"
+  "HTML and/or Word report with goal scorecard, funnel visualizations, three-layer diagnosis. Optional Excel export with structured data"
+  "HTML and/or Word report with 10-dimension scoring, per-creative breakdowns, platform compliance audit, creative brief"
+  "Professional .docx file with Helvetica/Courier New, monochrome palette, clean tables and code blocks"
+  "Professional .xlsx file with clean styling, frozen headers, auto-sized columns"
 )
 declare -a SKILL_EXAMPLES=(
   "UX review this app — here's a screen recording of the onboarding flow"
   "Why isn't our retention improving? Here's our Firebase events and DB metrics"
   "Review these ad creatives — folder is ./ads/. Campaign is awareness on Meta and radio"
+  "Create a Word doc summarizing these API endpoints"
+  "Export this data to a clean Excel spreadsheet"
 )
 
 # ─── Colors ──────────────────────────────────────────────────

@@ -24,6 +24,11 @@ Before analyzing screens, collect structured input. Present all questions in one
 - **Target User** — demographics, tech/reading literacy, device types, connectivity conditions, daily app habits
 - **Reference Apps** — 2-3 apps the target user opens daily. These set the mental model. Infer if the user doesn't specify (e.g., gen Z social users → Instagram/TikTok; business professionals → Slack/LinkedIn; general consumers → WhatsApp/Amazon).
 - **App Identity** — one-word category (chat, content, marketplace, tool, social, utility). Then verify: does the UI match?
+- **Output Format** — How should the report be delivered?
+  - **HTML** (default) — Self-contained HTML file with embedded screenshots and CSS. Best for interactive viewing.
+  - **Word (.docx)** — Professional Word document using the Eagle Clean Doc design system. Best for sharing with stakeholders.
+  - **Both** — Generate both HTML and Word formats.
+  - If the user doesn't specify, default to HTML. If they say "doc", "word", "docx", or "shareable", use Word. If they say "both", generate both.
 
 **Extended Inputs (ask for these — they dramatically improve review quality):**
 - **PRD / Hypothesis Document** — product requirements, intended user flows, success criteria, feature specs. If provided, add a "PRD Validation" section to the report checking each hypothesis against observed reality.
@@ -100,11 +105,13 @@ Validate each PRD requirement/hypothesis against observed behavior. For each:
 - Does the user flow match the intended happy path?
 - Are success criteria achievable given the UX?
 
-### Phase 4: Generate HTML Report
+### Phase 4: Generate Report
 
-**Always produce an HTML file.** Use the structure from `assets/report-template.html`.
+Generate the report in the user's chosen format (HTML, Word, or both). Default to HTML if not specified.
 
-Copy key frames to a `frames/` directory alongside the HTML file for relative image references.
+#### HTML Output
+
+Use the structure from `assets/report-template.html`. Copy key frames to a `frames/` directory alongside the HTML file for relative image references.
 
 **Required Report Sections:**
 
@@ -123,6 +130,22 @@ Copy key frames to a `frames/` directory alongside the HTML file for relative im
 7. **Visual Design Recommendations** — side-by-side current vs. proposed mockups built with HTML/CSS (phone-shaped containers showing UI changes)
 8. **Time to First Value Analysis** — timeline showing each step with problem markers
 9. **UX Laws Violated Summary** — table mapping laws to findings
+
+#### Word Output (.docx)
+
+When the user requests Word format, generate a `.docx` file using the Eagle Clean Doc design system. **Read `../eagle-clean-doc/SKILL.md` and `../eagle-clean-doc/references/design-system.md`** for the complete design system (Helvetica body, Courier New for code, monochrome palette, compact margins).
+
+The Word report contains the same sections as the HTML report, adapted for Word:
+- **Cover page** → Title (H1) + context table (north star, target user, reference apps, app identity)
+- **Central Thesis** → Bold paragraph with gray background shading
+- **Severity badges** → Bold parenthetical markers: **(CRITICAL)**, **(MAJOR)**, **(MINOR)**, **(INFO)**
+- **Evidence screenshots** → Inline images using `ImageRun` (max width 10800 DXA = full content width, scale proportionally)
+- **Priority matrix** → Clean Doc table styling (gray header, bordered cells)
+- **Side-by-side mockups** → Sequential sections: "Current" heading + image, then "Proposed" heading + image
+- **UX law tags** → Inline code spans in Courier New with gray background
+- **Flow maps** → Code block styling (bordered paragraph, Courier New)
+
+Save as `ux-review-report.docx` alongside `ux-review-report.html` (if both formats requested).
 
 ### Phase 5: Writing Principles
 

@@ -37,13 +37,15 @@ echo ""
 # --- Count files by type ---
 IMAGE_COUNT=$(find "$FOLDER" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" -o -iname "*.webp" -o -iname "*.bmp" -o -iname "*.tiff" \) | wc -l | tr -d ' ')
 VIDEO_COUNT=$(find "$FOLDER" -type f \( -iname "*.mp4" -o -iname "*.mov" -o -iname "*.avi" -o -iname "*.webm" -o -iname "*.mkv" \) | wc -l | tr -d ' ')
+AUDIO_COUNT=$(find "$FOLDER" -type f \( -iname "*.mp3" -o -iname "*.wav" -o -iname "*.aac" -o -iname "*.m4a" -o -iname "*.ogg" -o -iname "*.flac" \) | wc -l | tr -d ' ')
 PDF_COUNT=$(find "$FOLDER" -type f -iname "*.pdf" | wc -l | tr -d ' ')
 OTHER_COUNT=$(find "$FOLDER" -type f \( -iname "*.xlsx" -o -iname "*.docx" -o -iname "*.pptx" -o -iname "*.csv" \) | wc -l | tr -d ' ')
-TOTAL=$((IMAGE_COUNT + VIDEO_COUNT + PDF_COUNT + OTHER_COUNT))
+TOTAL=$((IMAGE_COUNT + VIDEO_COUNT + AUDIO_COUNT + PDF_COUNT + OTHER_COUNT))
 
 echo "=== File Inventory ==="
 echo "  Images: $IMAGE_COUNT"
 echo "  Videos: $VIDEO_COUNT"
+echo "  Audio:  $AUDIO_COUNT"
 echo "  PDFs:   $PDF_COUNT"
 echo "  Other:  $OTHER_COUNT"
 echo "  Total:  $TOTAL"
@@ -63,8 +65,6 @@ echo ""
 # --- Image dimensions and aspect ratios ---
 if command -v identify &>/dev/null; then
   echo "=== Image Dimensions ==="
-
-  declare -A RATIO_COUNTS 2>/dev/null || true
 
   CATALOG_FILE="$OUTPUT_DIR/image-catalog.csv"
   echo "file,width,height,aspect_ratio,format,size_kb,directory" > "$CATALOG_FILE"
@@ -157,19 +157,43 @@ if command -v ffprobe &>/dev/null && [ "$VIDEO_COUNT" -gt 0 ]; then
   echo ""
 fi
 
+# --- Audio metadata ---
+if command -v ffprobe &>/dev/null && [ "$AUDIO_COUNT" -gt 0 ]; then
+  echo "=== Audio Files ==="
+
+  AUDIO_CATALOG="$OUTPUT_DIR/audio-catalog.csv"
+  echo "file,duration_seconds,codec,sample_rate,channels,size_mb,directory" > "$AUDIO_CATALOG"
+
+  find "$FOLDER" -type f \( -iname "*.mp3" -o -iname "*.wav" -o -iname "*.aac" -o -iname "*.m4a" -o -iname "*.ogg" -o -iname "*.flac" \) | sort | while read -r aud; do
+    meta=$(ffprobe -v quiet -print_format json -show_format -show_streams "$aud" 2>/dev/null) || continue
+    duration=$(echo "$meta" | python3 -c "import sys,json; print(round(float(json.load(sys.stdin)['format'].get('duration', 0)), 1))" 2>/dev/null || echo "0")
+    codec=$(echo "$meta" | python3 -c "import sys,json; s=[x for x in json.load(sys.stdin)['streams'] if x.get('codec_type')=='audio']; print(s[0].get('codec_name','unknown') if s else 'unknown')" 2>/dev/null || echo "unknown")
+    sample_rate=$(echo "$meta" | python3 -c "import sys,json; s=[x for x in json.load(sys.stdin)['streams'] if x.get('codec_type')=='audio']; print(s[0].get('sample_rate','0') if s else '0')" 2>/dev/null || echo "0")
+    channels=$(echo "$meta" | python3 -c "import sys,json; s=[x for x in json.load(sys.stdin)['streams'] if x.get('codec_type')=='audio']; print(s[0].get('channels', 0) if s else 0)" 2>/dev/null || echo "0")
+    size_mb=$(python3 -c "import os; print(round(os.path.getsize('$aud')/1048576, 1))" 2>/dev/null || echo "0")
+    dir_name="$(dirname "${aud#$FOLDER/}")"
+
+    echo "\"$(basename "$aud")\",${duration}s,$codec,$sample_rate,$channels,$size_mb,\"$dir_name\"" >> "$AUDIO_CATALOG"
+    echo "  $(basename "$aud"): ${duration}s ${codec} ${sample_rate}Hz ${channels}ch ${size_mb}MB"
+  done
+
+  echo ""
+  echo "  Full catalog: $AUDIO_CATALOG"
+  echo ""
+fi
+
 # --- Generate thumbnails for report ---
 echo "=== Generating Thumbnails ==="
-THUMB_COUNT=0
 
 find "$FOLDER" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" \) | sort | while read -r img; do
   basename_clean=$(basename "$img" | sed 's/[^a-zA-Z0-9._-]/_/g')
   thumb_path="$OUTPUT_DIR/thumbnails/$basename_clean"
 
   if command -v convert &>/dev/null; then
-    convert "$img" -resize 400x400\> -quality 80 "$thumb_path" 2>/dev/null && THUMB_COUNT=$((THUMB_COUNT + 1))
+    convert "$img" -resize 400x400\> -quality 80 "$thumb_path" 2>/dev/null
   else
     # Fallback: just copy (no resize)
-    cp "$img" "$thumb_path" 2>/dev/null && THUMB_COUNT=$((THUMB_COUNT + 1))
+    cp "$img" "$thumb_path" 2>/dev/null
   fi
 done
 
@@ -191,10 +215,12 @@ echo ""
 echo "=== Catalog Complete ==="
 echo "  Images: $IMAGE_COUNT"
 echo "  Videos: $VIDEO_COUNT"
+echo "  Audio:  $AUDIO_COUNT"
 echo "  Total:  $TOTAL"
 echo "  Output: $OUTPUT_DIR/"
 echo ""
 echo "Files generated:"
 [ -f "$OUTPUT_DIR/image-catalog.csv" ] && echo "  - image-catalog.csv (image dimensions and metadata)"
 [ -f "$OUTPUT_DIR/video-catalog.csv" ] && echo "  - video-catalog.csv (video metadata)"
+[ -f "$OUTPUT_DIR/audio-catalog.csv" ] && echo "  - audio-catalog.csv (audio metadata)"
 echo "  - thumbnails/ ($THUMB_TOTAL thumbnail images for report)"

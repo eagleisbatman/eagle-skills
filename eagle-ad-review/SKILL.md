@@ -31,6 +31,11 @@ Before looking at a single creative, collect the marketing strategy. Present all
   - **Television**: TV commercials (15s/30s/60s), connected TV (CTV), infomercials
   - **Experiential**: Event booths, pop-ups, ambient/guerrilla
 - **Primary KPI** — What metric defines success? (CTR, CPA, ROAS, install rate, video completion rate, brand lift, recall, footfall, coupon redemption). The KPI determines which creative elements matter most.
+- **Output Format** — How should the report be delivered?
+  - **HTML** (default) — Self-contained HTML file with embedded thumbnails and CSS. Best for interactive viewing.
+  - **Word (.docx)** — Professional Word document using the Eagle Clean Doc design system. Best for sharing with stakeholders and clients.
+  - **Both** — Generate both HTML and Word formats.
+  - If the user doesn't specify, default to HTML. If they say "doc", "word", "docx", or "shareable", use Word. If they say "both", generate both.
 
 **Required — Brand & Product:**
 - **Product/Service** — What is being advertised? One sentence.
@@ -132,11 +137,13 @@ Does the creative set work as a testing/scaling system?
 - Is there creative for each funnel stage, or only one stage?
 - Are there signs of creative fatigue (same concepts recycled)?
 
-### Phase 4: Generate HTML Report
+### Phase 4: Generate Report
 
-**Always produce an HTML file.** Use the structure from `assets/report-template.html`.
+Generate the report in the user's chosen format (HTML, Word, or both). Default to HTML if not specified.
 
-Copy representative ad thumbnails to a `thumbnails/` directory alongside the HTML file.
+#### HTML Output
+
+Use the structure from `assets/report-template.html`. Copy representative ad thumbnails to a `thumbnails/` directory alongside the HTML file.
 
 **Required Report Sections:**
 
@@ -152,6 +159,22 @@ Copy representative ad thumbnails to a `thumbnails/` directory alongside the HTM
 9. **Creative System Assessment** — Testing framework evaluation, variation analysis, fatigue risk
 10. **Recommended Actions** — Prioritized by expected KPI impact. Three levels: quick fix, next sprint, strategic shift.
 11. **Creative Brief for Next Round** — Based on findings, what should the next batch of creatives focus on?
+
+#### Word Output (.docx)
+
+When the user requests Word format, generate a `.docx` file using the Eagle Clean Doc design system. **Read `../eagle-clean-doc/SKILL.md` and `../eagle-clean-doc/references/design-system.md`** for the complete design system.
+
+The Word report contains the same sections as the HTML report, adapted for Word:
+- **Cover page** → Title (H1) + context table (campaign, audience, platforms, KPI, creative count)
+- **Overall Verdict** → Bold paragraph with score and thesis, gray background shading
+- **Creative Inventory** → Clean Doc table (market × medium × format × concept)
+- **Scoring Dashboard** → Table with 10 dimension scores and weighted overall (no radar chart — list the scores instead)
+- **Best/Worst Performers** → Sections with inline thumbnail images and explanations
+- **Per-creative breakdowns** → Tables with scores per dimension
+- **Platform Compliance** → Table with pass/fail per creative per spec
+- **Creative Brief** → Structured paragraphs with H2/H3 hierarchy
+
+Save as `ad-review-report.docx` alongside the HTML (if both formats requested).
 
 ### Phase 5: Writing Principles
 

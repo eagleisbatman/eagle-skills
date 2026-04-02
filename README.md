@@ -2,11 +2,15 @@
 
 Custom skills for [Claude Code](https://docs.anthropic.com/en/docs/claude-code), Anthropic's agentic coding tool. Each skill extends Claude with domain-specific expertise, structured workflows, and production-quality deliverables.
 
-This repo contains three skills that work together as a complete product evaluation pipeline:
+This repo contains five skills that work together as a complete product evaluation pipeline:
 
 1. **Eagle UX Review** — looks at your screens and tells you what's broken and why
 2. **Eagle Product Diagnostics** — takes your real data and proves whether those problems actually cost you users and revenue
 3. **Eagle Ad Review** — audits your ad creatives against marketing strategy, platform specs, and creative effectiveness research
+4. **Eagle Clean Doc** — modern Word document generation with a clean, monochrome design system
+5. **Eagle Clean Sheet** — modern Excel spreadsheet generation with consistent styling
+
+The three review skills can output **HTML, Word (.docx), or both** — so reports are easy to share with stakeholders who don't use Claude Code. Product Diagnostics can also export structured data to **Excel (.xlsx)**.
 
 Use them independently or combine them: review your product, validate with data, then audit the ads that drive users to it.
 
@@ -17,12 +21,14 @@ Use them independently or combine them: review your product, validate with data,
 - [Eagle UX Review](#eagle-ux-review)
 - [Eagle Product Diagnostics](#eagle-product-diagnostics)
 - [Eagle Ad Review](#eagle-ad-review)
+- [Eagle Clean Doc](#eagle-clean-doc)
+- [Eagle Clean Sheet](#eagle-clean-sheet)
+- [Output Formats](#output-formats)
 - [The Three-Skill Pipeline](#the-three-skill-pipeline)
 - [Installation](#installation)
 - [Prerequisites](#prerequisites)
 - [Usage](#usage)
 - [Built With](#built-with)
-- [Contributing](#contributing)
 - [License](#license)
 
 ---
@@ -80,6 +86,49 @@ The review evaluates creatives against their **marketing job**, not just visual 
 **How it works:** Strategy-first 4-step process — gather marketing context, catalog and process all creative files, three-level analysis (strategic fit → execution quality → creative system health), then score and compile the report. Weights adjust dynamically by campaign type (awareness, DR, brand, multi-market) and medium (digital, radio, OOH, print, TV).
 
 [Read the full methodology →](docs/ad-review-methodology.md)
+
+---
+
+# Eagle Clean Doc
+
+**Modern Word document generation with a clean, monochrome design system.**
+
+The review skills generate HTML by default, which is great for viewing but hard to share. Eagle Clean Doc wraps Claude Code's built-in docx capability with a consistent design system: Helvetica body, Courier New for code, monochrome palette, compact margins, and zero visual clutter.
+
+When you ask any Eagle review skill to output Word format, it uses this design system automatically. You can also use it standalone to generate any Word document.
+
+**Design system:** Helvetica 10.5pt body, Courier New 9.5pt code, black/gray/white only. Compact margins (0.4" top/bottom, 0.5" sides). Clean tables with gray headers. Inline code spans with subtle gray background.
+
+---
+
+# Eagle Clean Sheet
+
+**Modern Excel spreadsheet generation with consistent styling.**
+
+Eagle Clean Sheet applies the same design language to Excel outputs via openpyxl: Helvetica body, Courier New for technical columns, monochrome palette, frozen header rows, and auto-sized columns.
+
+Use it standalone for any spreadsheet task, or as an export format from Product Diagnostics (scorecards, funnels, findings as sortable/filterable data).
+
+**Design system:** Same color tokens as Clean Doc. Gray header rows, thin gray borders, alternating row fills for large datasets. Code font for event names, endpoints, and technical identifiers.
+
+---
+
+# Output Formats
+
+All three review skills (UX Review, Product Diagnostics, Ad Review) support multiple output formats. Claude will ask during context gathering, or you can specify upfront:
+
+| Format | Extension | Best for | Available in |
+|--------|-----------|----------|--------------|
+| HTML | `.html` | Interactive viewing, embedded screenshots | All review skills |
+| Word | `.docx` | Sharing with stakeholders, email attachments | All review skills |
+| Excel | `.xlsx` | Sorting/filtering data, further analysis | Product Diagnostics |
+
+**How to choose:**
+- Say nothing → HTML (default)
+- Say "word", "doc", "docx", or "shareable" → Word
+- Say "both" → HTML + Word
+- Say "excel" or "spreadsheet" → Excel (Product Diagnostics only)
+- Say "all" → HTML + Word + Excel
 
 ---
 
@@ -142,6 +191,8 @@ cd eagle-skills
 ln -sf "$(pwd)/eagle-ux-review" ~/.claude/skills/eagle-ux-review
 ln -sf "$(pwd)/eagle-product-diagnostics" ~/.claude/skills/eagle-product-diagnostics
 ln -sf "$(pwd)/eagle-ad-review" ~/.claude/skills/eagle-ad-review
+ln -sf "$(pwd)/eagle-clean-doc" ~/.claude/skills/eagle-clean-doc
+ln -sf "$(pwd)/eagle-clean-sheet" ~/.claude/skills/eagle-clean-sheet
 ```
 
 Update with `git pull`. Symlinks mean installed skills update automatically.
@@ -178,6 +229,8 @@ Skills activate automatically when Claude detects matching intent. You can also 
 /eagle-ux-review
 /eagle-product-diagnostics
 /eagle-ad-review
+/eagle-clean-doc
+/eagle-clean-sheet
 ```
 
 ### Eagle UX Review
@@ -194,7 +247,7 @@ Skills activate automatically when Claude detects matching intent. You can also 
 - User personas
 - Analytics data or competitive screenshots
 
-**Output:** Self-contained HTML report in your working directory with severity-rated findings, embedded evidence screenshots, before/after CSS mockups, priority matrix, and UX law citations.
+**Output:** HTML and/or Word report in your working directory with severity-rated findings, embedded evidence screenshots, before/after mockups, priority matrix, and UX law citations. Default is HTML; say "word" or "both" for Word output.
 
 **Example session:**
 ```
@@ -216,7 +269,7 @@ Claude: [extracts frames at 1fps, analyzes against 65+ UX laws, generates HTML r
 **Optional inputs:**
 - A UX review report (from Eagle UX Review) for per-finding validation
 
-**Output:** HTML report with goal scorecard (PASS/FAIL/PARTIAL per layer), funnel visualizations, three-layer diagnosis per feature, disagreement analysis, and prioritized actions.
+**Output:** HTML, Word, and/or Excel report with goal scorecard (PASS/FAIL/PARTIAL per layer), funnel visualizations, three-layer diagnosis per feature, disagreement analysis, and prioritized actions. Default is HTML; say "word", "excel", "both", or "all" for other formats.
 
 **Example session:**
 ```
@@ -234,7 +287,7 @@ Claude: [triangulates design intent vs. behavior vs. outcomes, generates HTML re
 - Brand context (value proposition, positioning, competitive landscape)
 - Creative files (images, videos, audio, PDFs, scripts — any format, any medium)
 
-**Output:** HTML report with 10-dimension scoring (weighted by campaign type and medium), per-creative breakdowns, best/worst performer galleries, cross-cutting findings, platform compliance audit, and a creative brief for the next round.
+**Output:** HTML and/or Word report with 10-dimension scoring (weighted by campaign type and medium), per-creative breakdowns, best/worst performer galleries, cross-cutting findings, platform compliance audit, and a creative brief for the next round. Default is HTML; say "word" or "both" for Word output.
 
 **Example session:**
 ```
@@ -256,28 +309,6 @@ Claude: [catalogs all files, scores against Meta ABCD + Kantar + medium-specific
 - **Three-layer triangulation framework** combining UX analysis, behavioral analytics, and outcome data
 - **Ad creative effectiveness research** from Meta ABCD, Kantar (200K+ ad database), System1, Nielsen, IPA Databank (1,400+ case studies)
 - **Platform-specific ad specs** for Meta, Google, TikTok, LinkedIn, X, and Pinterest
-
----
-
-## Contributing
-
-Contributions are welcome. Areas where help is especially valuable:
-
-- **New UX law categories** — additional principles with audit checklists
-- **Analytics platform integrations** — better export guides for niche platforms
-- **Report template improvements** — accessibility, print styles, dark mode
-- **New skills** — other review types (accessibility audit, content strategy review, competitor teardown) following the same pattern
-- **Ad platform updates** — specs change frequently; keep ad-platforms.md current
-- **Language/localization** — report templates and UX law references in other languages
-- **Real-world case studies** — anonymized examples showing the pipeline in action
-
-To contribute:
-
-1. Fork this repository
-2. Create a feature branch (`git checkout -b feature/your-feature`)
-3. Make your changes
-4. Test by installing the skill locally and running a review
-5. Submit a pull request with a clear description of what changed and why
 
 ---
 

@@ -51,6 +51,13 @@ Present all questions in one message. Provide the input templates from `assets/i
    - Cohort data if available (e.g., users who hit feature X vs. those who didn't)
    - Retention/revenue/engagement numbers
 
+4. **Output Format** — How should the report be delivered?
+   - **HTML** (default) — Self-contained HTML file with embedded visualizations and CSS.
+   - **Word (.docx)** — Professional Word document using the Eagle Clean Doc design system. Best for sharing with stakeholders.
+   - **Excel (.xlsx)** — Structured spreadsheet with scorecard, funnel data, and findings as separate sheets. Uses the Eagle Clean Sheet design system. Best for teams that want to sort/filter/annotate findings.
+   - **Both** or **All** — Generate multiple formats. "Both" = HTML + Word. "All" = HTML + Word + Excel.
+   - If the user doesn't specify, default to HTML. If they say "doc", "word", "docx", or "shareable", use Word. If they say "spreadsheet", "excel", or "xlsx", use Excel.
+
 **Optional but high-value:**
 - **UX Review Report** — Output from `eagle-ux-review`. Enables direct finding-to-event mapping.
 - **A/B Test Results** — If variants exist, compare UX paths against metric outcomes.
@@ -106,7 +113,11 @@ For each feature/goal, produce a three-layer verdict:
 
 ### Phase 4: Generate Report
 
-**Always produce an HTML file.** Use the structure from `assets/report-template.html`.
+Generate the report in the user's chosen format (HTML, Word, Excel, or a combination). Default to HTML if not specified.
+
+#### HTML Output
+
+Use the structure from `assets/report-template.html`.
 
 **Required Report Sections:**
 
@@ -120,6 +131,32 @@ For each feature/goal, produce a three-layer verdict:
 8. **Metric Impact Quantification** — Business impact estimates with calculations
 9. **Recommended Actions** — Prioritized by validated impact (not just UX severity)
 10. **Data Gaps** — What additional instrumentation or data would strengthen the diagnosis
+
+#### Word Output (.docx)
+
+When the user requests Word format, generate a `.docx` file using the Eagle Clean Doc design system. **Read `../eagle-clean-doc/SKILL.md` and `../eagle-clean-doc/references/design-system.md`** for the complete design system.
+
+The Word report contains the same sections as the HTML report, adapted for Word:
+- **Cover page** → Title (H1) + context table (product name, data sources, date, confidence level)
+- **Goal Scorecard** → Clean Doc table with PASS/FAIL/PARTIAL as bold text per layer
+- **Funnel Analysis** → Tables showing step-by-step conversion (event names in Courier New)
+- **Three-layer verdicts** → Tables with Design Intent / Behavior / Outcome columns
+- **Business impact estimates** → Bold callout paragraphs
+- **Data gaps** → Bulleted lists
+
+Save as `product-diagnostics-report.docx` alongside the HTML (if both formats requested).
+
+#### Excel Output (.xlsx)
+
+When the user requests Excel format, generate a `.xlsx` file using the Eagle Clean Sheet design system. **Read `../eagle-clean-sheet/SKILL.md` and `../eagle-clean-sheet/references/design-system.md`** for the complete design system.
+
+Create a workbook with these sheets:
+1. **Goal Scorecard** — One row per feature/goal, columns for each validation layer and overall verdict
+2. **Funnel Analysis** — One row per funnel step, columns for event name, user count, conversion rate, drop-off rate
+3. **Findings** — One row per finding, columns for severity, description, layer verdicts, recommended action, estimated impact
+4. **Data Gaps** — Missing instrumentation and recommended additions
+
+Save as `product-diagnostics-data.xlsx`.
 
 ### Phase 5: Writing Principles
 
