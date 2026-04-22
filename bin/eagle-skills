@@ -6,15 +6,15 @@ set -euo pipefail
 # https://github.com/eagleisbatman/eagle-skills
 # ─────────────────────────────────────────────────────────────
 
-VERSION="2.0.0"
+VERSION="2.1.0"
 REPO_URL="https://github.com/eagleisbatman/eagle-skills.git"
 INSTALL_DIR="${EAGLE_SKILLS_DIR:-$HOME/.eagle-skills}"
 SKILLS_DIR="$HOME/.claude/skills"
 AGENTS_DIR="$HOME/.claude/agents"
 
 # ─── Available skills (directory → display) ─────────────────
-declare -a SKILL_DIRS=("eagle-ux-review" "eagle-product-diagnostics" "eagle-ad-review" "eagle-anti-slop" "eagle-clean-doc" "eagle-clean-sheet" "eagle-multi-stack-scaffolder")
-declare -a SKILL_NAMES=("Eagle UX Review" "Eagle Product Diagnostics" "Eagle Ad Review" "Eagle Anti-Slop" "Eagle Clean Doc" "Eagle Clean Sheet" "Eagle Multi-Stack Scaffolder")
+declare -a SKILL_DIRS=("eagle-ux-review" "eagle-product-diagnostics" "eagle-ad-review" "eagle-anti-slop" "eagle-clean-doc" "eagle-clean-sheet" "eagle-multi-stack-scaffolder" "eagle-claude-md" "eagle-bootstrap")
+declare -a SKILL_NAMES=("Eagle UX Review" "Eagle Product Diagnostics" "Eagle Ad Review" "Eagle Anti-Slop" "Eagle Clean Doc" "Eagle Clean Sheet" "Eagle Multi-Stack Scaffolder" "Eagle CLAUDE.md" "Eagle Bootstrap")
 declare -a SKILL_DESCS=(
   "Expert-level UX audits grounded in 65+ UX laws"
   "Three-layer data validation: design intent + behavior + outcomes"
@@ -23,8 +23,10 @@ declare -a SKILL_DESCS=(
   "Modern Word document generation — Helvetica, monochrome, clean"
   "Modern Excel spreadsheet generation — clean tables, monochrome"
   "Research-driven project scaffolding for 13+ technology stacks"
+  "Lean project-specific CLAUDE.md generator with LLM Wiki and Obsidian integration"
+  "One-time global environment setup — behavioral rules, hooks, vault, plugin checks"
 )
-declare -a SKILL_COMMANDS=("/eagle-ux-review" "/eagle-product-diagnostics" "/eagle-ad-review" "/eagle-anti-slop" "/eagle-clean-doc" "/eagle-clean-sheet" "/eagle-multi-stack-scaffolder")
+declare -a SKILL_COMMANDS=("/eagle-ux-review" "/eagle-product-diagnostics" "/eagle-ad-review" "/eagle-anti-slop" "/eagle-clean-doc" "/eagle-clean-sheet" "/eagle-multi-stack-scaffolder" "/eagle-claude-md" "/eagle-bootstrap")
 declare -a SKILL_TRIGGERS=(
   "ux review, ux audit, usability review, heuristic evaluation, critique this design, what's wrong with this UI"
   "validate these findings, product diagnostics, funnel analysis, why isn't this metric moving, triangulate UX and data"
@@ -33,6 +35,8 @@ declare -a SKILL_TRIGGERS=(
   "word doc, docx, create a document, write a report, generate a Word file"
   "spreadsheet, excel, xlsx, create a spreadsheet, export to Excel"
   "scaffold, new project, create app, bootstrap, set up project, initialize codebase, start new application, project structure"
+  "init claude, setup claude md, create claude.md, project init, eagle init, onboard this project, add claude.md"
+  "eagle bootstrap, setup my environment, first time setup, configure claude globally, install eagle environment"
 )
 declare -a SKILL_INPUTS=(
   "North star metric|Target user profile (demographics, tech literacy, device/connectivity)|2-3 reference apps the target user opens daily|App identity (chat, marketplace, tool, social, etc.)|Output format: HTML, Word, or both|Screen recording (video) or a folder of screenshots|Optional: PRD or hypothesis document|Optional: User personas, analytics data, competitive screenshots"
@@ -42,6 +46,8 @@ declare -a SKILL_INPUTS=(
   "Content for the document (text, data, or instructions)|Optional: document type (report, memo, letter, spec)"
   "Data to populate the spreadsheet (text, CSV, JSON, or instructions)|Optional: sheet structure preferences"
   "What you're building (app type, features, platforms)|Optional: technology preferences|Optional: existing backend/services to integrate with"
+  "A project directory (runs in current directory by default)|Optional: Obsidian vault path (auto-detected if configured)"
+  "No inputs required (auto-detects what's already configured)"
 )
 declare -a SKILL_OUTPUTS=(
   "HTML and/or Word report with severity-rated findings, embedded evidence, before/after mockups, priority matrix, UX law citations"
@@ -51,6 +57,8 @@ declare -a SKILL_OUTPUTS=(
   "Professional .docx file with Helvetica/Courier New, monochrome palette, clean tables and code blocks"
   "Professional .xlsx file with clean styling, frozen headers, auto-sized columns"
   "Scaffolded project with docs (RESEARCH.md, DEPENDENCIES.md, STRUCTURE.md, SETUP.md), config files, and boilerplate code"
+  "Lean CLAUDE.md, raw/ and wiki/ directories, Obsidian vault symlink"
+  "Enriched global CLAUDE.md, compact.sh hook, Obsidian vault config, plugin/agent verification report"
 )
 declare -a SKILL_EXAMPLES=(
   "UX review this app — here's a screen recording of the onboarding flow"
@@ -60,6 +68,8 @@ declare -a SKILL_EXAMPLES=(
   "Create a Word doc summarizing these API endpoints"
   "Export this data to a clean Excel spreadsheet"
   "Scaffold a fitness tracking app for iOS and Android with a Python backend"
+  "Set up this project for Claude — create a CLAUDE.md and wiki structure"
+  "Run eagle bootstrap to set up my global Claude environment"
 )
 
 # ─── Available agents (filename without .md → display) ──────

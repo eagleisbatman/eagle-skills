@@ -2,7 +2,7 @@
 
 Skills and agents for [Claude Code](https://docs.anthropic.com/en/docs/claude-code), Anthropic's agentic coding tool. Skills extend Claude with domain-specific expertise and structured workflows. Agents are autonomous reviewers that audit, fix, and re-review your code.
 
-**7 skills** — invoked via slash commands:
+**9 skills** — invoked via slash commands:
 
 1. **Eagle UX Review** — looks at your screens and tells you what's broken and why
 2. **Eagle Product Diagnostics** — takes your real data and proves whether those problems actually cost you users and revenue
@@ -11,6 +11,8 @@ Skills and agents for [Claude Code](https://docs.anthropic.com/en/docs/claude-co
 5. **Eagle Clean Doc** — modern Word document generation with a clean, monochrome design system
 6. **Eagle Clean Sheet** — modern Excel spreadsheet generation with consistent styling
 7. **Eagle Multi-Stack Scaffolder** — research-driven project scaffolding for 13+ technology stacks
+8. **Eagle CLAUDE.md** — lean project-specific CLAUDE.md generator with LLM Wiki and Obsidian vault integration
+9. **Eagle Bootstrap** — one-time global environment setup: behavioral rules, compact.sh hook, vault config, plugin checks
 
 **14 agents** — dispatched by Claude's Agent tool:
 
@@ -46,6 +48,8 @@ Use them independently or combine them: review your product, validate with data,
 - [Eagle Clean Doc](#eagle-clean-doc)
 - [Eagle Clean Sheet](#eagle-clean-sheet)
 - [Eagle Multi-Stack Scaffolder](#eagle-multi-stack-scaffolder)
+- [Eagle CLAUDE.md](#eagle-claudemd)
+- [Eagle Bootstrap](#eagle-bootstrap)
 - [Eagle Spectral Agents](#eagle-spectral-agents)
 - [Output Formats](#output-formats)
 - [The Three-Skill Pipeline](#the-three-skill-pipeline)
@@ -196,6 +200,42 @@ Most scaffolders spit out a boilerplate template from 2023. This skill researche
 
 ---
 
+# Eagle CLAUDE.md
+
+**Lean project-specific CLAUDE.md generator with LLM Wiki and Obsidian vault integration.**
+
+Most project CLAUDE.md files duplicate global rules — deployment workflows, coding principles, tool lists — that belong in `~/.claude/CLAUDE.md`. This skill generates a CLAUDE.md that contains ONLY what is unique to the current project: identity, commands, architecture decisions, domain vocabulary, and active constraints.
+
+It also bootstraps the [LLM Wiki](https://github.com/tonbistudio/llm-wiki) directory structure (`raw/` + `wiki/`) and symlinks the wiki into your Obsidian vault so project knowledge is searchable across all your projects.
+
+**What it does:**
+1. Analyzes the project (stack, commands, architecture from package.json/config files)
+2. Reads global CLAUDE.md to avoid duplicating existing sections
+3. Creates `raw/` and `wiki/` directories with index and log files
+4. Symlinks `wiki/` into your Obsidian vault (`<vault>/projects/<project-name>/`)
+5. Generates a lean CLAUDE.md (typically under 50 lines)
+
+**Idempotent:** Safe to re-run. Existing CLAUDE.md sections are preserved (merge by H2 heading), wiki dirs are skipped if present, symlinks are skipped if already correct.
+
+---
+
+# Eagle Bootstrap
+
+**One-time global environment setup for Claude Code.**
+
+Run this once per machine to configure your Claude Code environment with behavioral rules, a token-saving hook, Obsidian vault integration, and verification that your tools are installed.
+
+**What it does:**
+1. Enriches `~/.claude/CLAUDE.md` with behavioral rules (Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution)
+2. Installs `compact.sh` — a PreToolUse hook that rewrites verbose bash commands (`git status` → `git status -s`, `git log` → `git log --oneline -20`, `ls` → `ls -1`) to save tokens
+3. Configures and saves your Obsidian vault path for eagle-claude-md's wiki integration
+4. Verifies Claude Mem plugin is installed (guides you to marketplace if not)
+5. Verifies all 14 eagle-skills agents are installed
+
+**Idempotent:** Every step checks its own state before acting. Running twice produces the same result as running once.
+
+---
+
 # Eagle Spectral Agents
 
 **14 autonomous agents for code review, debugging, planning, and shipping.** Each agent applies a 3-lens analytical framework and works iteratively — auditing, fixing, and re-auditing until the code passes.
@@ -320,6 +360,8 @@ ln -sf "$(pwd)/eagle-anti-slop" ~/.claude/skills/eagle-anti-slop
 ln -sf "$(pwd)/eagle-clean-doc" ~/.claude/skills/eagle-clean-doc
 ln -sf "$(pwd)/eagle-clean-sheet" ~/.claude/skills/eagle-clean-sheet
 ln -sf "$(pwd)/eagle-multi-stack-scaffolder" ~/.claude/skills/eagle-multi-stack-scaffolder
+ln -sf "$(pwd)/eagle-claude-md" ~/.claude/skills/eagle-claude-md
+ln -sf "$(pwd)/eagle-bootstrap" ~/.claude/skills/eagle-bootstrap
 
 # Agents (symlink .md files)
 mkdir -p ~/.claude/agents
@@ -366,6 +408,8 @@ Skills activate automatically when Claude detects matching intent. You can also 
 /eagle-clean-doc
 /eagle-clean-sheet
 /eagle-multi-stack-scaffolder
+/eagle-claude-md
+/eagle-bootstrap
 ```
 
 Agents are dispatched by Claude's Agent tool. Ask Claude to run one by name (e.g., "run eagle-spectral-suite") or describe what you need and the orchestrator will pick the right agent.
@@ -486,6 +530,32 @@ python eagle-anti-slop/scripts/clean_slop.py myfile.txt --save --aggressive
 You:   I want to build a fitness tracking app for iOS and Android with a Python backend
 Claude: [identifies stacks: Expo React Native + FastAPI, reads reference files,
         researches current best practices, generates docs + scaffold]
+```
+
+### Eagle CLAUDE.md
+
+**No required inputs** — analyzes the current project automatically.
+
+**Output:** Lean CLAUDE.md, `raw/` and `wiki/` directories, Obsidian vault symlink.
+
+**Example session:**
+```
+You:   Set up this project for Claude
+Claude: [reads package.json, checks global CLAUDE.md, creates wiki dirs,
+        symlinks to vault, generates lean project CLAUDE.md]
+```
+
+### Eagle Bootstrap
+
+**No required inputs** — auto-detects what's already configured.
+
+**Output:** Enriched global CLAUDE.md, compact.sh hook, vault config, status report.
+
+**Example session:**
+```
+You:   Run eagle bootstrap
+Claude: [checks global CLAUDE.md → appends behavioral rules, installs compact.sh,
+        finds Obsidian vault, verifies Claude Mem + 14 agents → prints report]
 ```
 
 ### Eagle Spectral Agents
