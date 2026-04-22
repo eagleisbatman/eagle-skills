@@ -1,7 +1,7 @@
 {
   "name": "eagle-skills",
-  "version": "1.3.0",
-  "description": "Custom skills for Claude Code — UX Review, Product Diagnostics, Ad Review, Anti-Slop, Clean Doc, and Clean Sheet",
+  "version": "2.0.0",
+  "description": "Skills and agents for Claude Code — 7 skills + 14 Spectral review agents",
   "bin": {
     "eagle-skills": "bin/eagle-skills"
   },
@@ -13,12 +13,13 @@
     "claude-code",
     "claude",
     "skills",
+    "agents",
+    "spectral",
+    "code-review",
+    "scaffolder",
     "ux-review",
-    "product-diagnostics",
-    "ad-review",
+    "security-audit",
     "anti-slop",
-    "clean-doc",
-    "clean-sheet",
     "anthropic"
   ],
   "author": "eagleisbatman",

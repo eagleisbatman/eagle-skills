@@ -6,14 +6,15 @@ set -euo pipefail
 # https://github.com/eagleisbatman/eagle-skills
 # ─────────────────────────────────────────────────────────────
 
-VERSION="1.3.0"
+VERSION="2.0.0"
 REPO_URL="https://github.com/eagleisbatman/eagle-skills.git"
 INSTALL_DIR="${EAGLE_SKILLS_DIR:-$HOME/.eagle-skills}"
 SKILLS_DIR="$HOME/.claude/skills"
+AGENTS_DIR="$HOME/.claude/agents"
 
-# Available skills (directory name → display name)
-declare -a SKILL_DIRS=("eagle-ux-review" "eagle-product-diagnostics" "eagle-ad-review" "eagle-anti-slop" "eagle-clean-doc" "eagle-clean-sheet")
-declare -a SKILL_NAMES=("Eagle UX Review" "Eagle Product Diagnostics" "Eagle Ad Review" "Eagle Anti-Slop" "Eagle Clean Doc" "Eagle Clean Sheet")
+# ─── Available skills (directory → display) ─────────────────
+declare -a SKILL_DIRS=("eagle-ux-review" "eagle-product-diagnostics" "eagle-ad-review" "eagle-anti-slop" "eagle-clean-doc" "eagle-clean-sheet" "eagle-multi-stack-scaffolder")
+declare -a SKILL_NAMES=("Eagle UX Review" "Eagle Product Diagnostics" "Eagle Ad Review" "Eagle Anti-Slop" "Eagle Clean Doc" "Eagle Clean Sheet" "Eagle Multi-Stack Scaffolder")
 declare -a SKILL_DESCS=(
   "Expert-level UX audits grounded in 65+ UX laws"
   "Three-layer data validation: design intent + behavior + outcomes"
@@ -21,8 +22,9 @@ declare -a SKILL_DESCS=(
   "Detect and eliminate AI-generated slop in code, text, and design"
   "Modern Word document generation — Helvetica, monochrome, clean"
   "Modern Excel spreadsheet generation — clean tables, monochrome"
+  "Research-driven project scaffolding for 13+ technology stacks"
 )
-declare -a SKILL_COMMANDS=("/eagle-ux-review" "/eagle-product-diagnostics" "/eagle-ad-review" "/eagle-anti-slop" "/eagle-clean-doc" "/eagle-clean-sheet")
+declare -a SKILL_COMMANDS=("/eagle-ux-review" "/eagle-product-diagnostics" "/eagle-ad-review" "/eagle-anti-slop" "/eagle-clean-doc" "/eagle-clean-sheet" "/eagle-multi-stack-scaffolder")
 declare -a SKILL_TRIGGERS=(
   "ux review, ux audit, usability review, heuristic evaluation, critique this design, what's wrong with this UI"
   "validate these findings, product diagnostics, funnel analysis, why isn't this metric moving, triangulate UX and data"
@@ -30,6 +32,7 @@ declare -a SKILL_TRIGGERS=(
   "slop, anti-slop, clean up AI code, review for slop, detect slop, LLM-generated, over-abstracted, too many comments"
   "word doc, docx, create a document, write a report, generate a Word file"
   "spreadsheet, excel, xlsx, create a spreadsheet, export to Excel"
+  "scaffold, new project, create app, bootstrap, set up project, initialize codebase, start new application, project structure"
 )
 declare -a SKILL_INPUTS=(
   "North star metric|Target user profile (demographics, tech literacy, device/connectivity)|2-3 reference apps the target user opens daily|App identity (chat, marketplace, tool, social, etc.)|Output format: HTML, Word, or both|Screen recording (video) or a folder of screenshots|Optional: PRD or hypothesis document|Optional: User personas, analytics data, competitive screenshots"
@@ -38,6 +41,7 @@ declare -a SKILL_INPUTS=(
   "Code, text, or design files to review|Optional: --aggressive flag for stricter cleanup"
   "Content for the document (text, data, or instructions)|Optional: document type (report, memo, letter, spec)"
   "Data to populate the spreadsheet (text, CSV, JSON, or instructions)|Optional: sheet structure preferences"
+  "What you're building (app type, features, platforms)|Optional: technology preferences|Optional: existing backend/services to integrate with"
 )
 declare -a SKILL_OUTPUTS=(
   "HTML and/or Word report with severity-rated findings, embedded evidence, before/after mockups, priority matrix, UX law citations"
@@ -46,6 +50,7 @@ declare -a SKILL_OUTPUTS=(
   "Cleaned files with slop removed, scored reports for text, refactored code in-place"
   "Professional .docx file with Helvetica/Courier New, monochrome palette, clean tables and code blocks"
   "Professional .xlsx file with clean styling, frozen headers, auto-sized columns"
+  "Scaffolded project with docs (RESEARCH.md, DEPENDENCIES.md, STRUCTURE.md, SETUP.md), config files, and boilerplate code"
 )
 declare -a SKILL_EXAMPLES=(
   "UX review this app — here's a screen recording of the onboarding flow"
@@ -54,6 +59,73 @@ declare -a SKILL_EXAMPLES=(
   "Review this file for slop"
   "Create a Word doc summarizing these API endpoints"
   "Export this data to a clean Excel spreadsheet"
+  "Scaffold a fitness tracking app for iOS and Android with a Python backend"
+)
+
+# ─── Available agents (filename without .md → display) ──────
+declare -a AGENT_FILES=(
+  "eagle-spectral-suite"
+  "eagle-spectral-plan"
+  "eagle-spectral-investigate"
+  "eagle-spectral-ship"
+  "eagle-triad-review"
+  "eagle-security-audit"
+  "eagle-architecture-review"
+  "eagle-performance-review"
+  "eagle-code-quality"
+  "eagle-ux-code-review"
+  "eagle-accessibility-review"
+  "eagle-api-review"
+  "eagle-data-integrity"
+  "eagle-database-review"
+)
+declare -a AGENT_NAMES=(
+  "Eagle Spectral Suite"
+  "Eagle Spectral Plan"
+  "Eagle Spectral Investigate"
+  "Eagle Spectral Ship"
+  "Eagle Triad Review"
+  "Eagle Security Audit"
+  "Eagle Architecture Review"
+  "Eagle Performance Review"
+  "Eagle Code Quality"
+  "Eagle UX Code Review"
+  "Eagle Accessibility Review"
+  "Eagle API Review"
+  "Eagle Data Integrity"
+  "Eagle Database Review"
+)
+declare -a AGENT_DESCS=(
+  "Orchestrates review agents — detects intent and tech stack, dispatches specialists"
+  "Planning and architecture design — scopes features, evaluates approaches"
+  "Root-cause debugging — traces code paths, tests hypotheses, applies fixes"
+  "Pre-ship pipeline and PR creation — runs gates, cleans diff, creates PR"
+  "Single-pass 3-lens review: security + ops/reliability + maintainability"
+  "Deep vulnerability hunting — injection, auth flaws, data exposure, supply chain"
+  "Structural health — dependency management, coupling, cohesion, design patterns"
+  "Bottleneck and resource usage analysis — memory leaks, N+1 queries, bundle bloat"
+  "Readability, dead code, duplication, convention violations, test gaps"
+  "Frontend code UX patterns — loading states, error handling, form validation, responsive design"
+  "WCAG 2.1 AA compliance — semantic HTML, ARIA, keyboard nav, color contrast"
+  "API design consistency — endpoints, contracts, error handling, versioning, pagination"
+  "Data corruption and loss vectors — race conditions, partial writes, missing transactions"
+  "Schema design, query performance, migrations, indexes, ORM usage"
+)
+declare -a AGENT_CATEGORIES=(
+  "orchestrator"
+  "lifecycle"
+  "lifecycle"
+  "lifecycle"
+  "review"
+  "review"
+  "review"
+  "review"
+  "review"
+  "review"
+  "review"
+  "review"
+  "review"
+  "review"
 )
 
 # ─── Colors ──────────────────────────────────────────────────
@@ -94,15 +166,23 @@ ensure_skills_dir() {
   mkdir -p "$SKILLS_DIR"
 }
 
-# ─── Skill selection menu ────────────────────────────────────
-select_skills() {
-  local -a selected=()
+ensure_agents_dir() {
+  mkdir -p "$AGENTS_DIR"
+}
+
+# ─── Selection menu ──────────────────────────────────────────
+select_items() {
+  local -a selected_skills=()
+  local -a selected_agents=()
+  local skill_count=${#SKILL_DIRS[@]}
+  local agent_count=${#AGENT_FILES[@]}
+  local total=$((skill_count + agent_count))
 
   header "Eagle Skills"
-  echo -e "  ${DIM}Custom skills for Claude Code${RESET}"
+  echo -e "  ${DIM}Skills and agents for Claude Code${RESET}"
   echo ""
 
-  echo -e "  ${BOLD}Available skills:${RESET}"
+  echo -e "  ${BOLD}Skills${RESET} ${DIM}(invoked via slash commands in Claude Code)${RESET}"
   echo ""
   for i in "${!SKILL_DIRS[@]}"; do
     local num=$((i + 1))
@@ -111,31 +191,54 @@ select_skills() {
     echo ""
   done
 
-  echo -e "    ${CYAN}a${RESET}  ${BOLD}All skills${RESET}"
+  echo -e "  ${BOLD}Agents${RESET} ${DIM}(dispatched via the Agent tool in Claude Code)${RESET}"
+  echo ""
+  for i in "${!AGENT_FILES[@]}"; do
+    local num=$((skill_count + i + 1))
+    local category="${AGENT_CATEGORIES[$i]}"
+    local tag=""
+    case "$category" in
+      orchestrator) tag="${MAGENTA}orchestrator${RESET}" ;;
+      lifecycle)    tag="${BLUE}lifecycle${RESET}" ;;
+      review)       tag="${GREEN}review${RESET}" ;;
+    esac
+    echo -e "    ${CYAN}${num}${RESET}  ${BOLD}${AGENT_NAMES[$i]}${RESET}  ${DIM}[${tag}${DIM}]${RESET}"
+    echo -e "       ${DIM}${AGENT_DESCS[$i]}${RESET}"
+    echo ""
+  done
+
+  echo -e "    ${CYAN}a${RESET}  ${BOLD}All skills and agents${RESET}"
   echo ""
 
-  read -rp "  Select skills to install (e.g. 1,3 or a for all): " choice
+  read -rp "  Select items to install (e.g. 1,3,8 or a for all): " choice
 
   if [[ "$choice" =~ ^[Aa]$ ]]; then
-    selected=("${SKILL_DIRS[@]}")
+    selected_skills=("${SKILL_DIRS[@]}")
+    selected_agents=("${AGENT_FILES[@]}")
   else
     IFS=',' read -ra nums <<< "$choice"
     for num in "${nums[@]}"; do
       num=$(echo "$num" | tr -d ' ')
-      if [[ "$num" =~ ^[0-9]+$ ]] && [ "$num" -ge 1 ] && [ "$num" -le "${#SKILL_DIRS[@]}" ]; then
-        selected+=("${SKILL_DIRS[$((num - 1))]}")
+      if [[ "$num" =~ ^[0-9]+$ ]] && [ "$num" -ge 1 ] && [ "$num" -le "$total" ]; then
+        if [ "$num" -le "$skill_count" ]; then
+          selected_skills+=("${SKILL_DIRS[$((num - 1))]}")
+        else
+          local agent_idx=$((num - skill_count - 1))
+          selected_agents+=("${AGENT_FILES[$agent_idx]}")
+        fi
       else
         warn "Skipping invalid selection: $num"
       fi
     done
   fi
 
-  if [ ${#selected[@]} -eq 0 ]; then
-    err "No skills selected."
+  if [ ${#selected_skills[@]} -eq 0 ] && [ ${#selected_agents[@]} -eq 0 ]; then
+    err "No items selected."
     exit 1
   fi
 
-  SELECTED_SKILLS=("${selected[@]}")
+  SELECTED_SKILLS=("${selected_skills[@]+"${selected_skills[@]}"}")
+  SELECTED_AGENTS=("${selected_agents[@]+"${selected_agents[@]}"}")
 }
 
 # ─── Commands ────────────────────────────────────────────────
@@ -144,8 +247,9 @@ cmd_install() {
   check_git
   check_claude_code
   ensure_skills_dir
+  ensure_agents_dir
 
-  select_skills
+  select_items
 
   echo ""
 
@@ -160,9 +264,11 @@ cmd_install() {
     ok "Repository cloned"
   fi
 
-  # Symlink selected skills
   local count=0
-  for skill in "${SELECTED_SKILLS[@]}"; do
+
+  # Symlink selected skills (directory → ~/.claude/skills/<name>/)
+  for skill in "${SELECTED_SKILLS[@]+"${SELECTED_SKILLS[@]}"}"; do
+    [ -z "$skill" ] && continue
     local src="$INSTALL_DIR/$skill"
     local dst="$SKILLS_DIR/$skill"
 
@@ -171,7 +277,6 @@ cmd_install() {
       continue
     fi
 
-    # Remove existing (symlink or directory)
     if [ -L "$dst" ]; then
       rm "$dst"
     elif [ -d "$dst" ]; then
@@ -186,16 +291,45 @@ cmd_install() {
     fi
 
     ln -sf "$src" "$dst"
-    ok "Installed ${BOLD}$(skill_display_name "$skill")${RESET}"
+    ok "Installed skill ${BOLD}$(skill_display_name "$skill")${RESET}"
+    count=$((count + 1))
+  done
+
+  # Symlink selected agents (.md file → ~/.claude/agents/<name>.md)
+  for agent in "${SELECTED_AGENTS[@]+"${SELECTED_AGENTS[@]}"}"; do
+    [ -z "$agent" ] && continue
+    local src="$INSTALL_DIR/agents/${agent}.md"
+    local dst="$AGENTS_DIR/${agent}.md"
+
+    if [ ! -f "$src" ]; then
+      warn "Agent file not found: $src (skipping)"
+      continue
+    fi
+
+    if [ -L "$dst" ]; then
+      rm "$dst"
+    elif [ -f "$dst" ]; then
+      warn "$dst exists and is not a symlink. Overwrite? [y/N]"
+      read -rp "  " answer
+      if [[ "$answer" =~ ^[Yy]$ ]]; then
+        rm -f "$dst"
+      else
+        warn "Skipping $agent"
+        continue
+      fi
+    fi
+
+    ln -sf "$src" "$dst"
+    ok "Installed agent ${BOLD}$(agent_display_name "$agent")${RESET}"
     count=$((count + 1))
   done
 
   echo ""
   if [ "$count" -gt 0 ]; then
-    echo -e "  ${GREEN}${BOLD}$count skill(s) installed.${RESET}"
-    echo -e "  ${DIM}Skills are symlinked — run ${RESET}eagle-skills update${DIM} to get the latest.${RESET}"
+    echo -e "  ${GREEN}${BOLD}$count item(s) installed.${RESET}"
+    echo -e "  ${DIM}Items are symlinked — run ${RESET}eagle-skills update${DIM} to get the latest.${RESET}"
   else
-    warn "No skills were installed."
+    warn "No items were installed."
   fi
   echo ""
 }
@@ -242,6 +376,17 @@ cmd_update() {
       fi
     fi
   done
+  for agent in "${AGENT_FILES[@]}"; do
+    local dst="$AGENTS_DIR/${agent}.md"
+    if [ -L "$dst" ]; then
+      if [ -f "$dst" ]; then
+        ok "$agent"
+      else
+        err "$agent — broken symlink"
+        broken=$((broken + 1))
+      fi
+    fi
+  done
 
   if [ "$broken" -gt 0 ]; then
     warn "$broken broken symlink(s). Run ${RESET}eagle-skills install${DIM} to fix.${RESET}"
@@ -279,25 +424,49 @@ cmd_status() {
   # Check each skill
   echo -e "  ${BOLD}Installed skills:${RESET}"
   echo ""
-  local installed=0
+  local installed_skills=0
   for i in "${!SKILL_DIRS[@]}"; do
     local skill="${SKILL_DIRS[$i]}"
     local dst="$SKILLS_DIR/$skill"
     if [ -L "$dst" ] && [ -d "$dst" ]; then
       echo -e "    ${GREEN}*${RESET} ${BOLD}${SKILL_NAMES[$i]}${RESET}"
       echo -e "      ${DIM}$dst -> $(readlink "$dst")${RESET}"
-      installed=$((installed + 1))
+      installed_skills=$((installed_skills + 1))
     elif [ -L "$dst" ]; then
       echo -e "    ${RED}!${RESET} ${BOLD}${SKILL_NAMES[$i]}${RESET} ${RED}(broken symlink)${RESET}"
     elif [ -d "$dst" ]; then
       echo -e "    ${YELLOW}~${RESET} ${BOLD}${SKILL_NAMES[$i]}${RESET} ${YELLOW}(copied, not symlinked)${RESET}"
-      installed=$((installed + 1))
+      installed_skills=$((installed_skills + 1))
     else
       echo -e "    ${DIM}-${RESET} ${DIM}${SKILL_NAMES[$i]}${RESET} ${DIM}(not installed)${RESET}"
     fi
   done
   echo ""
-  echo -e "  ${DIM}$installed of ${#SKILL_DIRS[@]} skills installed${RESET}"
+  echo -e "  ${DIM}$installed_skills of ${#SKILL_DIRS[@]} skills installed${RESET}"
+
+  # Check each agent
+  echo ""
+  echo -e "  ${BOLD}Installed agents:${RESET}"
+  echo ""
+  local installed_agents=0
+  for i in "${!AGENT_FILES[@]}"; do
+    local agent="${AGENT_FILES[$i]}"
+    local dst="$AGENTS_DIR/${agent}.md"
+    if [ -L "$dst" ] && [ -f "$dst" ]; then
+      echo -e "    ${GREEN}*${RESET} ${BOLD}${AGENT_NAMES[$i]}${RESET}"
+      echo -e "      ${DIM}$dst -> $(readlink "$dst")${RESET}"
+      installed_agents=$((installed_agents + 1))
+    elif [ -L "$dst" ]; then
+      echo -e "    ${RED}!${RESET} ${BOLD}${AGENT_NAMES[$i]}${RESET} ${RED}(broken symlink)${RESET}"
+    elif [ -f "$dst" ]; then
+      echo -e "    ${YELLOW}~${RESET} ${BOLD}${AGENT_NAMES[$i]}${RESET} ${YELLOW}(copied, not symlinked)${RESET}"
+      installed_agents=$((installed_agents + 1))
+    else
+      echo -e "    ${DIM}-${RESET} ${DIM}${AGENT_NAMES[$i]}${RESET} ${DIM}(not installed)${RESET}"
+    fi
+  done
+  echo ""
+  echo -e "  ${DIM}$installed_agents of ${#AGENT_FILES[@]} agents installed${RESET}"
   echo ""
 }
 
@@ -311,22 +480,39 @@ cmd_uninstall() {
     local dst="$SKILLS_DIR/$skill"
     if [ -L "$dst" ]; then
       rm "$dst"
-      ok "Removed ${SKILL_NAMES[$i]}"
+      ok "Removed skill ${SKILL_NAMES[$i]}"
       removed=$((removed + 1))
     elif [ -d "$dst" ]; then
       read -rp "  Remove ${SKILL_NAMES[$i]} (not a symlink — will delete)? [y/N] " answer
       if [[ "$answer" =~ ^[Yy]$ ]]; then
         rm -rf "$dst"
-        ok "Removed ${SKILL_NAMES[$i]}"
+        ok "Removed skill ${SKILL_NAMES[$i]}"
+        removed=$((removed + 1))
+      fi
+    fi
+  done
+
+  for i in "${!AGENT_FILES[@]}"; do
+    local agent="${AGENT_FILES[$i]}"
+    local dst="$AGENTS_DIR/${agent}.md"
+    if [ -L "$dst" ]; then
+      rm "$dst"
+      ok "Removed agent ${AGENT_NAMES[$i]}"
+      removed=$((removed + 1))
+    elif [ -f "$dst" ]; then
+      read -rp "  Remove ${AGENT_NAMES[$i]} (not a symlink — will delete)? [y/N] " answer
+      if [[ "$answer" =~ ^[Yy]$ ]]; then
+        rm -f "$dst"
+        ok "Removed agent ${AGENT_NAMES[$i]}"
         removed=$((removed + 1))
       fi
     fi
   done
 
   if [ "$removed" -eq 0 ]; then
-    info "No skills were installed."
+    info "No items were installed."
   else
-    ok "$removed skill(s) removed."
+    ok "$removed item(s) removed."
   fi
 
   # Optionally remove the clone
@@ -350,6 +536,17 @@ skill_display_name() {
     fi
   done
   echo "$dir"
+}
+
+agent_display_name() {
+  local file="$1"
+  for i in "${!AGENT_FILES[@]}"; do
+    if [ "${AGENT_FILES[$i]}" = "$file" ]; then
+      echo "${AGENT_NAMES[$i]}"
+      return
+    fi
+  done
+  echo "$file"
 }
 
 # ─── Usage command ──────────────────────────────────────────
@@ -387,84 +584,138 @@ print_skill_usage() {
   echo ""
 }
 
+print_agent_usage() {
+  local i="$1"
+  local category="${AGENT_CATEGORIES[$i]}"
+  local tag=""
+  case "$category" in
+    orchestrator) tag="${MAGENTA}orchestrator${RESET}" ;;
+    lifecycle)    tag="${BLUE}lifecycle${RESET}" ;;
+    review)       tag="${GREEN}review${RESET}" ;;
+  esac
+  echo -e "  ${BOLD}${MAGENTA}${AGENT_NAMES[$i]}${RESET}  ${DIM}[${tag}${DIM}]${RESET}"
+  echo ""
+  echo -e "    ${BOLD}Agent name:${RESET}  ${CYAN}${AGENT_FILES[$i]}${RESET}"
+  echo -e "    ${BOLD}Category:${RESET}    ${DIM}${category}${RESET}"
+  echo ""
+  echo -e "    ${BOLD}Description:${RESET}"
+  echo -e "      ${AGENT_DESCS[$i]}"
+  echo ""
+  echo -e "    ${BOLD}Invoke:${RESET}"
+  echo -e "      ${DIM}Claude dispatches this agent automatically via the Agent tool,${RESET}"
+  echo -e "      ${DIM}or you can ask: \"run ${AGENT_FILES[$i]}\"${RESET}"
+  echo ""
+}
+
 cmd_usage() {
   local filter="${1:-}"
 
   header "Eagle Skills — How to Use"
 
-  # Determine which skills to show
-  local -a show_indices=()
-  local showing_installed=false
+  # Determine which items to show
+  local -a show_skill_indices=()
+  local -a show_agent_indices=()
+  local has_installed=false
 
   if [ -n "$filter" ]; then
-    # User asked for a specific skill
     local found=false
     for i in "${!SKILL_DIRS[@]}"; do
       if [ "${SKILL_DIRS[$i]}" = "$filter" ] || [ "${SKILL_COMMANDS[$i]}" = "/$filter" ] || [ "${SKILL_COMMANDS[$i]}" = "$filter" ]; then
-        show_indices+=("$i")
+        show_skill_indices+=("$i")
         found=true
         break
       fi
     done
     if [ "$found" = false ]; then
-      err "Unknown skill: $filter"
-      echo -e "  ${DIM}Available: ${SKILL_DIRS[*]}${RESET}"
+      for i in "${!AGENT_FILES[@]}"; do
+        if [ "${AGENT_FILES[$i]}" = "$filter" ]; then
+          show_agent_indices+=("$i")
+          found=true
+          break
+        fi
+      done
+    fi
+    if [ "$found" = false ]; then
+      err "Unknown skill or agent: $filter"
+      echo -e "  ${DIM}Skills: ${SKILL_DIRS[*]}${RESET}"
+      echo -e "  ${DIM}Agents: ${AGENT_FILES[*]}${RESET}"
       echo ""
       return 1
     fi
   else
-    # Show installed skills, or all if none installed
     for i in "${!SKILL_DIRS[@]}"; do
       local dst="$SKILLS_DIR/${SKILL_DIRS[$i]}"
       if [ -L "$dst" ] && [ -d "$dst" ]; then
-        show_indices+=("$i")
-        showing_installed=true
+        show_skill_indices+=("$i")
+        has_installed=true
       elif [ -d "$dst" ]; then
-        show_indices+=("$i")
-        showing_installed=true
+        show_skill_indices+=("$i")
+        has_installed=true
+      fi
+    done
+    for i in "${!AGENT_FILES[@]}"; do
+      local dst="$AGENTS_DIR/${AGENT_FILES[$i]}.md"
+      if [ -L "$dst" ] && [ -f "$dst" ]; then
+        show_agent_indices+=("$i")
+        has_installed=true
+      elif [ -f "$dst" ]; then
+        show_agent_indices+=("$i")
+        has_installed=true
       fi
     done
 
-    if [ ${#show_indices[@]} -eq 0 ]; then
-      echo -e "  ${DIM}No skills installed. Showing all available skills.${RESET}"
+    if [ ${#show_skill_indices[@]} -eq 0 ] && [ ${#show_agent_indices[@]} -eq 0 ]; then
+      echo -e "  ${DIM}Nothing installed. Showing all available items.${RESET}"
       echo -e "  ${DIM}Run ${RESET}eagle-skills install${DIM} to get started.${RESET}"
       echo ""
-      for i in "${!SKILL_DIRS[@]}"; do
-        show_indices+=("$i")
-      done
+      for i in "${!SKILL_DIRS[@]}"; do show_skill_indices+=("$i"); done
+      for i in "${!AGENT_FILES[@]}"; do show_agent_indices+=("$i"); done
     else
-      echo -e "  ${DIM}Showing your ${#show_indices[@]} installed skill(s). Run ${RESET}eagle-skills usage <skill-name>${DIM} for one skill.${RESET}"
+      local total=$(( ${#show_skill_indices[@]} + ${#show_agent_indices[@]} ))
+      echo -e "  ${DIM}Showing $total installed item(s). Run ${RESET}eagle-skills usage <name>${DIM} for details on one.${RESET}"
       echo ""
     fi
   fi
 
-  for i in "${show_indices[@]}"; do
-    print_skill_usage "$i"
-  done
+  if [ ${#show_skill_indices[@]} -gt 0 ]; then
+    echo -e "  ${BOLD}${CYAN}── Skills ──${RESET}"
+    echo ""
+    for i in "${show_skill_indices[@]}"; do
+      print_skill_usage "$i"
+    done
+  fi
+
+  if [ ${#show_agent_indices[@]} -gt 0 ]; then
+    echo -e "  ${BOLD}${CYAN}── Agents ──${RESET}"
+    echo ""
+    for i in "${show_agent_indices[@]}"; do
+      print_agent_usage "$i"
+    done
+  fi
 
   echo -e "  ${DIM}────────────────────────────────────────────────${RESET}"
   echo ""
   echo -e "  ${BOLD}Tips:${RESET}"
-  echo -e "    ${DIM}-${RESET} Skills activate automatically when Claude detects matching intent"
-  echo -e "    ${DIM}-${RESET} You can also invoke directly: type the slash command in Claude Code"
-  echo -e "    ${DIM}-${RESET} Output is always an HTML report saved in your working directory"
+  echo -e "    ${DIM}-${RESET} Skills activate when Claude detects matching intent, or invoke with slash commands"
+  echo -e "    ${DIM}-${RESET} Agents are dispatched by Claude's Agent tool — ask Claude to run one by name"
+  echo -e "    ${DIM}-${RESET} Use ${RESET}eagle-spectral-suite${DIM} to auto-detect which review agents to run"
   echo ""
 }
 
 cmd_help() {
   echo ""
   echo -e "${BOLD}Eagle Skills${RESET} v${VERSION}"
-  echo -e "${DIM}Custom skills for Claude Code${RESET}"
+  echo -e "${DIM}Skills and agents for Claude Code${RESET}"
   echo ""
   echo -e "${BOLD}Usage:${RESET}"
   echo "  eagle-skills <command>"
   echo ""
   echo -e "${BOLD}Commands:${RESET}"
-  echo "  install     Select and install skills for Claude Code"
-  echo "  update      Pull latest changes (symlinked skills update automatically)"
-  echo "  status      Show installed skills and check for updates"
-  echo "  usage       Show how to use installed skills (inputs, outputs, examples)"
-  echo "  uninstall   Remove installed skills"
+  echo "  install     Select and install skills and agents for Claude Code"
+  echo "  update      Pull latest changes (symlinked items update automatically)"
+  echo "  status      Show installed skills/agents and check for updates"
+  echo "  usage       Show how to use installed items (inputs, outputs, examples)"
+  echo "  uninstall   Remove installed skills and agents"
   echo "  help        Show this help message"
   echo ""
   echo -e "${BOLD}Quick start:${RESET}"
@@ -472,6 +723,10 @@ cmd_help() {
   echo ""
   echo -e "${BOLD}Alternative (without npm):${RESET}"
   echo "  curl -fsSL https://raw.githubusercontent.com/eagleisbatman/eagle-skills/main/install.sh | bash"
+  echo ""
+  echo -e "${BOLD}What's inside:${RESET}"
+  echo -e "  ${CYAN}${#SKILL_DIRS[@]} skills${RESET}  — invoked via slash commands (${DIM}/eagle-ux-review, /eagle-anti-slop, ...${RESET})"
+  echo -e "  ${CYAN}${#AGENT_FILES[@]} agents${RESET} — dispatched by Claude's Agent tool (${DIM}eagle-spectral-suite, eagle-triad-review, ...${RESET})"
   echo ""
 }
 

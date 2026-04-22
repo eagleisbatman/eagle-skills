@@ -1,8 +1,8 @@
 # Eagle Skills
 
-Custom skills for [Claude Code](https://docs.anthropic.com/en/docs/claude-code), Anthropic's agentic coding tool. Each skill extends Claude with domain-specific expertise, structured workflows, and production-quality deliverables.
+Skills and agents for [Claude Code](https://docs.anthropic.com/en/docs/claude-code), Anthropic's agentic coding tool. Skills extend Claude with domain-specific expertise and structured workflows. Agents are autonomous reviewers that audit, fix, and re-review your code.
 
-This repo contains six skills that work together as a complete product evaluation and quality pipeline:
+**7 skills** — invoked via slash commands:
 
 1. **Eagle UX Review** — looks at your screens and tells you what's broken and why
 2. **Eagle Product Diagnostics** — takes your real data and proves whether those problems actually cost you users and revenue
@@ -10,10 +10,30 @@ This repo contains six skills that work together as a complete product evaluatio
 4. **Eagle Anti-Slop** — detects and eliminates AI-generated slop in code, text, and design
 5. **Eagle Clean Doc** — modern Word document generation with a clean, monochrome design system
 6. **Eagle Clean Sheet** — modern Excel spreadsheet generation with consistent styling
+7. **Eagle Multi-Stack Scaffolder** — research-driven project scaffolding for 13+ technology stacks
 
-The three review skills can output **HTML, Word (.docx), or both** — so reports are easy to share with stakeholders who don't use Claude Code. Product Diagnostics can also export structured data to **Excel (.xlsx)**. Anti-Slop includes Python scripts for automated detection and cleanup.
+**14 agents** — dispatched by Claude's Agent tool:
 
-Use them independently or combine them: review your product, validate with data, audit the ads that drive users to it, and keep your AI-generated code clean.
+| Agent | Category | What it does |
+|-------|----------|-------------|
+| **Eagle Spectral Suite** | orchestrator | Detects intent and tech stack, dispatches the right specialist agents |
+| **Eagle Spectral Plan** | lifecycle | Scopes features, evaluates approaches, produces implementation plans |
+| **Eagle Spectral Investigate** | lifecycle | Root-cause debugging — traces code paths, tests hypotheses, applies fixes |
+| **Eagle Spectral Ship** | lifecycle | Pre-ship pipeline — runs gates, cleans diff, creates PR |
+| **Eagle Triad Review** | review | Single-pass 3-lens review: security + ops/reliability + maintainability |
+| **Eagle Security Audit** | review | Deep vulnerability hunting — injection, auth, data exposure, supply chain |
+| **Eagle Architecture Review** | review | Structural health — dependencies, coupling, cohesion, design patterns |
+| **Eagle Performance Review** | review | Bottleneck analysis — memory leaks, N+1 queries, bundle bloat |
+| **Eagle Code Quality** | review | Readability, dead code, duplication, convention violations, test gaps |
+| **Eagle UX Code Review** | review | Frontend code UX — loading states, error handling, form validation |
+| **Eagle Accessibility Review** | review | WCAG 2.1 AA compliance — semantic HTML, ARIA, keyboard nav, contrast |
+| **Eagle API Review** | review | API design consistency — endpoints, contracts, error handling, versioning |
+| **Eagle Data Integrity** | review | Data corruption and loss vectors — race conditions, partial writes |
+| **Eagle Database Review** | review | Schema design, query performance, migrations, indexes, ORM usage |
+
+The review skills can output **HTML, Word (.docx), or both**. Product Diagnostics can also export to **Excel (.xlsx)**. Anti-Slop includes Python scripts for automated detection.
+
+Use them independently or combine them: review your product, validate with data, scaffold new projects, and audit your code with autonomous agents.
 
 ---
 
@@ -25,6 +45,8 @@ Use them independently or combine them: review your product, validate with data,
 - [Eagle Anti-Slop](#eagle-anti-slop)
 - [Eagle Clean Doc](#eagle-clean-doc)
 - [Eagle Clean Sheet](#eagle-clean-sheet)
+- [Eagle Multi-Stack Scaffolder](#eagle-multi-stack-scaffolder)
+- [Eagle Spectral Agents](#eagle-spectral-agents)
 - [Output Formats](#output-formats)
 - [The Three-Skill Pipeline](#the-three-skill-pipeline)
 - [Installation](#installation)
@@ -151,6 +173,65 @@ Use it standalone for any spreadsheet task, or as an export format from Product 
 
 ---
 
+# Eagle Multi-Stack Scaffolder
+
+**Research-driven project scaffolding for 13+ technology stacks.**
+
+Most scaffolders spit out a boilerplate template from 2023. This skill researches current best practices via web search BEFORE generating any code, documents every dependency choice with a written justification, and uses modern tooling (Bun for JS/TS, uv for Python, cargo for Rust, SPM for Swift).
+
+**Supported stacks:**
+
+| Category | Stacks |
+|----------|--------|
+| **Mobile** | SwiftUI (iOS/macOS), Jetpack Compose (Android), Kotlin XML Views, Flutter, Expo React Native |
+| **Backend** | Node.js/Express, FastAPI, Flask, Django, Rust/Axum |
+| **Web** | Next.js (React), Nuxt.js (Vue) |
+| **Architecture** | Turborepo monorepo |
+
+**What you provide:** What you're building, target platforms, and any technology preferences.
+
+**What you get:** Scaffolded project with documentation (RESEARCH.md, DEPENDENCIES.md, STRUCTURE.md, SETUP.md), configuration files, and production-ready boilerplate. Every dependency includes a written justification.
+
+**How it works:** 7-step process — clarify requirements, identify stacks, read reference files, web research for current best practices, generate documentation, scaffold code, verify setup commands.
+
+---
+
+# Eagle Spectral Agents
+
+**14 autonomous agents for code review, debugging, planning, and shipping.** Each agent applies a 3-lens analytical framework and works iteratively — auditing, fixing, and re-auditing until the code passes.
+
+### How agents differ from skills
+
+| | Skills | Agents |
+|---|---|---|
+| **Invocation** | Slash commands (`/eagle-ux-review`) | Agent tool dispatch (`eagle-spectral-suite`) |
+| **Install location** | `~/.claude/skills/<name>/SKILL.md` | `~/.claude/agents/<name>.md` |
+| **Behavior** | Follow structured workflows with user input | Autonomous — audit, fix, re-audit in cycles |
+| **Best for** | Domain expertise, structured deliverables | Code review, debugging, shipping pipelines |
+
+### Agent categories
+
+**Orchestrator** — `eagle-spectral-suite` detects your intent and tech stack, then dispatches the right specialist agents. Ask it to "review everything" and it figures out which agents to run.
+
+**Lifecycle agents** — for the stages of development:
+- `eagle-spectral-plan` — scopes features, evaluates approaches through Feasibility / Risk / Maintainability lenses
+- `eagle-spectral-investigate` — root-cause debugging with systematic hypothesis testing
+- `eagle-spectral-ship` — pre-ship pipeline: build/test/lint gates, diff review, PR creation
+
+**Review specialists** — each applies 3 domain-specific lenses (Attacker / Ops / Maintainer):
+- `eagle-triad-review` — single-pass review covering security + ops + maintainability
+- `eagle-security-audit` — vulnerability hunting: injection, auth, data exposure, supply chain
+- `eagle-architecture-review` — structural health: coupling, cohesion, dependency direction
+- `eagle-performance-review` — bottlenecks: memory leaks, N+1 queries, bundle bloat
+- `eagle-code-quality` — readability, dead code, duplication, test gaps
+- `eagle-ux-code-review` — frontend code UX: loading states, error handling, form validation
+- `eagle-accessibility-review` — WCAG 2.1 AA: semantic HTML, ARIA, keyboard nav, contrast
+- `eagle-api-review` — endpoint consistency, contracts, error handling, versioning
+- `eagle-data-integrity` — race conditions, partial writes, missing transactions
+- `eagle-database-review` — schema design, query performance, migrations, indexes
+
+---
+
 # Output Formats
 
 All three review skills (UX Review, Product Diagnostics, Ad Review) support multiple output formats. Claude will ask during context gathering, or you can specify upfront:
@@ -197,7 +278,7 @@ Predictive                     Validated                          Acquisition
 
 ### Quick install (recommended)
 
-Interactive installer — choose which skills to install:
+Interactive installer — choose which skills and agents to install:
 
 ```bash
 npx eagle-skills install
@@ -209,14 +290,18 @@ Or without npm:
 curl -fsSL https://raw.githubusercontent.com/eagleisbatman/eagle-skills/main/install.sh | bash
 ```
 
-The installer clones the repo to `~/.eagle-skills` and symlinks your selected skills into `~/.claude/skills/`. Symlinked skills update in place when you run `npx eagle-skills update`.
+The installer clones the repo to `~/.eagle-skills` and symlinks your selections:
+- Skills → `~/.claude/skills/<name>/` (directory symlinks)
+- Agents → `~/.claude/agents/<name>.md` (file symlinks)
+
+Symlinked items update in place when you run `npx eagle-skills update`.
 
 ### Managing your installation
 
 ```bash
 npx eagle-skills update      # Pull latest changes
-npx eagle-skills status      # Show installed skills, check for updates
-npx eagle-skills uninstall   # Remove skills and optionally the repo
+npx eagle-skills status      # Show installed skills/agents, check for updates
+npx eagle-skills uninstall   # Remove skills, agents, and optionally the repo
 ```
 
 ### Manual install
@@ -226,15 +311,24 @@ If you prefer to manage it yourself:
 ```bash
 git clone https://github.com/eagleisbatman/eagle-skills.git
 cd eagle-skills
+
+# Skills (symlink directories)
 ln -sf "$(pwd)/eagle-ux-review" ~/.claude/skills/eagle-ux-review
 ln -sf "$(pwd)/eagle-product-diagnostics" ~/.claude/skills/eagle-product-diagnostics
 ln -sf "$(pwd)/eagle-ad-review" ~/.claude/skills/eagle-ad-review
 ln -sf "$(pwd)/eagle-anti-slop" ~/.claude/skills/eagle-anti-slop
 ln -sf "$(pwd)/eagle-clean-doc" ~/.claude/skills/eagle-clean-doc
 ln -sf "$(pwd)/eagle-clean-sheet" ~/.claude/skills/eagle-clean-sheet
+ln -sf "$(pwd)/eagle-multi-stack-scaffolder" ~/.claude/skills/eagle-multi-stack-scaffolder
+
+# Agents (symlink .md files)
+mkdir -p ~/.claude/agents
+for agent in agents/eagle-*.md; do
+  ln -sf "$(pwd)/$agent" ~/.claude/agents/$(basename "$agent")
+done
 ```
 
-Update with `git pull`. Symlinks mean installed skills update automatically.
+Update with `git pull`. Symlinks mean installed items update automatically.
 
 ---
 
@@ -271,7 +365,10 @@ Skills activate automatically when Claude detects matching intent. You can also 
 /eagle-anti-slop
 /eagle-clean-doc
 /eagle-clean-sheet
+/eagle-multi-stack-scaffolder
 ```
+
+Agents are dispatched by Claude's Agent tool. Ask Claude to run one by name (e.g., "run eagle-spectral-suite") or describe what you need and the orchestrator will pick the right agent.
 
 ### Eagle UX Review
 
@@ -374,17 +471,54 @@ python eagle-anti-slop/scripts/clean_slop.py myfile.txt --save
 python eagle-anti-slop/scripts/clean_slop.py myfile.txt --save --aggressive
 ```
 
+### Eagle Multi-Stack Scaffolder
+
+**Required inputs:**
+- What you're building (app type, features, target platforms)
+
+**Optional inputs:**
+- Technology preferences, existing backend/services to integrate with
+
+**Output:** Complete project scaffold with documentation and boilerplate for each stack.
+
+**Example session:**
+```
+You:   I want to build a fitness tracking app for iOS and Android with a Python backend
+Claude: [identifies stacks: Expo React Native + FastAPI, reads reference files,
+        researches current best practices, generates docs + scaffold]
+```
+
+### Eagle Spectral Agents
+
+Agents work autonomously — tell Claude what you need and the right agent runs:
+
+```
+You:   Review this codebase for security issues
+Claude: [dispatches eagle-security-audit → iterative 3-lens audit → fixes → report]
+
+You:   Help me plan this feature
+Claude: [dispatches eagle-spectral-plan → forcing questions → approach evaluation → plan]
+
+You:   Ship this
+Claude: [dispatches eagle-spectral-ship → build/test/lint gates → PR creation]
+
+You:   Run a full review
+Claude: [dispatches eagle-spectral-suite → detects stack → runs relevant specialists]
+```
+
 ---
 
 ## Built With
 
-- **[Claude Code Skills](https://docs.anthropic.com/en/docs/claude-code)** — Anthropic's skill system for extending Claude with domain expertise
+- **[Claude Code Skills & Agents](https://docs.anthropic.com/en/docs/claude-code)** — Anthropic's systems for extending Claude with domain expertise and autonomous capabilities
 - **ffmpeg** — video frame extraction at configurable intervals
 - **65+ UX laws** curated from established HCI research: Medhi et al. (2011), Nielsen (1994), Gestalt psychology, Fitts (1954), GSMA Mobile for Development, and more
 - **Three-layer triangulation framework** combining UX analysis, behavioral analytics, and outcome data
 - **Ad creative effectiveness research** from Meta ABCD, Kantar (200K+ ad database), System1, Nielsen, IPA Databank (1,400+ case studies)
 - **Platform-specific ad specs** for Meta, Google, TikTok, LinkedIn, X, and Pinterest
 - **Anti-slop pattern catalogs** covering code (Swift, Python, TS/JS, Java), natural language, and visual/UX design
+- **Spectral 3-lens framework** — every review agent applies Attacker / Ops / Maintainer perspectives in iterative audit cycles
+- **13+ stack references** for the scaffolder: SwiftUI, Jetpack Compose, Flutter, Expo RN, FastAPI, Django, Flask, Node/Express, Rust/Axum, Next.js, Nuxt.js, monorepo
 
 ---
 
