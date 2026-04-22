@@ -2,17 +2,18 @@
 
 Custom skills for [Claude Code](https://docs.anthropic.com/en/docs/claude-code), Anthropic's agentic coding tool. Each skill extends Claude with domain-specific expertise, structured workflows, and production-quality deliverables.
 
-This repo contains five skills that work together as a complete product evaluation pipeline:
+This repo contains six skills that work together as a complete product evaluation and quality pipeline:
 
 1. **Eagle UX Review** — looks at your screens and tells you what's broken and why
 2. **Eagle Product Diagnostics** — takes your real data and proves whether those problems actually cost you users and revenue
 3. **Eagle Ad Review** — audits your ad creatives against marketing strategy, platform specs, and creative effectiveness research
-4. **Eagle Clean Doc** — modern Word document generation with a clean, monochrome design system
-5. **Eagle Clean Sheet** — modern Excel spreadsheet generation with consistent styling
+4. **Eagle Anti-Slop** — detects and eliminates AI-generated slop in code, text, and design
+5. **Eagle Clean Doc** — modern Word document generation with a clean, monochrome design system
+6. **Eagle Clean Sheet** — modern Excel spreadsheet generation with consistent styling
 
-The three review skills can output **HTML, Word (.docx), or both** — so reports are easy to share with stakeholders who don't use Claude Code. Product Diagnostics can also export structured data to **Excel (.xlsx)**.
+The three review skills can output **HTML, Word (.docx), or both** — so reports are easy to share with stakeholders who don't use Claude Code. Product Diagnostics can also export structured data to **Excel (.xlsx)**. Anti-Slop includes Python scripts for automated detection and cleanup.
 
-Use them independently or combine them: review your product, validate with data, then audit the ads that drive users to it.
+Use them independently or combine them: review your product, validate with data, audit the ads that drive users to it, and keep your AI-generated code clean.
 
 ---
 
@@ -21,6 +22,7 @@ Use them independently or combine them: review your product, validate with data,
 - [Eagle UX Review](#eagle-ux-review)
 - [Eagle Product Diagnostics](#eagle-product-diagnostics)
 - [Eagle Ad Review](#eagle-ad-review)
+- [Eagle Anti-Slop](#eagle-anti-slop)
 - [Eagle Clean Doc](#eagle-clean-doc)
 - [Eagle Clean Sheet](#eagle-clean-sheet)
 - [Output Formats](#output-formats)
@@ -86,6 +88,42 @@ The review evaluates creatives against their **marketing job**, not just visual 
 **How it works:** Strategy-first 4-step process — gather marketing context, catalog and process all creative files, three-level analysis (strategic fit → execution quality → creative system health), then score and compile the report. Weights adjust dynamically by campaign type (awareness, DR, brand, multi-market) and medium (digital, radio, OOH, print, TV).
 
 [Read the full methodology →](docs/ad-review-methodology.md)
+
+---
+
+# Eagle Anti-Slop
+
+**Detects and eliminates AI-generated slop in code, text, and design.**
+
+AI-generated content has a recognizable smell: over-abstracted code, hedge-heavy prose, gradient-drenched design. This skill teaches Claude to spot and fix those patterns across all three domains — so the output reads like it was written by a senior engineer at 2 AM, not a language model trying to sound helpful.
+
+Point Claude at a file, a directory, or a PR diff. It applies a systematic multi-pass review — structural issues first, then naming and comments, then implementation patterns, then language-specific idioms — and rewrites the code to be flatter, leaner, and more direct.
+
+**What it covers:**
+
+| Domain | What it catches |
+|--------|----------------|
+| **Code** | Wrapper types without value, single-case error enums, happy-path logging, "what" comments, defensive checks for impossible states, unnecessary abstractions, over-engineered error handling |
+| **Text** | "Delve into," "navigate the complexities," meta-commentary, hedge clusters, buzzword density, wordy constructions, redundant qualifiers |
+| **Design** | AI startup gradients, glassmorphism everywhere, generic stock photos, center-alignment abuse, card overuse, "Empower Your Business" copy |
+
+**10 core principles:**
+1. No wrapper types that add indirection without value
+2. No defensive code for impossible states
+3. No single-case error enums
+4. No logging that restates the code
+5. No comments that describe what the code does
+6. Inline short helpers called once
+7. Flat over nested
+8. Fewer files over more files
+9. Standard library first
+10. Test behavior, not implementation
+
+**Bundled scripts:**
+- `detect_slop.py` — scans any text or code file, scores 0–100 across 7 categories (high-risk phrases, buzzwords, meta-commentary, hedging, obvious comments, structural red flags), outputs a detailed report with line-level findings
+- `clean_slop.py` — automated cleanup with preview mode (default) and `--save` mode. Supports `--aggressive` for transition-word removal and `--output` for writing to a new file
+
+**How it works:** The skill loads domain-specific reference catalogs (code-smells.md, text-smells.md, design-smells.md) based on what you're reviewing. For code, it runs a 4-pass review: structure → naming/comments → implementation → language-specific idioms. For text, it scores against pattern categories and rewrites. For design, it audits against the full visual/UX antipattern catalog.
 
 ---
 
@@ -191,6 +229,7 @@ cd eagle-skills
 ln -sf "$(pwd)/eagle-ux-review" ~/.claude/skills/eagle-ux-review
 ln -sf "$(pwd)/eagle-product-diagnostics" ~/.claude/skills/eagle-product-diagnostics
 ln -sf "$(pwd)/eagle-ad-review" ~/.claude/skills/eagle-ad-review
+ln -sf "$(pwd)/eagle-anti-slop" ~/.claude/skills/eagle-anti-slop
 ln -sf "$(pwd)/eagle-clean-doc" ~/.claude/skills/eagle-clean-doc
 ln -sf "$(pwd)/eagle-clean-sheet" ~/.claude/skills/eagle-clean-sheet
 ```
@@ -229,6 +268,7 @@ Skills activate automatically when Claude detects matching intent. You can also 
 /eagle-ux-review
 /eagle-product-diagnostics
 /eagle-ad-review
+/eagle-anti-slop
 /eagle-clean-doc
 /eagle-clean-sheet
 ```
@@ -299,6 +339,41 @@ Claude: [catalogs all files, scores against Meta ABCD + Kantar + medium-specific
         best practices, generates HTML report]
 ```
 
+### Eagle Anti-Slop
+
+**No required inputs** — just point it at code, text, or a design.
+
+**Output:** Cleaned files with slop removed. For code: refactored in-place with explanations. For text: scored report + cleaned version. For design: audit against the antipattern catalog.
+
+**Example sessions:**
+```
+You:   Review this file for slop
+Claude: [runs 4-pass code review, identifies wrapper types, happy-path logs,
+        "what" comments — rewrites to be leaner]
+
+You:   Clean up the AI-generated text in ./docs/
+Claude: [scores each file, previews changes, applies cleanup with --save]
+
+You:   Is this landing page design sloppy?
+Claude: [audits against design-smells catalog — gradient overuse, generic copy,
+        card-within-card nesting — recommends specific fixes]
+```
+
+**Bundled scripts** (can also be run standalone):
+```bash
+# Scan a file and get a slop score (0-100)
+python eagle-anti-slop/scripts/detect_slop.py myfile.txt
+
+# Preview what would change
+python eagle-anti-slop/scripts/clean_slop.py myfile.txt
+
+# Apply cleanup
+python eagle-anti-slop/scripts/clean_slop.py myfile.txt --save
+
+# Aggressive mode (removes transition words too)
+python eagle-anti-slop/scripts/clean_slop.py myfile.txt --save --aggressive
+```
+
 ---
 
 ## Built With
@@ -309,6 +384,7 @@ Claude: [catalogs all files, scores against Meta ABCD + Kantar + medium-specific
 - **Three-layer triangulation framework** combining UX analysis, behavioral analytics, and outcome data
 - **Ad creative effectiveness research** from Meta ABCD, Kantar (200K+ ad database), System1, Nielsen, IPA Databank (1,400+ case studies)
 - **Platform-specific ad specs** for Meta, Google, TikTok, LinkedIn, X, and Pinterest
+- **Anti-slop pattern catalogs** covering code (Swift, Python, TS/JS, Java), natural language, and visual/UX design
 
 ---
 
