@@ -1,16 +1,17 @@
 ---
 name: eagle-claude-md
 description: >
-  Generates a lean, project-specific CLAUDE.md and bootstraps the LLM Wiki directory structure.
-  Use when starting a new project, onboarding to a codebase, or when the user says: 'init claude',
-  'setup claude md', 'create claude.md', 'project init', 'eagle init', 'bootstrap this project',
-  'set up this repo for claude', 'add claude.md', 'onboard this project'. Also trigger when you
-  detect a project has no CLAUDE.md and the user is about to do significant work in it.
+  Full project onboarding: generates a lean CLAUDE.md, bootstraps LLM Wiki, links Obsidian vault,
+  and installs eagle-skills (9 skills + 14 agents). Use when starting a new project, onboarding to
+  a codebase, or when the user says: 'init claude', 'setup claude md', 'create claude.md',
+  'project init', 'eagle init', 'bootstrap this project', 'set up this repo for claude',
+  'add claude.md', 'onboard this project', 'install eagle skills'. Also trigger when you detect
+  a project has no CLAUDE.md and the user is about to do significant work in it.
 ---
 
 # Eagle CLAUDE.md
 
-Generate a minimal, project-specific CLAUDE.md and bootstrap the LLM Wiki structure. The output is a CLAUDE.md that contains ONLY what is unique to this project — no duplication of global rules.
+Full project onboarding: generate a minimal project-specific CLAUDE.md, bootstrap LLM Wiki, link Obsidian vault, and install eagle-skills. The CLAUDE.md contains ONLY what is unique to this project — no duplication of global rules.
 
 ## Core Constraint
 
@@ -185,15 +186,63 @@ Structure:
 
 The output should feel like something a senior engineer writes in 5 minutes when handing off a repo — not a generated document.
 
-### Step 6: Report
+### Step 6: Install eagle-skills
+
+**Detection:** Check if eagle-skills are already installed:
+- Skills: `ls ~/.claude/skills/eagle-*/SKILL.md 2>/dev/null | wc -l`
+- Agents: `ls ~/.claude/agents/eagle-*.md 2>/dev/null | wc -l`
+
+Expected: 9 skills, 14 agents.
+
+**If missing or incomplete:**
+
+1. Check if the repo is already cloned:
+   ```bash
+   ls ~/.eagle-skills/.git 2>/dev/null
+   ```
+
+2. If not cloned, clone it:
+   ```bash
+   git clone --quiet https://github.com/eagleisbatman/eagle-skills.git ~/.eagle-skills
+   ```
+
+3. If already cloned, pull latest:
+   ```bash
+   git -C ~/.eagle-skills pull --quiet
+   ```
+
+4. Symlink all skills (directories):
+   ```bash
+   mkdir -p ~/.claude/skills
+   for skill in ~/.eagle-skills/eagle-*/; do
+     name=$(basename "$skill")
+     [ -f "$skill/SKILL.md" ] || continue
+     ln -sfn "$skill" ~/.claude/skills/"$name"
+   done
+   ```
+
+5. Symlink all agents (.md files):
+   ```bash
+   mkdir -p ~/.claude/agents
+   for agent in ~/.eagle-skills/agents/eagle-*.md; do
+     ln -sfn "$agent" ~/.claude/agents/$(basename "$agent")
+   done
+   ```
+
+6. Verify counts match expected (9 skills, 14 agents).
+
+**If already fully installed:** Skip and report counts.
+
+### Step 7: Report
 
 After all steps, print a short summary:
 
 ```
 eagle-claude-md complete:
-  CLAUDE.md: <created | updated | already up to date>
-  LLM Wiki:  <created | already exists>
-  Obsidian:  <linked to <vault>/projects/<name> | skipped (no vault) | already linked>
+  CLAUDE.md:     <created | updated | already up to date>
+  LLM Wiki:      <created | already exists>
+  Obsidian:      <linked to <vault>/projects/<name> | skipped (no vault) | already linked>
+  Eagle Skills:  <9/9 skills, 14/14 agents | installed | already installed>
 ```
 
 ## Idempotency
@@ -204,5 +253,6 @@ This skill is safe to run multiple times. Each step checks its own state before 
 - Symlink exists and points correctly → skip linking
 - CLAUDE.md section exists → skip that section
 - Vault path saved → skip prompting
+- Eagle-skills fully installed (9 skills + 14 agents) → skip installation
 
 Re-running after project changes should only add new sections to CLAUDE.md if the project has evolved.

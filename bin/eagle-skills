@@ -23,7 +23,7 @@ declare -a SKILL_DESCS=(
   "Modern Word document generation — Helvetica, monochrome, clean"
   "Modern Excel spreadsheet generation — clean tables, monochrome"
   "Research-driven project scaffolding for 13+ technology stacks"
-  "Lean project-specific CLAUDE.md generator with LLM Wiki and Obsidian integration"
+  "Full project onboarding — lean CLAUDE.md, LLM Wiki, Obsidian vault, eagle-skills install"
   "One-time global environment setup — behavioral rules, hooks, vault, plugin checks"
 )
 declare -a SKILL_COMMANDS=("/eagle-ux-review" "/eagle-product-diagnostics" "/eagle-ad-review" "/eagle-anti-slop" "/eagle-clean-doc" "/eagle-clean-sheet" "/eagle-multi-stack-scaffolder" "/eagle-claude-md" "/eagle-bootstrap")
