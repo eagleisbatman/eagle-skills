@@ -1,0 +1,194 @@
+[
+  {
+    "pattern": "^git status$",
+    "type": "flag",
+    "rewrite": "git status -s",
+    "desc": "Machine-readable short format, same info"
+  },
+  {
+    "pattern": "^git log$",
+    "type": "flag",
+    "rewrite": "git log --oneline -20",
+    "desc": "SHA + subject only, last 20"
+  },
+  {
+    "pattern": "^git branch$",
+    "type": "flag",
+    "rewrite": "git branch --no-color",
+    "desc": "Strip ANSI escape codes"
+  },
+  {
+    "pattern": "^git branch -a$",
+    "type": "flag",
+    "rewrite": "git branch -a --no-color",
+    "desc": "Strip ANSI escape codes"
+  },
+  {
+    "pattern": "^git branch -r$",
+    "type": "flag",
+    "rewrite": "git branch -r --no-color",
+    "desc": "Strip ANSI escape codes"
+  },
+  {
+    "pattern": "^git stash list$",
+    "type": "flag",
+    "rewrite": "git stash list --oneline",
+    "desc": "One line per stash, no details"
+  },
+  {
+    "pattern": "^ls( -l| -la| -lah| -al)?$",
+    "type": "flag",
+    "rewrite": "ls -1",
+    "desc": "One file per line, no metadata"
+  },
+  {
+    "pattern": "^tree$",
+    "type": "flag",
+    "rewrite": "tree -L 3 --charset=ascii -I node_modules",
+    "desc": "Cap depth, ASCII chars, skip node_modules"
+  },
+  {
+    "pattern": "^tree -a$",
+    "type": "flag",
+    "rewrite": "tree -a -L 3 --charset=ascii -I node_modules",
+    "desc": "Cap depth, ASCII chars, skip node_modules"
+  },
+  {
+    "pattern": "^npm (list|ls)$",
+    "type": "flag",
+    "rewrite": "npm list --depth=0",
+    "desc": "Top-level deps only"
+  },
+  {
+    "pattern": "^npm (list|ls) --all$",
+    "type": "flag",
+    "rewrite": "npm list --depth=1",
+    "desc": "One level of transitive deps"
+  },
+  {
+    "pattern": "^pnpm (list|ls)$",
+    "type": "flag",
+    "rewrite": "pnpm list --depth=0",
+    "desc": "Top-level deps only"
+  },
+  {
+    "pattern": "^pip3? list$",
+    "type": "flag",
+    "rewrite": "pip list --format=freeze",
+    "desc": "Compact name==version format"
+  },
+  {
+    "pattern": "^brew list$",
+    "type": "flag",
+    "rewrite": "brew list --formula -1",
+    "desc": "One formula per line"
+  },
+  {
+    "pattern": "^brew list --cask$",
+    "type": "flag",
+    "rewrite": "brew list --cask -1",
+    "desc": "One cask per line"
+  },
+  {
+    "pattern": "^npm (install|i|ci)$",
+    "type": "flag",
+    "rewrite": "npm install --no-fund --no-audit --loglevel=warn",
+    "desc": "Strip funding nags and audit noise"
+  },
+  {
+    "pattern": "^docker ps$",
+    "type": "flag",
+    "rewrite": "docker ps --format \"table {{.ID}}\\t{{.Names}}\\t{{.Status}}\\t{{.Ports}}\"",
+    "desc": "Drop Image, Command, Created columns"
+  },
+  {
+    "pattern": "^docker ps -a$",
+    "type": "flag",
+    "rewrite": "docker ps -a --format \"table {{.ID}}\\t{{.Names}}\\t{{.Status}}\\t{{.Ports}}\"",
+    "desc": "Drop Image, Command, Created columns"
+  },
+  {
+    "pattern": "^docker images$",
+    "type": "flag",
+    "rewrite": "docker images --format \"table {{.Repository}}\\t{{.Tag}}\\t{{.Size}}\"",
+    "desc": "Drop ID, Created columns"
+  },
+  {
+    "pattern": "^docker compose ps$",
+    "type": "flag",
+    "rewrite": "docker compose ps --format \"table {{.Name}}\\t{{.Status}}\\t{{.Ports}}\"",
+    "desc": "Compact service listing"
+  },
+  {
+    "pattern": "^(printenv|env)$",
+    "type": "flag",
+    "rewrite": "env | sort",
+    "desc": "Sorted for consistent output"
+  },
+  {
+    "pattern": "^pytest",
+    "type": "pipe",
+    "filter": "pytest",
+    "desc": "Show failures + summary, skip passing test lines"
+  },
+  {
+    "pattern": "^python3? -m pytest",
+    "type": "pipe",
+    "filter": "pytest",
+    "desc": "Show failures + summary, skip passing test lines"
+  },
+  {
+    "pattern": "^(npm test|pnpm test|bun test|yarn test)",
+    "type": "pipe",
+    "filter": "test",
+    "desc": "Show failures + summary, skip passing test lines"
+  },
+  {
+    "pattern": "^(npx )?(jest|vitest)",
+    "type": "pipe",
+    "filter": "test",
+    "desc": "Show failures + summary, skip passing test lines"
+  },
+  {
+    "pattern": "^cargo test",
+    "type": "pipe",
+    "filter": "cargo-test",
+    "desc": "Show failures + summary, skip ok lines"
+  },
+  {
+    "pattern": "^go test",
+    "type": "pipe",
+    "filter": "go-test",
+    "desc": "Show failures + summary, skip PASS lines"
+  },
+  {
+    "pattern": "^(npx )?eslint",
+    "type": "pipe",
+    "filter": "lint",
+    "desc": "Group errors by rule, deduplicate"
+  },
+  {
+    "pattern": "^(npx )?tsc( --noEmit)?$",
+    "type": "pipe",
+    "filter": "tsc",
+    "desc": "Deduplicate repeated type errors"
+  },
+  {
+    "pattern": "^cargo (build|clippy)",
+    "type": "pipe",
+    "filter": "cargo-build",
+    "desc": "Strip progress lines, keep warnings/errors"
+  },
+  {
+    "pattern": "^docker logs",
+    "type": "pipe",
+    "filter": "docker-logs",
+    "desc": "Deduplicate repeated log lines"
+  },
+  {
+    "pattern": "^kubectl logs",
+    "type": "pipe",
+    "filter": "k8s-logs",
+    "desc": "Deduplicate repeated log lines"
+  }
+]

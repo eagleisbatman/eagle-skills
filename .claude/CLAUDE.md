@@ -1,6 +1,6 @@
 ## Eagle Skills
 
-Skills and agents package for Claude Code — 9 skills + 14 Spectral review agents.
+Skills and agents package for Claude Code — 10 skills + 14 Spectral review agents.
 
 ## Stack
 

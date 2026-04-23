@@ -42,11 +42,13 @@ Append the content from `references/behavioral-rules.md` to the end of `~/.claud
 
 If missing, do both:
 
-1. **Copy the hook script:**
+1. **Copy the hook files:**
    ```bash
    mkdir -p ~/.claude/hooks
    cp <skill-path>/references/compact.sh ~/.claude/hooks/compact.sh
-   chmod +x ~/.claude/hooks/compact.sh
+   cp <skill-path>/references/compact-rules.json ~/.claude/hooks/compact-rules.json
+   cp <skill-path>/references/compact-filter.sh ~/.claude/hooks/compact-filter.sh
+   chmod +x ~/.claude/hooks/compact.sh ~/.claude/hooks/compact-filter.sh
    ```
 
 2. **Merge hook config into settings.json:**

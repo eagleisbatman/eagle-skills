@@ -1,42 +1,48 @@
 #!/usr/bin/env bash
 # PreToolUse hook: compact Bash output for Claude Code.
-# Conservative: only rewrites when NO information is lost.
+# Reads rewrite rules from compact-rules.json — add entries there, not here.
 set -euo pipefail
+
+HOOKS_DIR="$HOME/.claude/hooks"
+RULES="$HOOKS_DIR/compact-rules.json"
+FILTER="$HOOKS_DIR/compact-filter.sh"
 
 input=$(cat)
 cmd=$(echo "$input" | jq -r '.tool_input.command // empty')
 [ -z "$cmd" ] && exit 0
 cmd_trimmed=$(echo "$cmd" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-rewritten="$cmd_trimmed"
 
-# SAFE rewrites (no semantic loss, just less noise):
-case "$cmd_trimmed" in
-  # git status -s is the designed-for-machines format. Same info, less prose.
-  "git status")         rewritten="git status -s" ;;
+[ ! -f "$RULES" ] && exit 0
 
-  # --oneline drops author/date/prose. Keeps SHA + subject.
-  # Only safe if Claude just needs to know "what commits happened".
-  # If Claude needs full context, it will use git show.
-  "git log")            rewritten="git log --oneline -20" ;;
+match=$(jq -r --arg cmd "$cmd_trimmed" '
+  .[] | (.pattern as $p |
+    if ($cmd | test($p)) then
+      if .type == "flag" then .rewrite
+      elif .type == "pipe" then "PIPE:" + .filter
+      else empty end
+    else empty end)
+' "$RULES" | head -1)
 
-  # ls -1 drops permissions/size/date. Keep this ONLY when Claude asked for
-  # bare `ls` / `ls -l` / `ls -la`. If it wanted sizes, it used `-lh` etc.
-  "ls"|"ls -l"|"ls -la"|"ls -lah"|"ls -al")
-                        rewritten="ls -1" ;;
-esac
+[ -z "$match" ] && exit 0
 
-# DELIBERATELY NOT INCLUDED (lossy, causes re-runs):
-#   git diff        → git diff --stat      # loses actual changes
-#   cargo test      → cargo test --quiet   # loses failure context
-#   docker logs     → docker logs --tail   # loses older errors
-
-if [ "$rewritten" != "$cmd_trimmed" ]; then
-  jq -n --arg c "$rewritten" '{
-    hookSpecificOutput: {
-      hookEventName: "PreToolUse",
-      permissionDecision: "allow",
-      permissionDecisionReason: "compact-rewrite",
-      updatedInput: { command: $c }
-    }
-  }'
+if [[ "$match" == PIPE:* ]]; then
+  # Skip pipe-through for compound commands — shell precedence would break the pipe
+  [[ "$cmd_trimmed" =~ ['\&\&'\|'||'';''|''>''<''`''\$\('] ]] && exit 0
+  filter_name="${match#PIPE:}"
+  if [ -x "$FILTER" ]; then
+    rewritten="set -o pipefail; { $cmd_trimmed ; } 2>&1 | \"$FILTER\" $filter_name"
+  else
+    exit 0
+  fi
+else
+  rewritten="$match"
 fi
+
+jq -n --arg c "$rewritten" '{
+  hookSpecificOutput: {
+    hookEventName: "PreToolUse",
+    permissionDecision: "allow",
+    permissionDecisionReason: "compact-rewrite",
+    updatedInput: { command: $c }
+  }
+}'
