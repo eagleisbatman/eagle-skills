@@ -156,6 +156,19 @@ warn()    { echo -e "${YELLOW}warn${RESET}  $1"; }
 err()     { echo -e "${RED} err${RESET}  $1"; }
 header()  { echo -e "\n${BOLD}${MAGENTA}$1${RESET}\n"; }
 
+banner() {
+  echo -e "${BOLD}${MAGENTA}"
+  cat << 'BANNER'
+███████╗░█████╗░░██████╗░██╗░░░░░███████╗  ░██████╗██╗░░██╗██╗██╗░░░░░██╗░░░░░░██████╗
+██╔════╝██╔══██╗██╔════╝░██║░░░░░██╔════╝  ██╔════╝██║░██╔╝██║██║░░░░░██║░░░░░██╔════╝
+█████╗░░███████║██║░░██╗░██║░░░░░█████╗░░  ╚█████╗░█████═╝░██║██║░░░░░██║░░░░░╚█████╗░
+██╔══╝░░██╔══██║██║░░╚██╗██║░░░░░██╔══╝░░  ░╚═══██╗██╔═██╗░██║██║░░░░░██║░░░░░░╚═══██╗
+███████╗██║░░██║╚██████╔╝███████╗███████╗  ██████╔╝██║░╚██╗██║███████╗███████╗██████╔╝
+╚══════╝╚═╝░░╚═╝░╚═════╝░╚══════╝╚══════╝  ╚═════╝░╚═╝░░╚═╝╚═╝╚══════╝╚══════╝╚═════╝
+BANNER
+  echo -e "${RESET}"
+}
+
 check_git() {
   if ! command -v git &>/dev/null; then
     err "git is required but not installed."
@@ -188,8 +201,8 @@ select_items() {
   local agent_count=${#AGENT_FILES[@]}
   local total=$((skill_count + agent_count))
 
-  header "Eagle Skills"
-  echo -e "  ${DIM}Skills and agents for Claude Code${RESET}"
+  banner
+  echo -e "  ${DIM}Select skills and agents to install${RESET}"
   echo ""
 
   echo -e "  ${BOLD}Skills${RESET} ${DIM}(invoked via slash commands in Claude Code)${RESET}"
@@ -713,9 +726,9 @@ cmd_usage() {
 }
 
 cmd_help() {
-  echo ""
-  echo -e "${BOLD}Eagle Skills${RESET} v${VERSION}"
-  echo -e "${DIM}Skills and agents for Claude Code${RESET}"
+  banner
+  echo -e "  ${BOLD}Eagle Skills${RESET} v${VERSION}"
+  echo -e "  ${DIM}Skills and agents for Claude Code${RESET}"
   echo ""
   echo -e "${BOLD}Usage:${RESET}"
   echo "  eagle-skills <command>"
