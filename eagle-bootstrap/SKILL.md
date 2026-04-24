@@ -16,7 +16,7 @@ One-time global setup that configures your Claude Code environment. Every step i
 ## What it does
 
 1. Enriches `~/.claude/CLAUDE.md` with behavioral rules (without overwriting existing content)
-2. Installs the `compact.sh` PreToolUse hook (saves tokens on verbose bash commands)
+2. Installs the compact hook system: `compact.sh` (PreToolUse rewriter), `compact-observer.sh` (PostToolUse auto-growing candidate logger), and supporting files
 3. Configures the Obsidian vault path for wiki integration
 4. Verifies the Claude Mem plugin is installed
 5. Verifies eagle-skills agents are installed
@@ -38,7 +38,7 @@ Append the content from `references/behavioral-rules.md` to the end of `~/.claud
 
 ### Step 2: Install compact.sh hook
 
-**Detection:** Check if `~/.claude/hooks/compact.sh` exists AND `~/.claude/settings.json` has a PreToolUse hook referencing it.
+**Detection:** Check if `~/.claude/hooks/compact.sh` and `~/.claude/hooks/compact-observer.sh` exist AND `~/.claude/settings.json` has PreToolUse and PostToolUse hooks referencing them.
 
 If missing, do both:
 
@@ -48,21 +48,29 @@ If missing, do both:
    cp <skill-path>/references/compact.sh ~/.claude/hooks/compact.sh
    cp <skill-path>/references/compact-rules.json ~/.claude/hooks/compact-rules.json
    cp <skill-path>/references/compact-filter.sh ~/.claude/hooks/compact-filter.sh
-   chmod +x ~/.claude/hooks/compact.sh ~/.claude/hooks/compact-filter.sh
+   cp <skill-path>/references/compact-observer.sh ~/.claude/hooks/compact-observer.sh
+   chmod +x ~/.claude/hooks/compact.sh ~/.claude/hooks/compact-filter.sh ~/.claude/hooks/compact-observer.sh
+   echo '[]' > ~/.claude/hooks/compact-candidates.json
    ```
 
 2. **Merge hook config into settings.json:**
-   Read `~/.claude/settings.json`. Use `jq` to merge the hooks key without clobbering other settings:
+   Read `~/.claude/settings.json`. Use `jq` to merge the hooks keys without clobbering other settings:
 
    ```bash
+   # PreToolUse — compact.sh rewrites verbose commands
    jq '.hooks.PreToolUse += [{"matcher": "Bash", "hooks": [{"type": "command", "command": "~/.claude/hooks/compact.sh"}]}]' \
+     ~/.claude/settings.json > /tmp/settings-merged.json && \
+     mv /tmp/settings-merged.json ~/.claude/settings.json
+
+   # PostToolUse — compact-observer.sh logs uncovered verbose commands
+   jq '.hooks.PostToolUse += [{"matcher": "Bash", "hooks": [{"type": "command", "command": "~/.claude/hooks/compact-observer.sh"}]}]' \
      ~/.claude/settings.json > /tmp/settings-merged.json && \
      mv /tmp/settings-merged.json ~/.claude/settings.json
    ```
 
-   If `settings.json` has no `hooks` key at all, the jq expression handles it (creates the key). If it already has PreToolUse hooks, the new one is appended to the array.
+   If `settings.json` has no `hooks` key at all, the jq expression handles it (creates the key). If it already has hooks, the new ones are appended to the arrays.
 
-   **Check for duplicates:** Before merging, grep the file for `compact.sh`. If already present, skip.
+   **Check for duplicates:** Before merging, grep the file for `compact.sh` and `compact-observer.sh`. If already present, skip each respectively.
 
 ### Step 3: Configure Obsidian vault path
 

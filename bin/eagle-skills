@@ -6,15 +6,15 @@ set -euo pipefail
 # https://github.com/eagleisbatman/eagle-skills
 # ─────────────────────────────────────────────────────────────
 
-VERSION="2.2.1"
+VERSION="2.3.0"
 REPO_URL="https://github.com/eagleisbatman/eagle-skills.git"
 INSTALL_DIR="${EAGLE_SKILLS_DIR:-$HOME/.eagle-skills}"
 SKILLS_DIR="$HOME/.claude/skills"
 AGENTS_DIR="$HOME/.claude/agents"
 
 # ─── Available skills (directory → display) ─────────────────
-declare -a SKILL_DIRS=("eagle-ux-review" "eagle-product-diagnostics" "eagle-ad-review" "eagle-anti-slop" "eagle-clean-doc" "eagle-clean-sheet" "eagle-multi-stack-scaffolder" "eagle-claude-md" "eagle-bootstrap" "eagle-feature-flow")
-declare -a SKILL_NAMES=("Eagle UX Review" "Eagle Product Diagnostics" "Eagle Ad Review" "Eagle Anti-Slop" "Eagle Clean Doc" "Eagle Clean Sheet" "Eagle Multi-Stack Scaffolder" "Eagle CLAUDE.md" "Eagle Bootstrap" "Eagle Feature Flow")
+declare -a SKILL_DIRS=("eagle-ux-review" "eagle-product-diagnostics" "eagle-ad-review" "eagle-anti-slop" "eagle-clean-doc" "eagle-clean-sheet" "eagle-multi-stack-scaffolder" "eagle-claude-md" "eagle-bootstrap" "eagle-feature-flow" "eagle-compact-add")
+declare -a SKILL_NAMES=("Eagle UX Review" "Eagle Product Diagnostics" "Eagle Ad Review" "Eagle Anti-Slop" "Eagle Clean Doc" "Eagle Clean Sheet" "Eagle Multi-Stack Scaffolder" "Eagle CLAUDE.md" "Eagle Bootstrap" "Eagle Feature Flow" "Eagle Compact Add")
 declare -a SKILL_DESCS=(
   "Expert-level UX audits grounded in 65+ UX laws"
   "Three-layer data validation: design intent + behavior + outcomes"
@@ -26,8 +26,9 @@ declare -a SKILL_DESCS=(
   "Full project onboarding — lean CLAUDE.md, LLM Wiki, Obsidian vault, eagle-skills install"
   "One-time global environment setup — behavioral rules, hooks, vault, plugin checks"
   "Structured dev workflow — plan, build, test, spectral review, anti-slop, commit"
+  "Review observer candidates and promote into compact-rules.json"
 )
-declare -a SKILL_COMMANDS=("/eagle-ux-review" "/eagle-product-diagnostics" "/eagle-ad-review" "/eagle-anti-slop" "/eagle-clean-doc" "/eagle-clean-sheet" "/eagle-multi-stack-scaffolder" "/eagle-claude-md" "/eagle-bootstrap" "/eagle-feature-flow")
+declare -a SKILL_COMMANDS=("/eagle-ux-review" "/eagle-product-diagnostics" "/eagle-ad-review" "/eagle-anti-slop" "/eagle-clean-doc" "/eagle-clean-sheet" "/eagle-multi-stack-scaffolder" "/eagle-claude-md" "/eagle-bootstrap" "/eagle-feature-flow" "/eagle-compact-add")
 declare -a SKILL_TRIGGERS=(
   "ux review, ux audit, usability review, heuristic evaluation, critique this design, what's wrong with this UI"
   "validate these findings, product diagnostics, funnel analysis, why isn't this metric moving, triangulate UX and data"
@@ -39,6 +40,7 @@ declare -a SKILL_TRIGGERS=(
   "init claude, setup claude md, create claude.md, project init, eagle init, onboard this project, add claude.md"
   "eagle bootstrap, setup my environment, first time setup, configure claude globally, install eagle environment"
   "feature flow, build this feature, implement this, dev workflow, eagle flow, start feature, build and ship, full dev cycle, plan and build"
+  "compact-add, review compact candidates, add compact rules, grow compact database, show compact candidates, promote candidates"
 )
 declare -a SKILL_INPUTS=(
   "North star metric|Target user profile (demographics, tech literacy, device/connectivity)|2-3 reference apps the target user opens daily|App identity (chat, marketplace, tool, social, etc.)|Output format: HTML, Word, or both|Screen recording (video) or a folder of screenshots|Optional: PRD or hypothesis document|Optional: User personas, analytics data, competitive screenshots"
@@ -51,6 +53,7 @@ declare -a SKILL_INPUTS=(
   "A project directory (runs in current directory by default)|Optional: Obsidian vault path (auto-detected if configured)"
   "No inputs required (auto-detects what's already configured)"
   "Feature description (what to build and why)|Project must have a test suite or instructions to create one"
+  "No inputs required (reads ~/.claude/hooks/compact-candidates.json automatically)"
 )
 declare -a SKILL_OUTPUTS=(
   "HTML and/or Word report with severity-rated findings, embedded evidence, before/after mockups, priority matrix, UX law citations"
@@ -63,6 +66,7 @@ declare -a SKILL_OUTPUTS=(
   "Lean CLAUDE.md, raw/ and wiki/ directories, Obsidian vault symlink"
   "Enriched global CLAUDE.md, compact.sh hook, Obsidian vault config, plugin/agent verification report"
   "Committed, tested, reviewed code with clean git history"
+  "New rules appended to compact-rules.json, processed candidates cleared"
 )
 declare -a SKILL_EXAMPLES=(
   "UX review this app — here's a screen recording of the onboarding flow"
@@ -75,6 +79,7 @@ declare -a SKILL_EXAMPLES=(
   "Set up this project for Claude — create a CLAUDE.md and wiki structure"
   "Run eagle bootstrap to set up my global Claude environment"
   "Build a rate-limiting middleware for the auth routes"
+  "Review compact candidates and add rules for frequent verbose commands"
 )
 
 # ─── Available agents (filename without .md → display) ──────
