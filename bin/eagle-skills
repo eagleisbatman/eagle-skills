@@ -752,9 +752,40 @@ cmd_help() {
   echo -e "${BOLD}Alternative (without npm):${RESET}"
   echo "  curl -fsSL https://raw.githubusercontent.com/eagleisbatman/eagle-skills/main/install.sh | bash"
   echo ""
-  echo -e "${BOLD}What's inside:${RESET}"
-  echo -e "  ${CYAN}${#SKILL_DIRS[@]} skills${RESET}  — invoked via slash commands (${DIM}/eagle-ux-review, /eagle-anti-slop, ...${RESET})"
-  echo -e "  ${CYAN}${#AGENT_FILES[@]} agents${RESET} — dispatched by Claude's Agent tool (${DIM}eagle-spectral-suite, eagle-triad-review, ...${RESET})"
+
+  local col_w=58
+  local bar
+  bar=$(printf '─%.0s' $(seq 1 $((col_w + 2))))
+  local hdr_bar
+  hdr_bar=$(printf '─%.0s' $(seq 1 34))
+
+  _trunc() {
+    local s="$1"
+    if [ ${#s} -gt $col_w ]; then
+      echo "${s:0:$((col_w - 2))}.."
+    else
+      echo "$s"
+    fi
+  }
+
+  echo -e "${BOLD}Skills${RESET} ${DIM}(${#SKILL_DIRS[@]} — invoked via slash commands)${RESET}"
+  echo -e "  ${DIM}┌${hdr_bar}┬${bar}┐${RESET}"
+  printf "  ${DIM}│${RESET} ${BOLD}%-32s${RESET} ${DIM}│${RESET} ${BOLD}%-${col_w}s${RESET} ${DIM}│${RESET}\n" "Command" "Description"
+  echo -e "  ${DIM}├${hdr_bar}┼${bar}┤${RESET}"
+  for i in "${!SKILL_DIRS[@]}"; do
+    printf "  ${DIM}│${RESET} ${CYAN}%-32s${RESET} ${DIM}│${RESET} %-${col_w}s ${DIM}│${RESET}\n" "${SKILL_COMMANDS[$i]}" "$(_trunc "${SKILL_DESCS[$i]}")"
+  done
+  echo -e "  ${DIM}└${hdr_bar}┴${bar}┘${RESET}"
+  echo ""
+
+  echo -e "${BOLD}Agents${RESET} ${DIM}(${#AGENT_FILES[@]} — dispatched by Claude's Agent tool)${RESET}"
+  echo -e "  ${DIM}┌${hdr_bar}┬${bar}┐${RESET}"
+  printf "  ${DIM}│${RESET} ${BOLD}%-32s${RESET} ${DIM}│${RESET} ${BOLD}%-${col_w}s${RESET} ${DIM}│${RESET}\n" "Agent" "Description"
+  echo -e "  ${DIM}├${hdr_bar}┼${bar}┤${RESET}"
+  for i in "${!AGENT_FILES[@]}"; do
+    printf "  ${DIM}│${RESET} ${CYAN}%-32s${RESET} ${DIM}│${RESET} %-${col_w}s ${DIM}│${RESET}\n" "${AGENT_FILES[$i]}" "$(_trunc "${AGENT_DESCS[$i]}")"
+  done
+  echo -e "  ${DIM}└${hdr_bar}┴${bar}┘${RESET}"
   echo ""
 }
 
