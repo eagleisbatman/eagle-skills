@@ -16,7 +16,7 @@ One-time global setup that configures your Claude Code environment. Every step i
 ## What it does
 
 1. Enriches `~/.claude/CLAUDE.md` with behavioral rules (without overwriting existing content)
-2. Installs the compact hook system: `compact.sh` (PreToolUse rewriter), `compact-observer.sh` (PostToolUse auto-growing candidate logger), and supporting files
+2. Installs the compact hook system: `compact.sh` (PreToolUse rewriter), `compact-observer.sh` (PostToolUse candidate logger), `compact-session-check.sh` (SessionStart auto-promoter trigger), and supporting files
 3. Configures the Obsidian vault path for wiki integration
 4. Verifies the Claude Mem plugin is installed
 5. Verifies eagle-skills agents are installed
@@ -49,7 +49,8 @@ If missing, do both:
    cp <skill-path>/references/compact-rules.json ~/.claude/hooks/compact-rules.json
    cp <skill-path>/references/compact-filter.sh ~/.claude/hooks/compact-filter.sh
    cp <skill-path>/references/compact-observer.sh ~/.claude/hooks/compact-observer.sh
-   chmod +x ~/.claude/hooks/compact.sh ~/.claude/hooks/compact-filter.sh ~/.claude/hooks/compact-observer.sh
+   cp <skill-path>/references/compact-session-check.sh ~/.claude/hooks/compact-session-check.sh
+   chmod +x ~/.claude/hooks/compact.sh ~/.claude/hooks/compact-filter.sh ~/.claude/hooks/compact-observer.sh ~/.claude/hooks/compact-session-check.sh
    echo '[]' > ~/.claude/hooks/compact-candidates.json
    ```
 
@@ -57,6 +58,11 @@ If missing, do both:
    Read `~/.claude/settings.json`. Use `jq` to merge the hooks keys without clobbering other settings:
 
    ```bash
+   # SessionStart — compact-session-check.sh triggers auto-promotion
+   jq '.hooks.SessionStart += [{"hooks": [{"type": "command", "command": "~/.claude/hooks/compact-session-check.sh"}]}]' \
+     ~/.claude/settings.json > /tmp/settings-merged.json && \
+     mv /tmp/settings-merged.json ~/.claude/settings.json
+
    # PreToolUse — compact.sh rewrites verbose commands
    jq '.hooks.PreToolUse += [{"matcher": "Bash", "hooks": [{"type": "command", "command": "~/.claude/hooks/compact.sh"}]}]' \
      ~/.claude/settings.json > /tmp/settings-merged.json && \
@@ -70,7 +76,7 @@ If missing, do both:
 
    If `settings.json` has no `hooks` key at all, the jq expression handles it (creates the key). If it already has hooks, the new ones are appended to the arrays.
 
-   **Check for duplicates:** Before merging, grep the file for `compact.sh` and `compact-observer.sh`. If already present, skip each respectively.
+   **Check for duplicates:** Before merging, grep the file for `compact.sh`, `compact-observer.sh`, and `compact-session-check.sh`. If already present, skip each respectively.
 
 ### Step 3: Configure Obsidian vault path
 
@@ -109,11 +115,12 @@ If missing: report "Claude Mem: not installed. Install it from the Claude Code m
 
 **Detection:** Check if `~/.claude/agents/` contains the expected agent files.
 
-Expected agents (14 total):
+Expected agents (15 total):
 - eagle-accessibility-review.md
 - eagle-api-review.md
 - eagle-architecture-review.md
 - eagle-code-quality.md
+- eagle-compact-promoter.md
 - eagle-data-integrity.md
 - eagle-database-review.md
 - eagle-performance-review.md
@@ -126,8 +133,8 @@ Expected agents (14 total):
 - eagle-ux-code-review.md
 
 Count how many are present. Report:
-- All 14 found → "Eagle agents: all 14 installed"
-- Partial → "Eagle agents: <n>/14 installed. Missing: <list>. Run `eagle-skills install` to fix."
+- All 15 found → "Eagle agents: all 15 installed"
+- Partial → "Eagle agents: <n>/15 installed. Missing: <list>. Run `eagle-skills install` to fix."
 - None → "Eagle agents: not installed. Run `npx eagle-skills` or `eagle-skills install`."
 
 ### Step 6: Report

@@ -7,23 +7,23 @@
 ╚══════╝╚═╝░░╚═╝░╚═════╝░╚══════╝╚══════╝  ╚═════╝░╚═╝░░╚═╝╚═╝╚══════╝╚══════╝╚═════╝
 ```
 
-**11 skills + 14 agents for [Claude Code](https://docs.anthropic.com/en/docs/claude-code).** Skills give Claude domain expertise via slash commands. Agents are autonomous reviewers that audit, fix, and re-review your code.
+**11 skills + 15 agents for [Claude Code](https://docs.anthropic.com/en/docs/claude-code).** Skills give Claude domain expertise via slash commands. Agents are autonomous reviewers that audit, fix, and re-review your code.
 
 ### Self-growing token saver
 
-Eagle Skills includes a **compact hook system** that saves context window tokens by rewriting verbose Bash commands. The system learns which commands need rules by silently observing your sessions:
+Eagle Skills includes a **compact hook system** that saves context window tokens by rewriting verbose Bash commands. The system learns which commands need rules by silently observing your sessions and autonomously promoting rules:
 
 ```
 You work normally
      ↓
 Observer logs verbose uncovered commands (automatic)
      ↓
-/eagle-compact-add reviews candidates (you decide)
+Claude auto-promotes candidates into rules (background agent, no human needed)
      ↓
 Rules database grows → more tokens saved
 ```
 
-Ships with 32 rules out of the box. The database grows as you use Claude Code — no manual configuration needed. [Full details →](docs/compact-hook.md)
+Starts with 32 rules. The database grows autonomously as you use Claude Code — no manual configuration needed. Run `/eagle-compact-add` for manual review. [Full details →](docs/compact-hook.md)
 
 ## Install
 
@@ -77,6 +77,7 @@ Dispatched by Claude's Agent tool. Ask Claude to run one by name, or use `eagle-
 | [API Review](docs/agents.md#eagle-api-review) | review | Endpoint consistency, contracts, error handling, versioning |
 | [Data Integrity](docs/agents.md#eagle-data-integrity) | review | Race conditions, partial writes, missing transactions |
 | [Database Review](docs/agents.md#eagle-database-review) | review | Schema design, query performance, migrations, indexes |
+| [Compact Promoter](docs/agents.md#eagle-compact-promoter) | infra | Auto-promotes observed candidates into compact rules |
 
 ## CLI
 

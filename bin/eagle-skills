@@ -6,7 +6,7 @@ set -euo pipefail
 # https://github.com/eagleisbatman/eagle-skills
 # ─────────────────────────────────────────────────────────────
 
-VERSION="2.3.4"
+VERSION="2.4.0"
 REPO_URL="https://github.com/eagleisbatman/eagle-skills.git"
 INSTALL_DIR="${EAGLE_SKILLS_DIR:-$HOME/.eagle-skills}"
 SKILLS_DIR="$HOME/.claude/skills"
@@ -98,6 +98,7 @@ declare -a AGENT_FILES=(
   "eagle-api-review"
   "eagle-data-integrity"
   "eagle-database-review"
+  "eagle-compact-promoter"
 )
 declare -a AGENT_NAMES=(
   "Eagle Spectral Suite"
@@ -114,6 +115,7 @@ declare -a AGENT_NAMES=(
   "Eagle API Review"
   "Eagle Data Integrity"
   "Eagle Database Review"
+  "Eagle Compact Promoter"
 )
 declare -a AGENT_DESCS=(
   "Orchestrates review agents — detects intent and tech stack, dispatches specialists"
@@ -130,6 +132,7 @@ declare -a AGENT_DESCS=(
   "API design consistency — endpoints, contracts, error handling, versioning, pagination"
   "Data corruption and loss vectors — race conditions, partial writes, missing transactions"
   "Schema design, query performance, migrations, indexes, ORM usage"
+  "Auto-promotes compact-observer candidates into compact-rules.json at session start"
 )
 declare -a AGENT_CATEGORIES=(
   "orchestrator"
@@ -146,6 +149,7 @@ declare -a AGENT_CATEGORIES=(
   "review"
   "review"
   "review"
+  "infra"
 )
 
 # ─── Colors ──────────────────────────────────────────────────

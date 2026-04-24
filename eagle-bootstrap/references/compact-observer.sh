@@ -7,6 +7,7 @@ HOOKS_DIR="$HOME/.claude/hooks"
 RULES="$HOOKS_DIR/compact-rules.json"
 CANDIDATES="$HOOKS_DIR/compact-candidates.json"
 THRESHOLD=30
+MAX_SAMPLES=5
 
 input=$(cat)
 
@@ -23,16 +24,10 @@ total=$((stdout_n + stderr_n))
 [[ "$cmd" == *"compact-filter.sh"* ]] && exit 0
 
 cmd_trimmed=$(echo "$cmd" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-if [[ "$cmd_trimmed" == *'&&'* || "$cmd_trimmed" == *'||'* || \
-      "$cmd_trimmed" == *';'* || "$cmd_trimmed" == *'|'* || \
-      "$cmd_trimmed" == *'>'* || "$cmd_trimmed" == *'<'* || \
-      "$cmd_trimmed" == *'$('* || "$cmd_trimmed" == *\`* ]]; then
-  exit 0
-fi
 
 [ -f "$RULES" ] && {
   covered=$(jq --arg cmd "$cmd_trimmed" \
-    '[.[] | select($cmd | test(.pattern))] | length' "$RULES" 2>/dev/null)
+    'reduce .[] as $r (0; if ($cmd | test($r.pattern)) then . + 1 else . end)' "$RULES" 2>/dev/null)
   [ "${covered:-0}" -gt 0 ] && exit 0
 }
 
@@ -53,22 +48,34 @@ trap 'rmdir "$lockdir" 2>/dev/null' EXIT
 
 existing=$(cat "$CANDIDATES" 2>/dev/null) || existing='[]'
 
+# Migrate old format (sample_cmd/sample_lines → samples array)
+existing=$(echo "$existing" | jq '
+  map(if .sample_cmd and (.samples | not) then
+    {key, count, samples: [{cmd: .sample_cmd, lines: .sample_lines}], last_seen}
+  else . end)
+' 2>/dev/null) || existing='[]'
+
 has_key=$(echo "$existing" | jq --arg key "$key" \
   '[.[] | select(.key == $key)] | length' 2>/dev/null) || has_key=0
 
 if [ "$has_key" -gt 0 ]; then
   updated=$(echo "$existing" | jq --arg key "$key" --arg cmd "$cmd_trimmed" \
-    --argjson lines "$total" --arg now "$now" '
+    --argjson lines "$total" --arg now "$now" --argjson max "$MAX_SAMPLES" '
     map(if .key == $key then
       .count += 1 | .last_seen = $now |
-      if $lines > .sample_lines then .sample_cmd = $cmd | .sample_lines = $lines
-      else . end
+      if (.samples | map(.cmd) | index($cmd)) then .
+      elif (.samples | length) < $max then .samples += [{cmd: $cmd, lines: $lines}]
+      else
+        (.samples | to_entries | min_by(.value.lines)) as $min |
+        if $lines > $min.value.lines then .samples[$min.key] = {cmd: $cmd, lines: $lines}
+        else . end
+      end
     else . end)
   ' 2>/dev/null) || exit 0
 else
   updated=$(echo "$existing" | jq --arg key "$key" --arg cmd "$cmd_trimmed" \
     --argjson lines "$total" --arg now "$now" '
-    . + [{key: $key, count: 1, sample_cmd: $cmd, sample_lines: $lines, last_seen: $now}]
+    . + [{key: $key, count: 1, samples: [{cmd: $cmd, lines: $lines}], last_seen: $now}]
   ' 2>/dev/null) || exit 0
 fi
 
