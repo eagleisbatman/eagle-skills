@@ -758,7 +758,10 @@ cmd_help() {
   echo "  curl -fsSL https://raw.githubusercontent.com/eagleisbatman/eagle-skills/main/install.sh | bash"
   echo ""
 
-  local col_w=58
+  local term_w
+  term_w=$(tput cols 2>/dev/null || echo 120)
+  local col_w=$(( term_w - 41 ))
+  [ "$col_w" -lt 40 ] && col_w=40
   local bar
   bar=$(printf '─%.0s' $(seq 1 $((col_w + 2))))
   local hdr_bar
