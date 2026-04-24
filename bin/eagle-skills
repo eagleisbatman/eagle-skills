@@ -6,7 +6,7 @@ set -euo pipefail
 # https://github.com/eagleisbatman/eagle-skills
 # ─────────────────────────────────────────────────────────────
 
-VERSION="2.3.2"
+VERSION="2.3.3"
 REPO_URL="https://github.com/eagleisbatman/eagle-skills.git"
 INSTALL_DIR="${EAGLE_SKILLS_DIR:-$HOME/.eagle-skills}"
 SKILLS_DIR="$HOME/.claude/skills"
@@ -758,10 +758,10 @@ cmd_help() {
   echo "  curl -fsSL https://raw.githubusercontent.com/eagleisbatman/eagle-skills/main/install.sh | bash"
   echo ""
 
-  local term_w
-  term_w=$(tput cols 2>/dev/null || echo 120)
+  local term_w=${COLUMNS:-$(stty size 2>/dev/null | awk '{print $2}')}
+  [ -z "$term_w" ] && term_w=$(tput cols 2>/dev/null)
+  [ -z "$term_w" ] || [ "$term_w" -le 80 ] 2>/dev/null && term_w=140
   local col_w=$(( term_w - 41 ))
-  [ "$col_w" -lt 40 ] && col_w=40
   local bar
   bar=$(printf '─%.0s' $(seq 1 $((col_w + 2))))
   local hdr_bar
