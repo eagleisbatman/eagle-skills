@@ -1,6 +1,6 @@
 {
   "name": "eagle-skills",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "description": "Skills and agents for Claude Code — 11 skills + 14 Spectral review agents",
   "bin": {
     "eagle-skills": "bin/eagle-skills"
