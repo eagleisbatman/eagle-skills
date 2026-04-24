@@ -7,7 +7,23 @@
 ╚══════╝╚═╝░░╚═╝░╚═════╝░╚══════╝╚══════╝  ╚═════╝░╚═╝░░╚═╝╚═╝╚══════╝╚══════╝╚═════╝
 ```
 
-**10 skills + 14 agents for [Claude Code](https://docs.anthropic.com/en/docs/claude-code).** Skills give Claude domain expertise via slash commands. Agents are autonomous reviewers that audit, fix, and re-review your code.
+**11 skills + 14 agents for [Claude Code](https://docs.anthropic.com/en/docs/claude-code).** Skills give Claude domain expertise via slash commands. Agents are autonomous reviewers that audit, fix, and re-review your code.
+
+### Self-growing token saver
+
+Eagle Skills includes a **compact hook system** that saves context window tokens by rewriting verbose Bash commands. The system learns which commands need rules by silently observing your sessions:
+
+```
+You work normally
+     ↓
+Observer logs verbose uncovered commands (automatic)
+     ↓
+/eagle-compact-add reviews candidates (you decide)
+     ↓
+Rules database grows → more tokens saved
+```
+
+Ships with 32 rules out of the box. The database grows as you use Claude Code — no manual configuration needed. [Full details →](docs/compact-hook.md)
 
 ## Install
 
@@ -39,6 +55,7 @@ Invoked via slash commands in Claude Code.
 | [CLAUDE.md](docs/skills/claude-md.md) | `/eagle-claude-md` | Lean project CLAUDE.md + LLM Wiki + Obsidian vault integration |
 | [Bootstrap](docs/skills/bootstrap.md) | `/eagle-bootstrap` | One-time global setup: behavioral rules, hooks, vault config |
 | [Feature Flow](docs/skills/feature-flow.md) | `/eagle-feature-flow` | Structured dev workflow: plan, build, test, review, anti-slop, commit |
+| [Compact Add](docs/skills/compact-add.md) | `/eagle-compact-add` | Review observer candidates and promote into compact rules |
 
 ## Agents
 
@@ -77,7 +94,7 @@ npx eagle-skills uninstall    # Remove everything
 |-------|------|
 | Installation guide | [docs/installation.md](docs/installation.md) |
 | All agents reference | [docs/agents.md](docs/agents.md) |
-| Compact hook (token saver) | [docs/compact-hook.md](docs/compact-hook.md) |
+| Compact hook system (self-growing token saver) | [docs/compact-hook.md](docs/compact-hook.md) |
 | The three-skill pipeline | [docs/pipeline.md](docs/pipeline.md) |
 | UX Review methodology | [docs/ux-review-methodology.md](docs/ux-review-methodology.md) |
 | Product Diagnostics methodology | [docs/product-diagnostics-methodology.md](docs/product-diagnostics-methodology.md) |

@@ -7,7 +7,7 @@ One-time global environment setup for Claude Code.
 Run this once per machine to configure your Claude Code environment:
 
 1. **Behavioral rules** — Appends four principles to `~/.claude/CLAUDE.md`: Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution
-2. **Compact hook** — Installs `compact.sh`, a PreToolUse hook that rewrites verbose bash commands to save context window tokens ([details](../compact-hook.md))
+2. **Compact hook system** — Installs the self-growing token saver: command rewriter, output filters, and auto-growing observer ([details](../compact-hook.md))
 3. **Obsidian vault** — Configures and saves your vault path for wiki integration
 4. **Claude Mem** — Verifies the Claude Mem plugin is installed (guides to marketplace if not)
 5. **Eagle agents** — Verifies all 14 eagle-skills agents are installed
