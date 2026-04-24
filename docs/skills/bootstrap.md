@@ -31,6 +31,10 @@ eagle-bootstrap complete:
   Eagle agents: 14/14 installed | n/14 — run eagle-skills install
 ```
 
+## Next step
+
+After bootstrapping your global environment, run `/eagle-claude-md` inside any project to generate a project-specific CLAUDE.md. This sets up Claude Code to understand that project's stack, commands, and conventions — without duplicating global rules.
+
 ## Idempotent
 
 Every step checks its own state before acting. Running twice produces the same result as running once.

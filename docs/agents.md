@@ -77,38 +77,89 @@ Each applies domain-specific lenses and works iteratively until the code passes.
 
 Single-pass 3-lens review covering security + ops/reliability + maintainability. The broadest reviewer — use when you want comprehensive coverage without running multiple specialists.
 
+```
+You: Run the triad review
+You: Review this project for robustness
+You: Review src/auth/ and src/api/ for security issues
+```
+
 ### eagle-security-audit
 
 Deep vulnerability hunting: injection vectors, auth flaws, data exposure, supply chain risks. Fixes issues autonomously and re-audits until clean.
+
+```
+You: Audit this project for security vulnerabilities
+You: Check the auth module for vulnerabilities
+```
 
 ### eagle-architecture-review
 
 Structural health: dependency management, separation of concerns, scalability patterns, coupling, cohesion, design pattern usage. Flags architectural debt.
 
+```
+You: Review the architecture of this project
+You: Is this codebase well structured for scaling?
+```
+
 ### eagle-performance-review
 
 Bottleneck and resource analysis: memory leaks, inefficient algorithms, unnecessary re-renders, N+1 queries, bundle bloat, resource waste.
+
+```
+You: This app feels slow, can you review it?
+You: Review the database queries for performance
+```
 
 ### eagle-code-quality
 
 Readability, dead code, duplication, convention violations, missing error handling, test gaps. Cleans up the codebase autonomously.
 
+```
+You: Clean up this codebase
+You: Review this PR for code quality
+```
+
 ### eagle-ux-code-review
 
 Frontend code UX patterns: loading states, error handling UX, accessibility basics, responsive design, form validation, empty states, interaction patterns.
+
+```
+You: Review the UX of this app
+You: The forms feel broken, review them
+```
 
 ### eagle-accessibility-review
 
 WCAG 2.1 AA compliance: semantic HTML, ARIA usage, keyboard navigation, color contrast, screen reader support, focus management, form accessibility.
 
+```
+You: Check this app for accessibility
+You: Make sure the forms are accessible
+```
+
 ### eagle-api-review
 
 API design and implementation: endpoint consistency, request/response contracts, error handling, versioning, pagination, rate limiting, REST/GraphQL best practices.
+
+```
+You: Review our API endpoints
+You: Are our APIs consistent?
+```
 
 ### eagle-data-integrity
 
 Data integrity: race conditions, partial writes, missing transactions, schema mismatches, migration gaps, validation holes, data loss vectors.
 
+```
+You: Review the database layer for data integrity
+You: We've been seeing data inconsistencies
+```
+
 ### eagle-database-review
 
 Database schema design, SQL queries, migrations, indexes, and ORM usage for correctness, performance, and safety.
+
+```
+You: Review our database schema and queries
+You: Our queries are slow and we're not sure our schema is right
+```

@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Eagle Skills</title>
+    <meta
+      name="description"
+      content="Skills and agents for Claude Code — anti-slop detection, self-learning token saver, and 14 review agents."
+    />
+    <style>
+      :root {
+        color-scheme: dark light;
+        --ink: #e0e0e0;
+        --muted: #888;
+        --paper: #0a0a0a;
+        --surface: #111;
+        --card: #161616;
+        --accent: #fff;
+        --accent-dim: rgba(255, 255, 255, 0.06);
+        --line: rgba(255, 255, 255, 0.1);
+        --mono: "JetBrains Mono", "SF Mono", "Fira Code", "Cascadia Code", "Consolas", monospace;
+      }
+
+      @media (prefers-color-scheme: light) {
+        :root {
+          --ink: #1a1a1a;
+          --muted: #666;
+          --paper: #fff;
+          --surface: #f5f5f5;
+          --card: #fafafa;
+          --accent: #000;
+          --accent-dim: rgba(0, 0, 0, 0.04);
+          --line: rgba(0, 0, 0, 0.1);
+        }
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        background: var(--paper);
+        font-family: var(--mono);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      main {
+        width: min(1100px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 48px 0 60px;
+      }
+
+      /* ── Hero: full-width banner ── */
+
+      .hero {
+        text-align: center;
+        padding: 60px 0 70px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .ascii-banner {
+        display: inline-block;
+        margin: 0 auto 32px;
+        font-family: var(--mono);
+        font-size: clamp(6.5px, 1.25vw, 13px);
+        font-weight: 700;
+        line-height: 1.15;
+        white-space: pre;
+        color: var(--accent);
+        text-align: left;
+      }
+
+      .hero .tagline {
+        margin: 0 auto;
+        max-width: 600px;
+        color: var(--muted);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: clamp(17px, 1.9vw, 21px);
+        line-height: 1.6;
+      }
+
+      .install-block {
+        display: inline-block;
+        margin-top: 28px;
+        padding: 14px 28px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        font-size: 16px;
+        letter-spacing: 0.3px;
+      }
+
+      .install-block .prefix {
+        color: var(--muted);
+        user-select: none;
+      }
+
+      .actions {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      a { color: inherit; }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 0 16px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        text-decoration: none;
+        font-family: var(--mono);
+        font-size: 14px;
+        font-weight: 600;
+        background: var(--card);
+        transition: border-color 0.15s;
+      }
+
+      .button:hover { border-color: var(--accent); }
+
+      .button.primary {
+        color: var(--paper);
+        background: var(--accent);
+        border-color: transparent;
+      }
+
+      /* ── Highlights row ── */
+
+      .highlights {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1px;
+        margin-top: 48px;
+        background: var(--line);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .highlight {
+        padding: 28px 24px;
+        background: var(--card);
+      }
+
+      .highlight h3 {
+        margin: 0 0 8px;
+        font-size: 14px;
+        color: var(--accent);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .highlight .num {
+        display: block;
+        font-size: 36px;
+        font-weight: 800;
+        color: var(--accent);
+        line-height: 1;
+        margin-bottom: 8px;
+      }
+
+      .highlight p {
+        margin: 0;
+        color: var(--muted);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      /* ── Feature details ── */
+
+      section.details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        padding: 48px 0 0;
+      }
+
+      .feature {
+        padding: 32px 28px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+      }
+
+      .feature h3 {
+        margin: 0 0 10px;
+        font-size: 16px;
+        color: var(--accent);
+      }
+
+      .feature p {
+        margin: 0;
+        color: var(--muted);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 15px;
+        line-height: 1.55;
+      }
+
+      .feature ul {
+        margin: 10px 0 0;
+        padding: 0 0 0 18px;
+        color: var(--muted);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 14px;
+        line-height: 1.65;
+      }
+
+      .feature code {
+        font-family: var(--mono);
+        font-size: 13px;
+        padding: 1px 5px;
+        background: var(--accent-dim);
+        border-radius: 3px;
+        color: var(--ink);
+        border: 1px solid var(--line);
+      }
+
+      /* ── Footer ── */
+
+      footer {
+        margin-top: 56px;
+        padding-top: 24px;
+        border-top: 1px solid var(--line);
+        text-align: center;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      footer a { text-decoration: underline; }
+
+      /* ── Responsive ── */
+
+      @media (max-width: 900px) {
+        .ascii-banner {
+          font-size: clamp(5px, 2.8vw, 10px);
+        }
+
+        .highlights {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        section.details {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 500px) {
+        .highlights {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="hero">
+<pre class="ascii-banner" role="img" aria-label="Eagle Skills">
+███████╗░█████╗░░██████╗░██╗░░░░░███████╗  ░██████╗██╗░░██╗██╗██╗░░░░░██╗░░░░░░██████╗
+██╔════╝██╔══██╗██╔════╝░██║░░░░░██╔════╝  ██╔════╝██║░██╔╝██║██║░░░░░██║░░░░░██╔════╝
+█████╗░░███████║██║░░██╗░██║░░░░░█████╗░░  ╚█████╗░█████═╝░██║██║░░░░░██║░░░░░╚█████╗░
+██╔══╝░░██╔══██║██║░░╚██╗██║░░░░░██╔══╝░░  ░╚═══██╗██╔═██╗░██║██║░░░░░██║░░░░░░╚═══██╗
+███████╗██║░░██║╚██████╔╝███████╗███████╗  ██████╔╝██║░╚██╗██║███████╗███████╗██████╔╝
+╚══════╝╚═╝░░╚═╝░╚═════╝░╚══════╝╚══════╝  ╚═════╝░╚═╝░░╚═╝╚═╝╚══════╝╚══════╝╚═════╝</pre>
+        <p class="tagline">
+          An open-source toolkit that extends
+          <a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code</a>
+          with skills and review agents. Catch AI slop, save tokens
+          automatically, and ship cleaner code.
+        </p>
+        <div class="install-block">
+          <span class="prefix">$ </span>npx eagle-skills
+        </div>
+        <div class="actions">
+          <a class="button primary" href="https://github.com/eagleisbatman/eagle-skills">GitHub</a>
+          <a class="button" href="https://www.npmjs.com/package/eagle-skills">npm</a>
+        </div>
+      </header>
+
+      <div class="highlights">
+        <div class="highlight">
+          <h3>Skills</h3>
+          <span class="num">11</span>
+          <p>Domain expertise via slash commands</p>
+        </div>
+        <div class="highlight">
+          <h3>Agents</h3>
+          <span class="num">14</span>
+          <p>Autonomous code review specialists</p>
+        </div>
+        <div class="highlight">
+          <h3>Rules</h3>
+          <span class="num">32</span>
+          <p>Token-saving compact rules, auto-growing</p>
+        </div>
+        <div class="highlight">
+          <h3>Filters</h3>
+          <span class="num">9</span>
+          <p>Output compression for test/build/logs</p>
+        </div>
+      </div>
+
+      <section class="details">
+        <div class="feature">
+          <h3>// anti-slop</h3>
+          <p>
+            Slop is the gap between what a senior engineer writes at 2 AM and
+            what an LLM produces. It compiles, it passes tests, but it's
+            unnecessary weight.
+          </p>
+          <ul>
+            <li><strong>Code smells</strong> — wrapper types, single-case enums, defensive guards, docstrings on 3-line helpers</li>
+            <li><strong>Text smells</strong> — "delve into", "leverage", meta-commentary, hedge language</li>
+            <li><strong>Design smells</strong> — AI startup gradients, glassmorphism, "Empower your business" headlines</li>
+          </ul>
+        </div>
+        <div class="feature">
+          <h3>// token-saver</h3>
+          <p>
+            Claude Code burns tokens on verbose output. This hook system
+            compresses it automatically — and learns your workflow over time.
+          </p>
+          <ul>
+            <li><strong>Flag rules</strong> — <code>git log</code> becomes <code>git log --oneline -20</code></li>
+            <li><strong>Pipe rules</strong> — test output compressed to failures + summary</li>
+            <li><strong>Auto-observer</strong> — logs verbose commands, promotes them to rules</li>
+            <li><strong>Fail-safe</strong> — errors exit silently, sessions never break</li>
+          </ul>
+        </div>
+        <div class="feature">
+          <h3>// spectral-agents</h3>
+          <p>
+            14 review agents that analyze your code through specialized lenses.
+            Run one at a time or dispatch the full suite.
+          </p>
+          <ul>
+            <li>Security audit, architecture, performance</li>
+            <li>Code quality, accessibility (WCAG 2.1 AA)</li>
+            <li>API design, database review, data integrity</li>
+            <li>UX review, triad review (3-lens single pass)</li>
+            <li>Planner, debugger, pre-ship pipeline</li>
+          </ul>
+        </div>
+        <div class="feature">
+          <h3>// more-skills</h3>
+          <p>
+            Every skill installs as a symlink — lightweight, always up to date.
+          </p>
+          <ul>
+            <li><strong>UX Review</strong> — structured user experience audit</li>
+            <li><strong>Ad Review</strong> — ad copy and creative analysis</li>
+            <li><strong>Product Diagnostics</strong> — validate product decisions</li>
+            <li><strong>Multi-Stack Scaffolder</strong> — research-driven project setup</li>
+            <li><strong>CLAUDE.md Generator</strong> — project onboarding files</li>
+            <li><strong>Bootstrap</strong> — one-time global environment setup</li>
+          </ul>
+        </div>
+      </section>
+
+      <footer>
+        Built by <a href="https://github.com/eagleisbatman">eagleisbatman</a>
+      </footer>
+    </main>
+  </body>
+</html>
