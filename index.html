@@ -62,7 +62,7 @@
         display: inline-block;
         margin: 0 auto 32px;
         font-family: var(--mono);
-        font-size: clamp(6.5px, 1.25vw, 13px);
+        font-size: clamp(5px, 1vw, 10px);
         font-weight: 700;
         line-height: 1.15;
         white-space: pre;
@@ -265,8 +265,11 @@
           automatically, and ship cleaner code.
         </p>
         <div class="install-block">
-          <span class="prefix">$ </span>npx eagle-skills
+          <span class="prefix">$ </span>npm install -g eagle-skills
         </div>
+        <p style="margin-top: 10px; color: var(--muted); font-size: 13px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+          or run directly: <code style="font-family: var(--mono); font-size: 12px; padding: 2px 6px; background: var(--accent-dim); border-radius: 3px; border: 1px solid var(--line);">npx eagle-skills install</code>
+        </p>
         <div class="actions">
           <a class="button primary" href="https://github.com/eagleisbatman/eagle-skills">GitHub</a>
           <a class="button" href="https://www.npmjs.com/package/eagle-skills">npm</a>
@@ -314,12 +317,12 @@
           <h3>// token-saver</h3>
           <p>
             Claude Code burns tokens on verbose output. This hook system
-            compresses it automatically — and learns your workflow over time.
+            compresses it automatically with 32 regex rules.
           </p>
           <ul>
             <li><strong>Flag rules</strong> — <code>git log</code> becomes <code>git log --oneline -20</code></li>
             <li><strong>Pipe rules</strong> — test output compressed to failures + summary</li>
-            <li><strong>Auto-observer</strong> — logs verbose commands, promotes them to rules</li>
+            <li><strong>10 filters</strong> — pytest, cargo, Go, lint, tsc, Docker, k8s, generic</li>
             <li><strong>Fail-safe</strong> — errors exit silently, sessions never break</li>
           </ul>
         </div>
@@ -331,9 +334,8 @@
           </p>
           <ul>
             <li>Security audit, architecture, performance</li>
-            <li>Code quality, accessibility (WCAG 2.1 AA)</li>
+            <li>Code quality, UX review, accessibility (WCAG 2.1 AA)</li>
             <li>API design, database review, data integrity</li>
-            <li>UX review, triad review (3-lens single pass)</li>
             <li>Planner, debugger, pre-ship pipeline</li>
           </ul>
         </div>
