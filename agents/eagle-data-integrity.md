@@ -3,7 +3,7 @@ name: eagle-data-integrity
 description: |
   Reviews code for data integrity issues: race conditions, partial writes, missing transactions, schema mismatches, migration gaps, validation holes, and data loss vectors. Ensures data is never silently corrupted or lost.
 
-  For a comprehensive cross-domain review, use eagle-triad-review instead. To run all specialists, use eagle-spectral-suite.
+  For a comprehensive review, ask Claude to run multiple specialists in parallel.
 
   <example>
   user: "Review the database layer for data integrity"

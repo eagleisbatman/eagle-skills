@@ -3,7 +3,7 @@ name: eagle-architecture-review
 description: |
   Reviews codebase architecture for structural health: dependency management, separation of concerns, scalability patterns, coupling, cohesion, and design pattern usage. Flags architectural debt and fixes what can be fixed without major rewrites.
 
-  For a comprehensive cross-domain review, use eagle-triad-review instead. To run all specialists, use eagle-spectral-suite.
+  For a comprehensive review, ask Claude to run multiple specialists in parallel.
 
   <example>
   user: "Review the architecture of this project"

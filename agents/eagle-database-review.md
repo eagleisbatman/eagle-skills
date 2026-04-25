@@ -3,7 +3,7 @@ name: eagle-database-review
 description: |
   Reviews database schema design, SQL queries, migrations, indexes, and ORM usage for correctness, performance, and safety. Finds slow queries, missing indexes, unsafe migrations, and schema design issues.
 
-  For a comprehensive cross-domain review, use eagle-triad-review instead. To run all specialists, use eagle-spectral-suite.
+  For a comprehensive review, ask Claude to run multiple specialists in parallel.
 
   <example>
   user: "Review our database schema and queries"

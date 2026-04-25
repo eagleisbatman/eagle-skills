@@ -3,7 +3,7 @@ name: eagle-code-quality
 description: |
   Reviews code for quality, readability, and maintainability. Catches dead code, naming issues, duplication, convention violations, missing error handling, and test gaps. Cleans up the codebase autonomously.
 
-  For a comprehensive cross-domain review, use eagle-triad-review instead. To run all specialists, use eagle-spectral-suite.
+  For a comprehensive review, ask Claude to run multiple specialists in parallel.
 
   <example>
   user: "Clean up this codebase"

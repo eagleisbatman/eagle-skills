@@ -3,7 +3,7 @@ name: eagle-accessibility-review
 description: |
   Reviews frontend code for accessibility (a11y) compliance. Checks WCAG 2.1 AA conformance: semantic HTML, ARIA usage, keyboard navigation, color contrast, screen reader support, focus management, and form accessibility. Fixes issues in code.
 
-  For a comprehensive cross-domain review, use eagle-triad-review instead. To run all specialists, use eagle-spectral-suite.
+  For a comprehensive review, ask Claude to run multiple specialists in parallel.
 
   <example>
   user: "Check this app for accessibility"

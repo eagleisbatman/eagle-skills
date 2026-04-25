@@ -18,7 +18,7 @@ Also triggers on: "feature flow", "build this feature", "implement this", "dev w
 | 2 | **Tasks** — break into tasks with acceptance criteria | All tasks created |
 | 3 | **Build** — implement each task in order | All ACs met |
 | 4 | **Test** — run full test suite | All tests pass |
-| 5 | **Spectral Review** — eagle-triad-review on changed files | HIGH/CRITICAL fixed |
+| 5 | **Spectral Review** — relevant review specialists on changed files | HIGH/CRITICAL fixed |
 | 6 | **Fix** — apply review findings, re-test | Tests pass again |
 | 7 | **Anti-Slop** — eagle-anti-slop on new/modified code | Slop stripped |
 | 8 | **Final Test** — full suite one more time | All tests pass |
@@ -40,7 +40,7 @@ Plan → Tasks → Build → Test ──→ Spectral Review → Fix ─┐
 
 ## What it orchestrates
 
-- **eagle-triad-review** — Phase 5 security/ops/maintainability review
+- **eagle-security-audit**, **eagle-code-quality**, etc. — Phase 5 review specialists (picked by stack)
 - **eagle-anti-slop** — Phase 7 AI pattern cleanup
 - **TaskCreate/TaskUpdate** — Phase 2-3 task tracking
 

@@ -2,7 +2,7 @@
 name: eagle-claude-md
 description: >
   Full project onboarding: generates a lean CLAUDE.md, bootstraps LLM Wiki, links Obsidian vault,
-  and installs eagle-skills (9 skills + 14 agents). Use when starting a new project, onboarding to
+  and installs eagle-skills (11 skills + 12 agents). Use when starting a new project, onboarding to
   a codebase, or when the user says: 'init claude', 'setup claude md', 'create claude.md',
   'project init', 'eagle init', 'bootstrap this project', 'set up this repo for claude',
   'add claude.md', 'onboard this project', 'install eagle skills'. Also trigger when you detect
@@ -192,7 +192,7 @@ The output should feel like something a senior engineer writes in 5 minutes when
 - Skills: `ls ~/.claude/skills/eagle-*/SKILL.md 2>/dev/null | wc -l`
 - Agents: `ls ~/.claude/agents/eagle-*.md 2>/dev/null | wc -l`
 
-Expected: 9 skills, 14 agents.
+Expected: 11 skills, 12 agents.
 
 **If missing or incomplete:**
 
@@ -229,7 +229,7 @@ Expected: 9 skills, 14 agents.
    done
    ```
 
-6. Verify counts match expected (9 skills, 14 agents).
+6. Verify counts match expected (11 skills, 12 agents).
 
 **If already fully installed:** Skip and report counts.
 
@@ -242,7 +242,7 @@ eagle-claude-md complete:
   CLAUDE.md:     <created | updated | already up to date>
   LLM Wiki:      <created | already exists>
   Obsidian:      <linked to <vault>/projects/<name> | skipped (no vault) | already linked>
-  Eagle Skills:  <9/9 skills, 14/14 agents | installed | already installed>
+  Eagle Skills:  <11/11 skills, 12/12 agents | installed | already installed>
 ```
 
 ## Idempotency
@@ -253,6 +253,6 @@ This skill is safe to run multiple times. Each step checks its own state before 
 - Symlink exists and points correctly → skip linking
 - CLAUDE.md section exists → skip that section
 - Vault path saved → skip prompting
-- Eagle-skills fully installed (9 skills + 14 agents) → skip installation
+- Eagle-skills fully installed (11 skills + 12 agents) → skip installation
 
 Re-running after project changes should only add new sections to CLAUDE.md if the project has evolved.

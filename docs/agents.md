@@ -1,35 +1,21 @@
 # Agents
 
-14 autonomous agents for code review, debugging, planning, and shipping. Each agent applies a 3-lens analytical framework and works iteratively — auditing, fixing, and re-auditing until the code passes.
+12 autonomous agents for code review, debugging, planning, and shipping. Each agent works iteratively — auditing, fixing, and re-auditing until the code passes.
 
 ## How agents work
 
 Unlike skills (which follow structured workflows with user input), agents are autonomous. Tell Claude what you need and the right agent runs, audits your code, fixes issues, and re-audits in cycles.
 
-Agents are dispatched by Claude's Agent tool. You can ask for one by name ("run eagle-security-audit") or describe what you need and the orchestrator picks the right specialist.
+Agents are dispatched by Claude's Agent tool. Ask for one by name ("run eagle-security-audit") or describe what you need — Claude picks the right specialist.
 
 ## Skills vs Agents
 
 | | Skills | Agents |
 |---|---|---|
-| **Invocation** | Slash commands (`/eagle-ux-review`) | Agent tool dispatch ("run eagle-triad-review") |
+| **Invocation** | Slash commands (`/eagle-ux-review`) | Agent tool dispatch ("run eagle-security-audit") |
 | **Install location** | `~/.claude/skills/<name>/SKILL.md` | `~/.claude/agents/<name>.md` |
 | **Behavior** | Structured workflows with user input | Autonomous audit-fix-reaudit cycles |
 | **Best for** | Domain expertise, structured deliverables | Code review, debugging, shipping |
-
----
-
-## Orchestrator
-
-### eagle-spectral-suite
-
-Detects your intent and tech stack, then dispatches the right specialist agents. Ask it to "review everything" and it figures out which agents to run.
-
-```
-You: Run a spectral review
-You: Review everything
-You: Run all the review agents
-```
 
 ---
 
@@ -71,17 +57,7 @@ You: Create a PR for this work
 
 ## Review specialists
 
-Each applies domain-specific lenses and works iteratively until the code passes.
-
-### eagle-triad-review
-
-Single-pass 3-lens review covering security + ops/reliability + maintainability. The broadest reviewer — use when you want comprehensive coverage without running multiple specialists.
-
-```
-You: Run the triad review
-You: Review this project for robustness
-You: Review src/auth/ and src/api/ for security issues
-```
+Each applies domain-specific expertise and works iteratively until the code passes.
 
 ### eagle-security-audit
 

@@ -1,7 +1,7 @@
 {
   "name": "eagle-skills",
-  "version": "2.4.0",
-  "description": "Skills and agents for Claude Code — 11 skills + 15 agents",
+  "version": "3.0.0",
+  "description": "Skills and agents for Claude Code — 11 skills + 12 agents",
   "bin": {
     "eagle-skills": "bin/eagle-skills"
   },

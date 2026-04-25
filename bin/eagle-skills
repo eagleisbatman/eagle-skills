@@ -6,7 +6,7 @@ set -euo pipefail
 # https://github.com/eagleisbatman/eagle-skills
 # ─────────────────────────────────────────────────────────────
 
-VERSION="2.4.0"
+VERSION="3.0.0"
 REPO_URL="https://github.com/eagleisbatman/eagle-skills.git"
 INSTALL_DIR="${EAGLE_SKILLS_DIR:-$HOME/.eagle-skills}"
 SKILLS_DIR="$HOME/.claude/skills"
@@ -26,7 +26,7 @@ declare -a SKILL_DESCS=(
   "Full project onboarding — lean CLAUDE.md, LLM Wiki, Obsidian vault, eagle-skills install"
   "One-time global environment setup — behavioral rules, hooks, vault, plugin checks"
   "Structured dev workflow — plan, build, test, spectral review, anti-slop, commit"
-  "Review observer candidates and promote into compact-rules.json"
+  "Add new rules to compact-rules.json for verbose commands"
 )
 declare -a SKILL_COMMANDS=("/eagle-ux-review" "/eagle-product-diagnostics" "/eagle-ad-review" "/eagle-anti-slop" "/eagle-clean-doc" "/eagle-clean-sheet" "/eagle-multi-stack-scaffolder" "/eagle-claude-md" "/eagle-bootstrap" "/eagle-feature-flow" "/eagle-compact-add")
 declare -a SKILL_TRIGGERS=(
@@ -40,7 +40,7 @@ declare -a SKILL_TRIGGERS=(
   "init claude, setup claude md, create claude.md, project init, eagle init, onboard this project, add claude.md"
   "eagle bootstrap, setup my environment, first time setup, configure claude globally, install eagle environment"
   "feature flow, build this feature, implement this, dev workflow, eagle flow, start feature, build and ship, full dev cycle, plan and build"
-  "compact-add, review compact candidates, add compact rules, grow compact database, show compact candidates, promote candidates"
+  "compact-add, add compact rules, this command is too verbose, compact this command"
 )
 declare -a SKILL_INPUTS=(
   "North star metric|Target user profile (demographics, tech literacy, device/connectivity)|2-3 reference apps the target user opens daily|App identity (chat, marketplace, tool, social, etc.)|Output format: HTML, Word, or both|Screen recording (video) or a folder of screenshots|Optional: PRD or hypothesis document|Optional: User personas, analytics data, competitive screenshots"
@@ -53,7 +53,7 @@ declare -a SKILL_INPUTS=(
   "A project directory (runs in current directory by default)|Optional: Obsidian vault path (auto-detected if configured)"
   "No inputs required (auto-detects what's already configured)"
   "Feature description (what to build and why)|Project must have a test suite or instructions to create one"
-  "No inputs required (reads ~/.claude/hooks/compact-candidates.json automatically)"
+  "Command to compact, or describe which commands are too verbose"
 )
 declare -a SKILL_OUTPUTS=(
   "HTML and/or Word report with severity-rated findings, embedded evidence, before/after mockups, priority matrix, UX law citations"
@@ -66,7 +66,7 @@ declare -a SKILL_OUTPUTS=(
   "Lean CLAUDE.md, raw/ and wiki/ directories, Obsidian vault symlink"
   "Enriched global CLAUDE.md, compact.sh hook, Obsidian vault config, plugin/agent verification report"
   "Committed, tested, reviewed code with clean git history"
-  "New rules appended to compact-rules.json, processed candidates cleared"
+  "New rules appended to compact-rules.json"
 )
 declare -a SKILL_EXAMPLES=(
   "UX review this app — here's a screen recording of the onboarding flow"
@@ -79,16 +79,14 @@ declare -a SKILL_EXAMPLES=(
   "Set up this project for Claude — create a CLAUDE.md and wiki structure"
   "Run eagle bootstrap to set up my global Claude environment"
   "Build a rate-limiting middleware for the auth routes"
-  "Review compact candidates and add rules for frequent verbose commands"
+  "That terraform plan output was way too long, compact it"
 )
 
 # ─── Available agents (filename without .md → display) ──────
 declare -a AGENT_FILES=(
-  "eagle-spectral-suite"
   "eagle-spectral-plan"
   "eagle-spectral-investigate"
   "eagle-spectral-ship"
-  "eagle-triad-review"
   "eagle-security-audit"
   "eagle-architecture-review"
   "eagle-performance-review"
@@ -98,14 +96,11 @@ declare -a AGENT_FILES=(
   "eagle-api-review"
   "eagle-data-integrity"
   "eagle-database-review"
-  "eagle-compact-promoter"
 )
 declare -a AGENT_NAMES=(
-  "Eagle Spectral Suite"
   "Eagle Spectral Plan"
   "Eagle Spectral Investigate"
   "Eagle Spectral Ship"
-  "Eagle Triad Review"
   "Eagle Security Audit"
   "Eagle Architecture Review"
   "Eagle Performance Review"
@@ -115,14 +110,11 @@ declare -a AGENT_NAMES=(
   "Eagle API Review"
   "Eagle Data Integrity"
   "Eagle Database Review"
-  "Eagle Compact Promoter"
 )
 declare -a AGENT_DESCS=(
-  "Orchestrates review agents — detects intent and tech stack, dispatches specialists"
   "Planning and architecture design — scopes features, evaluates approaches"
   "Root-cause debugging — traces code paths, tests hypotheses, applies fixes"
   "Pre-ship pipeline and PR creation — runs gates, cleans diff, creates PR"
-  "Single-pass 3-lens review: security + ops/reliability + maintainability"
   "Deep vulnerability hunting — injection, auth flaws, data exposure, supply chain"
   "Structural health — dependency management, coupling, cohesion, design patterns"
   "Bottleneck and resource usage analysis — memory leaks, N+1 queries, bundle bloat"
@@ -132,10 +124,8 @@ declare -a AGENT_DESCS=(
   "API design consistency — endpoints, contracts, error handling, versioning, pagination"
   "Data corruption and loss vectors — race conditions, partial writes, missing transactions"
   "Schema design, query performance, migrations, indexes, ORM usage"
-  "Auto-promotes compact-observer candidates into compact-rules.json at session start"
 )
 declare -a AGENT_CATEGORIES=(
-  "orchestrator"
   "lifecycle"
   "lifecycle"
   "lifecycle"
@@ -148,8 +138,6 @@ declare -a AGENT_CATEGORIES=(
   "review"
   "review"
   "review"
-  "review"
-  "infra"
 )
 
 # ─── Colors ──────────────────────────────────────────────────
@@ -235,7 +223,6 @@ select_items() {
     local category="${AGENT_CATEGORIES[$i]}"
     local tag=""
     case "$category" in
-      orchestrator) tag="${MAGENTA}orchestrator${RESET}" ;;
       lifecycle)    tag="${BLUE}lifecycle${RESET}" ;;
       review)       tag="${GREEN}review${RESET}" ;;
     esac
@@ -735,7 +722,7 @@ cmd_usage() {
   echo -e "  ${BOLD}Tips:${RESET}"
   echo -e "    ${DIM}-${RESET} Skills activate when Claude detects matching intent, or invoke with slash commands"
   echo -e "    ${DIM}-${RESET} Agents are dispatched by Claude's Agent tool — ask Claude to run one by name"
-  echo -e "    ${DIM}-${RESET} Use ${RESET}eagle-spectral-suite${DIM} to auto-detect which review agents to run"
+  echo -e "    ${DIM}-${RESET} Ask Claude to run specific review agents by name, or describe what you need"
   echo ""
 }
 

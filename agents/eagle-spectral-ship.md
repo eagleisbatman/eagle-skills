@@ -3,7 +3,7 @@ name: eagle-spectral-ship
 description: |
   Pre-ship pipeline and PR creation agent. Runs build/test/lint gates, reviews the diff through 3 lenses (Quality Gate / Diff Integrity / Release Hygiene), cleans up debug artifacts, and generates a PR with a structured body.
 
-  Run eagle-spectral-suite or eagle-triad-review before shipping to catch deeper issues.
+  Run the relevant review specialists before shipping to catch deeper issues.
 
   <example>
   user: "Ship this"

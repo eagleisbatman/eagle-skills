@@ -1,45 +1,28 @@
 ---
 name: eagle-compact-add
 description: >
-  Review and promote compact-observer candidates into compact-rules.json.
-  Use when the user says: 'review compact candidates', 'add compact rules',
-  'grow compact database', 'check compact observer', 'what commands need compacting',
-  'compact-add', 'show compact candidates', 'promote candidates'.
+  Review and add new rules to compact-rules.json for the token-saving hook.
+  Use when the user says: 'add compact rules', 'compact-add', 'add a compact rule',
+  'this command is too verbose', 'compact this command', 'grow compact database'.
 ---
 
 # Eagle Compact Add
 
-Review commands flagged by the compact-observer and promote worthy ones into compact-rules.json.
+Add new rules to compact-rules.json to make the token-saving hook cover more commands.
 
 ## How it works
 
-The `compact-observer.sh` PostToolUse hook silently watches every Bash command Claude Code runs. When a command produces verbose output (30+ lines) and isn't already covered by a rule, the observer logs it to `~/.claude/hooks/compact-candidates.json` with deduplication.
-
-This skill reviews those candidates and proposes new rules.
+The compact hook (`compact.sh`) rewrites verbose Bash commands before execution using regex rules. This skill helps you design and validate new rules for commands you find too verbose.
 
 ## Workflow
 
-### 1. Read candidates
+### 1. Identify the command
 
-Read `~/.claude/hooks/compact-candidates.json`. If empty or missing, report:
-> No candidates yet — the observer hasn't flagged any uncovered verbose commands.
+Ask the user which command they want to compact, or accept it as input. The user may say something like "this command is too verbose" after running a Bash command, or provide a specific command pattern.
 
-### 2. Show candidates
+### 2. Design the rule
 
-Display candidates sorted by count (most frequent first). Each candidate has a `samples` array (up to 5 structurally different commands observed under that key). Show all variants:
-
-| Key | Count | Last Seen |
-|-----|-------|-----------|
-
-Under each key, list its samples:
-```
-  1. <cmd> (42 lines)
-  2. <cmd> (87 lines)
-```
-
-### 3. Analyze samples and propose rules for candidates with count >= 2
-
-For each qualifying candidate, study the samples array to decide:
+Analyze the command to decide:
 
 **Pattern specificity** — If all samples share a common structure (e.g., all start with `psql -c`), write a specific pattern. If samples are wildly different (e.g., `node build.js` vs `node server.js`), the key is too coarse for a single rule — skip it or propose multiple rules for distinct subgroups.
 
@@ -55,27 +38,26 @@ For each qualifying candidate, study the samples array to decide:
 
 **Pipe rule** — when the output needs filtering (test results, build logs, lint output). Only works for simple (non-compound) commands. Choose the appropriate filter from compact-filter.sh or use `generic` if no specific filter fits.
 
-Available filters: `pytest`, `test`, `cargo_test`, `go_test`, `lint`, `tsc`, `cargo_build`, `docker_logs`, `k8s_logs`, `generic`
+Available filters: `pytest`, `test`, `cargo-test`, `go-test`, `lint`, `tsc`, `cargo-build`, `docker-logs`, `k8s-logs`, `generic`
 
 ```json
 {"pattern": "^pytest\\b", "type": "pipe", "filter": "pytest"}
 ```
 
-### 4. Validate each proposed rule
+### 3. Validate the rule
 
-For every proposed pattern, test it against every non-compound entry in the candidate's `samples[].cmd`:
+For the proposed pattern, test it against the target command:
 ```bash
 echo '' | jq --arg cmd "<sample_cmd>" 'if ($cmd | test("<pattern>")) then "MATCH" else "NO MATCH" end'
 ```
-All non-compound samples must match. Compound samples should NOT match (if they do, the pattern lacks proper anchoring).
 
 Also test against 2-3 unrelated commands (e.g., `ls`, `echo hello`, `cat file.txt`) to verify no false positives.
 
-### 5. Confirm with user
+### 4. Confirm with user
 
-Show all proposed rules in a summary table before writing anything. Wait for user confirmation.
+Show the proposed rule before writing anything. Wait for user confirmation.
 
-### 6. Append rules
+### 5. Append rules
 
 Use jq to append confirmed rules to `~/.claude/hooks/compact-rules.json`:
 ```bash
@@ -88,27 +70,13 @@ Verify the file is valid JSON after writing:
 jq empty ~/.claude/hooks/compact-rules.json
 ```
 
-### 7. Clean up processed candidates
-
-Remove promoted candidates (count >= 2 that were converted to rules) from compact-candidates.json. Keep candidates with count < 2 — they need more observations before promotion.
-
-### 8. Sync repo copy
+### 6. Sync repo copy
 
 If the current project is eagle-skills, also update `eagle-bootstrap/references/compact-rules.json` to match the installed version.
 
 ## Guidelines
 
-- Only propose rules for candidates with count >= 2 (one-off commands aren't worth a permanent rule)
 - Prefer flag rules when possible — they're lossless and faster than pipe-through
 - Use `\b` word boundaries in patterns to avoid partial matches
 - Use `^` anchors when the command is always at the start
 - Never propose rules for commands that are inherently variable (e.g., `curl` with different URLs)
-- If a candidate is noise (e.g., a one-time debug command that happened to repeat), skip it and remove from candidates
-
-## Troubleshooting
-
-If the observer stops logging candidates, check for a stale lock directory:
-```bash
-rmdir ~/.claude/hooks/compact-candidates.json.lock 2>/dev/null
-```
-This can happen if the observer process is killed mid-write (rare — only on crash or force-quit).

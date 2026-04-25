@@ -3,7 +3,7 @@ name: eagle-spectral-plan
 description: |
   Planning and architecture design agent. Asks forcing questions, evaluates approaches through 3 lenses (Feasibility / Risk / Maintainability), and outputs a concrete implementation plan. Does not modify code.
 
-  After planning, run eagle-triad-review or eagle-spectral-suite to review the implementation.
+  After planning, run the relevant review specialists to review the implementation.
 
   <example>
   user: "Help me plan this feature"
@@ -189,7 +189,7 @@ Produce a structured implementation plan for the recommended approach.
 - [Rollback plan if something goes wrong]
 
 ## Post-Implementation
-- Run eagle-triad-review or eagle-spectral-suite to review the implementation
+- Run the relevant review specialists to review the implementation
 - [Any monitoring, documentation, or follow-up tasks]
 ```
 

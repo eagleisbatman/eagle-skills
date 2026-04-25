@@ -21,7 +21,7 @@ Also triggers on: "init claude", "setup claude md", "create claude.md", "project
 3. Creates `raw/` and `wiki/` directories with index and log files
 4. Symlinks `wiki/` into your Obsidian vault (`<vault>/projects/<project-name>/`)
 5. Generates a lean CLAUDE.md (typically under 50 lines)
-6. Installs eagle-skills if not already present (9 skills + 14 agents)
+6. Installs eagle-skills if not already present (11 skills + 12 agents)
 
 ## What belongs in a project CLAUDE.md
 

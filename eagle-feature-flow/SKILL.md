@@ -76,10 +76,10 @@ If no test suite exists, write tests for the new code before running them.
 
 ### Phase 5: Spectral Review
 
-Run `eagle-triad-review` on the changed files. This is a 3-lens review covering:
-- Security vulnerabilities
-- Ops/reliability issues
-- Maintainability problems
+Run the relevant review specialists on the changed files. Pick agents based on the stack:
+- Backend → `eagle-security-audit`, `eagle-code-quality`
+- Frontend → `eagle-ux-code-review`, `eagle-accessibility-review`
+- Database → `eagle-database-review`, `eagle-data-integrity`
 
 **Gate:** Address all HIGH and CRITICAL findings. MEDIUM findings are addressed if the fix is straightforward. LOW findings are noted but not blocking.
 

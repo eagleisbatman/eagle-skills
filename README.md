@@ -7,23 +7,11 @@
 ╚══════╝╚═╝░░╚═╝░╚═════╝░╚══════╝╚══════╝  ╚═════╝░╚═╝░░╚═╝╚═╝╚══════╝╚══════╝╚═════╝
 ```
 
-**11 skills + 15 agents for [Claude Code](https://docs.anthropic.com/en/docs/claude-code).** Skills give Claude domain expertise via slash commands. Agents are autonomous reviewers that audit, fix, and re-review your code.
+**11 skills + 12 agents for [Claude Code](https://docs.anthropic.com/en/docs/claude-code).** Skills give Claude domain expertise via slash commands. Agents are autonomous reviewers that audit, fix, and re-review your code.
 
-### Self-growing token saver
+### Token saver
 
-Eagle Skills includes a **compact hook system** that saves context window tokens by rewriting verbose Bash commands. The system learns which commands need rules by silently observing your sessions and autonomously promoting rules:
-
-```
-You work normally
-     ↓
-Observer logs verbose uncovered commands (automatic)
-     ↓
-Claude auto-promotes candidates into rules (background agent, no human needed)
-     ↓
-Rules database grows → more tokens saved
-```
-
-Starts with 32 rules. The database grows autonomously as you use Claude Code — no manual configuration needed. Run `/eagle-compact-add` for manual review. [Full details →](docs/compact-hook.md)
+Eagle Skills includes a **compact hook system** that saves context window tokens by rewriting verbose Bash commands. 32 regex rules intercept commands like `git log`, `docker ps`, and test runners — replacing them with compact equivalents or filtering noisy output. Add your own rules with `/eagle-compact-add`. [Full details →](docs/compact-hook.md)
 
 ## Install
 
@@ -55,19 +43,17 @@ Invoked via slash commands in Claude Code.
 | [CLAUDE.md](docs/skills/claude-md.md) | `/eagle-claude-md` | Lean project CLAUDE.md + LLM Wiki + Obsidian vault integration |
 | [Bootstrap](docs/skills/bootstrap.md) | `/eagle-bootstrap` | One-time global setup: behavioral rules, hooks, vault config |
 | [Feature Flow](docs/skills/feature-flow.md) | `/eagle-feature-flow` | Structured dev workflow: plan, build, test, review, anti-slop, commit |
-| [Compact Add](docs/skills/compact-add.md) | `/eagle-compact-add` | Review observer candidates and promote into compact rules |
+| [Compact Add](docs/skills/compact-add.md) | `/eagle-compact-add` | Review and add new rules to the compact token saver |
 
 ## Agents
 
-Dispatched by Claude's Agent tool. Ask Claude to run one by name, or use `eagle-spectral-suite` to auto-detect which to run.
+Dispatched by Claude's Agent tool. Ask Claude to run one by name, or describe what you need — Claude picks the right specialist.
 
 | Agent | Category | What it does |
 |-------|----------|-------------|
-| [Spectral Suite](docs/agents.md#eagle-spectral-suite) | orchestrator | Auto-detects intent and stack, dispatches the right specialists |
 | [Spectral Plan](docs/agents.md#eagle-spectral-plan) | lifecycle | Scopes features, evaluates approaches, produces implementation plans |
 | [Spectral Investigate](docs/agents.md#eagle-spectral-investigate) | lifecycle | Root-cause debugging — traces code paths, tests hypotheses, fixes |
 | [Spectral Ship](docs/agents.md#eagle-spectral-ship) | lifecycle | Pre-ship pipeline — build/test/lint gates, diff review, PR creation |
-| [Triad Review](docs/agents.md#eagle-triad-review) | review | Single-pass 3-lens: security + ops/reliability + maintainability |
 | [Security Audit](docs/agents.md#eagle-security-audit) | review | Vulnerability hunting — injection, auth, data exposure, supply chain |
 | [Architecture Review](docs/agents.md#eagle-architecture-review) | review | Structural health — dependencies, coupling, cohesion, patterns |
 | [Performance Review](docs/agents.md#eagle-performance-review) | review | Bottleneck analysis — memory leaks, N+1 queries, bundle bloat |
@@ -77,7 +63,6 @@ Dispatched by Claude's Agent tool. Ask Claude to run one by name, or use `eagle-
 | [API Review](docs/agents.md#eagle-api-review) | review | Endpoint consistency, contracts, error handling, versioning |
 | [Data Integrity](docs/agents.md#eagle-data-integrity) | review | Race conditions, partial writes, missing transactions |
 | [Database Review](docs/agents.md#eagle-database-review) | review | Schema design, query performance, migrations, indexes |
-| [Compact Promoter](docs/agents.md#eagle-compact-promoter) | infra | Auto-promotes observed candidates into compact rules |
 
 ## CLI
 
@@ -95,7 +80,7 @@ npx eagle-skills uninstall    # Remove everything
 |-------|------|
 | Installation guide | [docs/installation.md](docs/installation.md) |
 | All agents reference | [docs/agents.md](docs/agents.md) |
-| Compact hook system (self-growing token saver) | [docs/compact-hook.md](docs/compact-hook.md) |
+| Compact hook system (token saver) | [docs/compact-hook.md](docs/compact-hook.md) |
 | The three-skill pipeline | [docs/pipeline.md](docs/pipeline.md) |
 | UX Review methodology | [docs/ux-review-methodology.md](docs/ux-review-methodology.md) |
 | Product Diagnostics methodology | [docs/product-diagnostics-methodology.md](docs/product-diagnostics-methodology.md) |
