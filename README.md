@@ -1,11 +1,4 @@
-```
-███████╗░█████╗░░██████╗░██╗░░░░░███████╗  ░██████╗██╗░░██╗██╗██╗░░░░░██╗░░░░░░██████╗
-██╔════╝██╔══██╗██╔════╝░██║░░░░░██╔════╝  ██╔════╝██║░██╔╝██║██║░░░░░██║░░░░░██╔════╝
-█████╗░░███████║██║░░██╗░██║░░░░░█████╗░░  ╚█████╗░█████═╝░██║██║░░░░░██║░░░░░╚█████╗░
-██╔══╝░░██╔══██║██║░░╚██╗██║░░░░░██╔══╝░░  ░╚═══██╗██╔═██╗░██║██║░░░░░██║░░░░░░╚═══██╗
-███████╗██║░░██║╚██████╔╝███████╗███████╗  ██████╔╝██║░╚██╗██║███████╗███████╗██████╔╝
-╚══════╝╚═╝░░╚═╝░╚═════╝░╚══════╝╚══════╝  ╚═════╝░╚═╝░░╚═╝╚═╝╚══════╝╚══════╝╚═════╝
-```
+# Eagle Skills
 
 **11 skills + 12 agents for [Claude Code](https://docs.anthropic.com/en/docs/claude-code).** Skills give Claude domain expertise via slash commands. Agents are autonomous reviewers that audit, fix, and re-review your code.
 
@@ -16,16 +9,17 @@ Eagle Skills includes a **compact hook system** that saves context window tokens
 ## Install
 
 ```bash
+npm install -g eagle-skills
+eagle-skills install
+```
+
+Or run directly without installing:
+
+```bash
 npx eagle-skills install
 ```
 
-Or without npm:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/eagleisbatman/eagle-skills/main/install.sh | bash
-```
-
-Interactive menu lets you pick what to install. Everything symlinks to `~/.claude/` — updates are instant via `npx eagle-skills update`.
+Interactive menu lets you pick what to install. Everything symlinks to `~/.claude/` — updates are instant via `eagle-skills update`.
 
 ## Skills
 
@@ -67,11 +61,11 @@ Dispatched by Claude's Agent tool. Ask Claude to run one by name, or describe wh
 ## CLI
 
 ```bash
-npx eagle-skills install      # Interactive installer
-npx eagle-skills update       # Pull latest (symlinks update in place)
-npx eagle-skills status       # Show installed items, check for updates
-npx eagle-skills usage        # Show inputs, outputs, and examples
-npx eagle-skills uninstall    # Remove everything
+eagle-skills install      # Interactive installer
+eagle-skills update       # Pull latest (symlinks update in place)
+eagle-skills status       # Show installed items, check for updates
+eagle-skills usage        # Show inputs, outputs, and examples
+eagle-skills uninstall    # Remove everything
 ```
 
 ## Docs
