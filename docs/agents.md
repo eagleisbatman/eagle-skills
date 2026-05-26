@@ -1,21 +1,35 @@
 # Agents
 
-12 autonomous agents for code review, debugging, planning, and shipping. Each agent works iteratively — auditing, fixing, and re-auditing until the code passes.
+13 autonomous agents for code review, debugging, planning, and shipping. Each agent works iteratively — auditing, fixing, and re-auditing until the code passes.
 
 ## How agents work
 
-Unlike skills (which follow structured workflows with user input), agents are autonomous. Tell Claude what you need and the right agent runs, audits your code, fixes issues, and re-audits in cycles.
+Unlike skills (which follow structured workflows with user input), agents are autonomous. Tell Claude Code or Grok Build what you need and the right agent runs, audits your code, fixes issues, and re-audits in cycles.
 
-Agents are dispatched by Claude's Agent tool. Ask for one by name ("run eagle-security-audit") or describe what you need — Claude picks the right specialist.
+Agents are dispatched by the host agent system. Ask for one by name ("run eagle-security-audit") or describe what you need. For broad "Spectral Agents" requests, route through `eagle-spectral-triage`.
 
 ## Skills vs Agents
 
 | | Skills | Agents |
 |---|---|---|
 | **Invocation** | Slash commands (`/eagle-ux-review`) | Agent tool dispatch ("run eagle-security-audit") |
-| **Install location** | `~/.claude/skills/<name>/SKILL.md` | `~/.claude/agents/<name>.md` |
+| **Install location** | Target skill dirs such as `~/.claude/skills` or `~/.codex/skills` | Claude-compatible agent dirs such as `~/.claude/agents/<name>.md` |
 | **Behavior** | Structured workflows with user input | Autonomous audit-fix-reaudit cycles |
 | **Best for** | Domain expertise, structured deliverables | Code review, debugging, shipping |
+
+---
+
+## Routing agent
+
+### eagle-spectral-triage
+
+Routes broad Spectral review requests to the right review specialists. Use this when the user says "Spectral Agents", "Spectral review", "full spectrum review", or asks for a code review without naming a specialist. It prevents generic review prompts from being sent to the lifecycle trio.
+
+```
+You: Use Spectral Agents to review this PR
+You: Run a full spectrum review
+You: Which Eagle review agents should run here?
+```
 
 ---
 

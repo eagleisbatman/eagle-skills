@@ -40,6 +40,7 @@ Plan → Tasks → Build → Test ──→ Spectral Review → Fix ─┐
 
 ## What it orchestrates
 
+- **eagle-spectral-triage** or **eagle-spectral-review** — Phase 5 routing to the right review specialists
 - **eagle-security-audit**, **eagle-code-quality**, etc. — Phase 5 review specialists (picked by stack)
 - **eagle-anti-slop** — Phase 7 AI pattern cleanup
 - **TaskCreate/TaskUpdate** — Phase 2-3 task tracking

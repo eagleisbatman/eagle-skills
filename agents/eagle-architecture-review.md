@@ -3,7 +3,7 @@ name: eagle-architecture-review
 description: |
   Reviews codebase architecture for structural health: dependency management, separation of concerns, scalability patterns, coupling, cohesion, and design pattern usage. Flags architectural debt and fixes what can be fixed without major rewrites.
 
-  For a comprehensive review, ask Claude to run multiple specialists in parallel.
+  Spectral review specialist. For a broad "Spectral Agents" request, route through eagle-spectral-triage so this runs only when architecture risk is relevant.
 
   <example>
   user: "Review the architecture of this project"

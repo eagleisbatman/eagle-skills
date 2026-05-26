@@ -3,7 +3,7 @@ name: eagle-ux-code-review
 description: |
   Reviews frontend code for user experience issues: loading states, error handling UX, accessibility basics, responsive design, form validation, empty states, and interaction patterns. Fixes issues in the code directly.
 
-  For a comprehensive review, ask Claude to run multiple specialists in parallel.
+  Spectral review specialist. For a broad "Spectral Agents" request, route through eagle-spectral-triage so this runs only when frontend UX risk is relevant.
 
   <example>
   user: "Review the UX of this app"

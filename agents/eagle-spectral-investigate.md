@@ -3,6 +3,8 @@ name: eagle-spectral-investigate
 description: |
   Root-cause debugging agent. Collects symptoms, traces code paths, generates ranked hypotheses, and tests them systematically through 3 lenses (Code Path / State & Environment / Change History). Applies fix when root cause is confirmed.
 
+  Use only for concrete bugs, failing tests, broken behavior, or root-cause investigations. Do not use for generic Spectral review requests; use eagle-spectral-triage for routing and the specialist review agents for review.
+
   After fixing, run the relevant Spectral specialist to verify the fix didn't introduce new issues.
 
   <example>

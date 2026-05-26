@@ -3,7 +3,7 @@ name: eagle-api-review
 description: |
   Reviews API design and implementation: endpoint consistency, request/response contracts, error handling, versioning, pagination, rate limiting, documentation, and REST/GraphQL best practices. Fixes issues in code.
 
-  For a comprehensive review, ask Claude to run multiple specialists in parallel.
+  Spectral review specialist. For a broad "Spectral Agents" request, route through eagle-spectral-triage so this runs only when API contract risk is relevant.
 
   <example>
   user: "Review our API endpoints"

@@ -3,6 +3,8 @@ name: eagle-spectral-plan
 description: |
   Planning and architecture design agent. Asks forcing questions, evaluates approaches through 3 lenses (Feasibility / Risk / Maintainability), and outputs a concrete implementation plan. Does not modify code.
 
+  Use only for planning, architecture decisions, feasibility analysis, or scoped implementation plans before code is written. Do not use for generic Spectral review requests; use eagle-spectral-triage for routing and the specialist review agents for review.
+
   After planning, run the relevant review specialists to review the implementation.
 
   <example>

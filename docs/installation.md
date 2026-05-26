@@ -8,6 +8,19 @@ npx eagle-skills install
 
 This runs an interactive menu where you choose which skills and agents to install. Select individual items by number (e.g., `1,3,8`) or `a` for all.
 
+To install for every supported agent surface:
+
+```bash
+npx eagle-skills install --target all
+```
+
+Supported targets:
+
+1. `claude`: skills to `~/.claude/skills`, agents to `~/.claude/agents`
+2. `codex`: skills to `~/.codex/skills`
+3. `grok`: skills to `~/.grok/skills`, agents to the Claude-compatible agent directory Grok discovers
+4. `antigravity`: skills to `~/.gemini/config/skills` and `~/.gemini/antigravity-ide/skills`
+
 ## Without npm
 
 ```bash
@@ -19,18 +32,18 @@ curl -fsSL https://raw.githubusercontent.com/eagleisbatman/eagle-skills/main/ins
 The installer:
 
 1. Clones the repo to `~/.eagle-skills/`
-2. Symlinks selected skills to `~/.claude/skills/<name>/`
-3. Symlinks selected agents to `~/.claude/agents/<name>.md`
+2. Symlinks selected skills to the selected target skill directories
+3. Symlinks selected agents to agent directories for targets that support agent files
 
 Because items are symlinked (not copied), running `eagle-skills update` pulls the latest code and your installed items update instantly.
 
 ## Managing your installation
 
 ```bash
-npx eagle-skills update      # Pull latest changes
-npx eagle-skills status      # Show installed items, check for updates
-npx eagle-skills usage       # Show how to use each installed item
-npx eagle-skills uninstall   # Remove symlinks and optionally the repo
+npx eagle-skills update --target all      # Pull latest changes
+npx eagle-skills status --target all      # Show installed items, check for updates
+npx eagle-skills usage --target all       # Show how to use each installed item
+npx eagle-skills uninstall --target all   # Remove symlinks and optionally the repo
 ```
 
 ## Manual install
@@ -40,9 +53,14 @@ git clone https://github.com/eagleisbatman/eagle-skills.git
 cd eagle-skills
 
 # Skills (symlink directories)
+mkdir -p ~/.claude/skills ~/.codex/skills ~/.grok/skills ~/.gemini/config/skills ~/.gemini/antigravity-ide/skills
 for skill in eagle-*/; do
   [ -f "$skill/SKILL.md" ] || continue
   ln -sf "$(pwd)/$skill" ~/.claude/skills/$(basename "$skill")
+  ln -sf "$(pwd)/$skill" ~/.codex/skills/$(basename "$skill")
+  ln -sf "$(pwd)/$skill" ~/.grok/skills/$(basename "$skill")
+  ln -sf "$(pwd)/$skill" ~/.gemini/config/skills/$(basename "$skill")
+  ln -sf "$(pwd)/$skill" ~/.gemini/antigravity-ide/skills/$(basename "$skill")
 done
 
 # Agents (symlink .md files)
@@ -70,4 +88,4 @@ Symlinked items point to the cloned repo, so `git pull` updates everything.
 npx eagle-skills uninstall
 ```
 
-This removes all symlinks from `~/.claude/skills/` and `~/.claude/agents/` and optionally deletes the cloned repo at `~/.eagle-skills/`.
+This removes Eagle symlinks from the selected target directories and optionally deletes the cloned repo at `~/.eagle-skills/`.

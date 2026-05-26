@@ -3,7 +3,7 @@ name: eagle-security-audit
 description: |
   Deep security-focused code review. Hunts for vulnerabilities, injection vectors, auth flaws, data exposure, and supply chain risks. Fixes issues autonomously and re-audits until clean.
 
-  For a comprehensive review, ask Claude to run multiple specialists in parallel.
+  Spectral review specialist. For a broad "Spectral Agents" request, route through eagle-spectral-triage so this runs only when security risk is relevant.
 
   <example>
   user: "Audit this project for security vulnerabilities"

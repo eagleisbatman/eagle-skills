@@ -3,7 +3,7 @@ name: eagle-performance-review
 description: |
   Performance-focused code review. Identifies bottlenecks, memory leaks, inefficient algorithms, unnecessary re-renders, N+1 queries, bundle bloat, and resource waste. Fixes issues and verifies improvements.
 
-  For a comprehensive review, ask Claude to run multiple specialists in parallel.
+  Spectral review specialist. For a broad "Spectral Agents" request, route through eagle-spectral-triage so this runs only when performance risk is relevant.
 
   <example>
   user: "This app feels slow, can you review it?"
