@@ -1,4 +1,6 @@
 .playwright-mcp/
+.claude/
+/AGENTS.md
 *.png
 *.jpg
 .git/
