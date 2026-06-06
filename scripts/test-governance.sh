@@ -82,6 +82,7 @@ printf '%s\n' "$status_output" | grep -q "Eagle Eval governance pack: available"
 
 block_output="$(printf '%s\n' '{"hook_event_name":"PreToolUse","cwd":"'"$repo"'","tool_input":{"command":"rm -rf /"}}' | .claude/hooks/eagle-governance.sh)"
 echo "$block_output" | jq -e '.decision == "block"' >/dev/null
+echo "$block_output" | jq -e '.hookSpecificOutput.hookEventName == "PreToolUse" and (.hookSpecificOutput | has("additionalContext") | not)' >/dev/null
 
 outside_output="$(printf '%s\n' '{"hook_event_name":"PreToolUse","tool_name":"Write","cwd":"'"$repo"'","tool_input":{"file_path":"'"$TMP/outside-root.txt"'","content":"x"}}' | .claude/hooks/eagle-governance.sh)"
 echo "$outside_output" | jq -e '.decision == "block"' >/dev/null
@@ -112,6 +113,7 @@ post_write_handoff_output="$(printf '%s\n' '{"hook_event_name":"PostToolUse","cw
 echo "$post_write_handoff_output" | jq -e '.decision == "block" and (.reason | contains("write-like implementation"))' >/dev/null
 handoff_output="$(printf '%s\n' '{"hook_event_name":"Stop","cwd":"'"$repo"'","transcript_path":"'"$transcript"'"}' | .claude/hooks/eagle-governance.sh)"
 echo "$handoff_output" | jq -e '.decision == "block"' >/dev/null
+echo "$handoff_output" | jq -e 'has("hookSpecificOutput") | not' >/dev/null
 [ -f .eagle-governance/handoff.md ]
 
 antigravity_pre_output="$(printf '%s\n' '{"toolCall":{"name":"run_command","args":{"CommandLine":"rm -rf /","Cwd":"'"$repo"'"}},"workspacePaths":["'"$repo"'"],"transcriptPath":"'"$transcript"'"}' | EAGLE_GOVERNANCE_PROVIDER=antigravity EAGLE_GOVERNANCE_EVENT=PreToolUse .agents/hooks/eagle-governance.sh)"
@@ -129,10 +131,10 @@ grep -q "tasks add" "$TMP/eagle-mem-handoff.log"
 
 printf '{"mode":"warn","gates":{"tests_required":false,"context_budget":true},"context_budget":{"warn_bytes":999999999,"handoff_bytes":999999999,"max_changed_files":99},"eagle_mem":{"enabled":"auto","feature_pending_gate":true}}\n' > .eagle-governance.json
 feature_output="$(printf '%s\n' '{"hook_event_name":"Stop","cwd":"'"$repo"'"}' | EAGLE_MEM_FAKE_LOG="$TMP/eagle-mem-feature.log" EAGLE_MEM_FAKE_PENDING=2 PATH="$fakebin:$PATH" .claude/hooks/eagle-governance.sh)"
-echo "$feature_output" | jq -e '.hookSpecificOutput.additionalContext | contains("2 pending feature")' >/dev/null
+echo "$feature_output" | jq -e '.systemMessage | contains("2 pending feature")' >/dev/null
 
 printf '{"mode":"warn","gates":{"tests_required":true,"context_budget":true},"context_budget":{"warn_bytes":999999999,"handoff_bytes":999999999,"max_changed_files":99},"eagle_mem":{"enabled":"auto","feature_pending_gate":false,"test_history_lookup":true}}\n' > .eagle-governance.json
 test_history_output="$(printf '%s\n' '{"hook_event_name":"Stop","cwd":"'"$repo"'"}' | EAGLE_MEM_FAKE_LOG="$TMP/eagle-mem-search.log" PATH="$fakebin:$PATH" .claude/hooks/eagle-governance.sh)"
-echo "$test_history_output" | jq -e '.hookSpecificOutput.additionalContext | contains("prior test/lint history")' >/dev/null
+echo "$test_history_output" | jq -e '.systemMessage | contains("prior test/lint history")' >/dev/null
 
 echo "Governance fixture tests passed"

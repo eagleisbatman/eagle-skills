@@ -99,12 +99,19 @@ json_context() {
     esac
     return
   fi
-  jq -n --arg event "$event" --arg message "$message" '{
-    hookSpecificOutput: {
-      hookEventName: $event,
-      additionalContext: $message
-    }
-  }'
+  case "$event" in
+    SessionStart|Setup|SubagentStart|UserPromptSubmit|UserPromptExpansion|PostToolUse|PostToolUseFailure|PostToolBatch)
+      jq -n --arg event "$event" --arg message "$message" '{
+        hookSpecificOutput: {
+          hookEventName: $event,
+          additionalContext: $message
+        }
+      }'
+      ;;
+    *)
+      jq -n --arg message "$message" '{systemMessage: $message}'
+      ;;
+  esac
 }
 
 json_block() {
@@ -133,18 +140,18 @@ json_block() {
       hookSpecificOutput: {
         hookEventName: $event,
         permissionDecision: "deny",
-        permissionDecisionReason: $reason,
-        additionalContext: $reason
+        permissionDecisionReason: $reason
       }
     }'
+  elif [ "$event" = "PermissionRequest" ]; then
+    jq -n --arg reason "$reason" '{
+      permissionDecision: "deny",
+      reason: $reason
+    }'
   else
-    jq -n --arg event "$event" --arg reason "$reason" '{
+    jq -n --arg reason "$reason" '{
       decision: "block",
-      reason: $reason,
-      hookSpecificOutput: {
-        hookEventName: $event,
-        additionalContext: $reason
-      }
+      reason: $reason
     }'
   fi
 }
