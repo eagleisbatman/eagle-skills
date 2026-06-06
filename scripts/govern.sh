@@ -33,8 +33,8 @@ Usage:
 Defaults:
   mode: warn
   context control: force handoff at high risk
-  full hooks: Claude Code and Codex
-  partial advisory support: Grok Build and Antigravity
+  full hooks: Claude Code, Codex, and Antigravity
+  Grok Build: enforced through its documented Claude Code compatibility layer
 USAGE
 }
 
@@ -232,11 +232,7 @@ settings_contains_governance() {
 
 merge_claude_settings() {
   local file="$PROJECT_DIR/.claude/settings.json"
-  local cmd='"${CLAUDE_PROJECT_DIR:-$(pwd)}/.claude/hooks/eagle-governance.sh"'
-  if settings_contains_governance "$file"; then
-    [ "$DRY_RUN" = true ] && echo -e "  ${DIM}would keep Claude hook wiring:${RESET} $file"
-    return 0
-  fi
+  local cmd='"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/hooks/eagle-governance.sh"'
   if [ "$DRY_RUN" = true ]; then
     echo -e "  ${DIM}would merge Claude hook wiring:${RESET} $file"
     return
@@ -246,26 +242,34 @@ merge_claude_settings() {
   local tmp
   tmp="$(mktemp)"
   jq --arg cmd "$cmd" '
+    def strip_governance:
+      map(
+        .hooks = ((.hooks // []) | map(select(((.command // "") | contains("eagle-governance.sh")) | not)))
+        | select(((.hooks // []) | length) > 0)
+      );
     .hooks = (.hooks // {}) |
+    .hooks.UserPromptSubmit = ((.hooks.UserPromptSubmit // []) | strip_governance) |
+    .hooks.PreToolUse = ((.hooks.PreToolUse // []) | strip_governance) |
+    .hooks.PostToolUse = ((.hooks.PostToolUse // []) | strip_governance) |
+    .hooks.Stop = ((.hooks.Stop // []) | strip_governance) |
+    .hooks.PreCompact = ((.hooks.PreCompact // []) | strip_governance) |
+    .hooks.PostCompact = ((.hooks.PostCompact // []) | strip_governance) |
+    .hooks.SessionStart = ((.hooks.SessionStart // []) | strip_governance) |
     .hooks.UserPromptSubmit = ((.hooks.UserPromptSubmit // []) + [{"hooks":[{"type":"command","command":$cmd,"statusMessage":"Eagle governance prompt gate"}]}]) |
     .hooks.PreToolUse = ((.hooks.PreToolUse // []) + [{"matcher":"Bash|Edit|Write","hooks":[{"type":"command","command":$cmd,"statusMessage":"Eagle governance pre-tool gate"}]}]) |
     .hooks.PostToolUse = ((.hooks.PostToolUse // []) + [{"matcher":"Bash|Edit|Write","hooks":[{"type":"command","command":$cmd,"statusMessage":"Eagle governance post-tool gate"}]}]) |
     .hooks.Stop = ((.hooks.Stop // []) + [{"hooks":[{"type":"command","command":$cmd,"statusMessage":"Eagle governance completion gate"}]}]) |
-    .hooks.PreCompact = ((.hooks.PreCompact // []) + [{"hooks":[{"type":"command","command":$cmd,"statusMessage":"Eagle governance handoff writer"}]}]) |
-    .hooks.PostCompact = ((.hooks.PostCompact // []) + [{"hooks":[{"type":"command","command":$cmd,"statusMessage":"Eagle governance restore receipt"}]}]) |
-    .hooks.SessionStart = ((.hooks.SessionStart // []) + [{"matcher":"compact","hooks":[{"type":"command","command":$cmd,"statusMessage":"Eagle governance compact resume"}]}])
+    .hooks.PreCompact = ((.hooks.PreCompact // []) + [{"matcher":"manual|auto","hooks":[{"type":"command","command":$cmd,"statusMessage":"Eagle governance handoff writer"}]}]) |
+    .hooks.PostCompact = ((.hooks.PostCompact // []) + [{"matcher":"manual|auto","hooks":[{"type":"command","command":$cmd,"statusMessage":"Eagle governance compact receipt"}]}]) |
+    .hooks.SessionStart = ((.hooks.SessionStart // []) + [{"matcher":"startup|resume|compact","hooks":[{"type":"command","command":$cmd,"statusMessage":"Eagle governance restore receipt"}]}])
   ' "$file" > "$tmp"
   mv "$tmp" "$file"
 }
 
 merge_codex_hooks() {
   local file="$PROJECT_DIR/.codex/hooks.json"
-  local cmd='"$(git rev-parse --show-toplevel)/.codex/hooks/eagle-governance.sh"'
+  local cmd='"$(git rev-parse --show-toplevel 2>/dev/null || pwd)/.codex/hooks/eagle-governance.sh"'
   local shell_matcher="Bash|exec_command|shell_command|unified_exec|apply_patch|Edit|Write"
-  if settings_contains_governance "$file"; then
-    [ "$DRY_RUN" = true ] && echo -e "  ${DIM}would keep Codex hook wiring:${RESET} $file"
-    return 0
-  fi
   if [ "$DRY_RUN" = true ]; then
     echo -e "  ${DIM}would merge Codex hook wiring:${RESET} $file"
     return
@@ -275,14 +279,67 @@ merge_codex_hooks() {
   local tmp
   tmp="$(mktemp)"
   jq --arg cmd "$cmd" --arg shell_matcher "$shell_matcher" '
+    def strip_governance:
+      map(
+        .hooks = ((.hooks // []) | map(select(((.command // "") | contains("eagle-governance.sh")) | not)))
+        | select(((.hooks // []) | length) > 0)
+      );
     .hooks = (.hooks // {}) |
+    .hooks.UserPromptSubmit = ((.hooks.UserPromptSubmit // []) | strip_governance) |
+    .hooks.PreToolUse = ((.hooks.PreToolUse // []) | strip_governance) |
+    .hooks.PostToolUse = ((.hooks.PostToolUse // []) | strip_governance) |
+    .hooks.Stop = ((.hooks.Stop // []) | strip_governance) |
+    .hooks.PreCompact = ((.hooks.PreCompact // []) | strip_governance) |
+    .hooks.PostCompact = ((.hooks.PostCompact // []) | strip_governance) |
+    .hooks.SessionStart = ((.hooks.SessionStart // []) | strip_governance) |
     .hooks.UserPromptSubmit = ((.hooks.UserPromptSubmit // []) + [{"hooks":[{"type":"command","command":$cmd,"statusMessage":"Eagle governance prompt gate"}]}]) |
     .hooks.PreToolUse = ((.hooks.PreToolUse // []) + [{"matcher":$shell_matcher,"hooks":[{"type":"command","command":$cmd,"statusMessage":"Eagle governance pre-tool gate"}]}]) |
     .hooks.PostToolUse = ((.hooks.PostToolUse // []) + [{"matcher":$shell_matcher,"hooks":[{"type":"command","command":$cmd,"statusMessage":"Eagle governance post-tool gate"}]}]) |
     .hooks.Stop = ((.hooks.Stop // []) + [{"hooks":[{"type":"command","command":$cmd,"statusMessage":"Eagle governance completion gate"}]}]) |
     .hooks.PreCompact = ((.hooks.PreCompact // []) + [{"matcher":"manual|auto","hooks":[{"type":"command","command":$cmd,"statusMessage":"Eagle governance handoff writer"}]}]) |
     .hooks.PostCompact = ((.hooks.PostCompact // []) + [{"matcher":"manual|auto","hooks":[{"type":"command","command":$cmd,"statusMessage":"Eagle governance restore receipt"}]}]) |
-    .hooks.SessionStart = ((.hooks.SessionStart // []) + [{"matcher":"compact","hooks":[{"type":"command","command":$cmd,"statusMessage":"Eagle governance compact resume"}]}])
+    .hooks.SessionStart = ((.hooks.SessionStart // []) + [{"matcher":"startup|resume|compact","hooks":[{"type":"command","command":$cmd,"statusMessage":"Eagle governance restore receipt"}]}])
+  ' "$file" > "$tmp"
+  mv "$tmp" "$file"
+}
+
+merge_antigravity_hooks() {
+  local file="$PROJECT_DIR/.agents/hooks.json"
+  local cmd='root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"; EAGLE_GOVERNANCE_PROVIDER=antigravity EAGLE_GOVERNANCE_EVENT=__EVENT__ "$root/.agents/hooks/eagle-governance.sh"'
+  if [ "$DRY_RUN" = true ]; then
+    echo -e "  ${DIM}would merge Antigravity hook wiring:${RESET} $file"
+    return
+  fi
+  mkdir -p "$(dirname "$file")"
+  [ -f "$file" ] || printf '{}\n' > "$file"
+  local tmp
+  tmp="$(mktemp)"
+  jq --arg cmd "$cmd" '
+    def command_for($event): ($cmd | gsub("__EVENT__"; $event));
+    .["eagle-governance"] = {
+      "enabled": true,
+      "PreToolUse": [
+        {
+          "matcher": "run_command|write_to_file|replace_file_content|multi_replace_file_content",
+          "hooks": [{"type":"command","command":command_for("PreToolUse"),"timeout":30}]
+        }
+      ],
+      "PostToolUse": [
+        {
+          "matcher": "run_command|write_to_file|replace_file_content|multi_replace_file_content",
+          "hooks": [{"type":"command","command":command_for("PostToolUse"),"timeout":30}]
+        }
+      ],
+      "PreInvocation": [
+        {"type":"command","command":command_for("PreInvocation"),"timeout":30}
+      ],
+      "PostInvocation": [
+        {"type":"command","command":command_for("PostInvocation"),"timeout":30}
+      ],
+      "Stop": [
+        {"type":"command","command":command_for("Stop"),"timeout":30}
+      ]
+    }
   ' "$file" > "$tmp"
   mv "$tmp" "$file"
 }
@@ -303,12 +360,17 @@ apply_target() {
       ok "Codex governance configured"
       ;;
     grok)
-      append_managed_block "$PROJECT_DIR/AGENTS.md" "Grok Build advisory support"
-      warn "Grok Build hook enforcement is not configured in v1; advisory shim installed."
+      copy_hook "$PROJECT_DIR/.claude/hooks/eagle-governance.sh"
+      merge_claude_settings
+      append_managed_block "$PROJECT_DIR/AGENTS.md" "Grok Build and generic agents"
+      append_managed_block "$PROJECT_DIR/CLAUDE.md" "Grok Build Claude-compatible hooks"
+      ok "Grok Build governance configured through Claude Code-compatible hooks"
       ;;
     antigravity)
-      append_managed_block "$PROJECT_DIR/AGENTS.md" "Antigravity advisory support"
-      warn "Antigravity hook enforcement is not configured in v1; advisory shim installed."
+      copy_hook "$PROJECT_DIR/.agents/hooks/eagle-governance.sh"
+      merge_antigravity_hooks
+      append_managed_block "$PROJECT_DIR/AGENTS.md" "Antigravity and generic agents"
+      ok "Antigravity governance configured"
       ;;
   esac
 }
@@ -425,10 +487,12 @@ cmd_status() {
         if settings_contains_governance "$PROJECT_DIR/.codex/hooks.json"; then ok "Codex hooks: wired"; else warn "Codex hooks: not wired"; fi
         ;;
       grok)
-        warn "Grok Build: advisory only in v1"
+        status_line "Grok hook" "Claude-compatible hook installed" "missing Claude-compatible hook" "$PROJECT_DIR/.claude/hooks/eagle-governance.sh"
+        if settings_contains_governance "$PROJECT_DIR/.claude/settings.json"; then ok "Grok hook compatibility: wired via .claude/settings.json"; else warn "Grok hook compatibility: not wired"; fi
         ;;
       antigravity)
-        warn "Antigravity: advisory only in v1"
+        status_line "Antigravity hook" "installed" "missing" "$PROJECT_DIR/.agents/hooks/eagle-governance.sh"
+        if settings_contains_governance "$PROJECT_DIR/.agents/hooks.json"; then ok "Antigravity hooks: wired"; else warn "Antigravity hooks: not wired"; fi
         ;;
     esac
   done
@@ -459,7 +523,14 @@ cmd_verify() {
         settings_contains_governance "$PROJECT_DIR/.codex/hooks.json" || failed=1
         [ -f "$PROJECT_DIR/AGENTS.md" ] && grep -q "eagle-governance:start" "$PROJECT_DIR/AGENTS.md" || failed=1
         ;;
-      grok|antigravity)
+      grok)
+        [ -x "$PROJECT_DIR/.claude/hooks/eagle-governance.sh" ] || failed=1
+        settings_contains_governance "$PROJECT_DIR/.claude/settings.json" || failed=1
+        [ -f "$PROJECT_DIR/AGENTS.md" ] && grep -q "eagle-governance:start" "$PROJECT_DIR/AGENTS.md" || failed=1
+        ;;
+      antigravity)
+        [ -x "$PROJECT_DIR/.agents/hooks/eagle-governance.sh" ] || failed=1
+        settings_contains_governance "$PROJECT_DIR/.agents/hooks.json" || failed=1
         [ -f "$PROJECT_DIR/AGENTS.md" ] && grep -q "eagle-governance:start" "$PROJECT_DIR/AGENTS.md" || failed=1
         ;;
     esac

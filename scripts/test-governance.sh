@@ -67,8 +67,13 @@ grep -q "echo existing" .claude/settings.json
 [ "$(grep -c "eagle-governance:start" CLAUDE.md)" -eq 1 ]
 jq empty .claude/settings.json
 jq empty .codex/hooks.json
+jq empty .agents/hooks.json
 jq -e '.eagle_mem.enabled == "auto" and .eagle_mem.handoff_mirror == true and .eagle_eval.governance_pack == true' .eagle-governance.json >/dev/null
 grep -q "exec_command" .codex/hooks.json
+jq -e '.hooks.SessionStart[] | select(.matcher == "startup|resume|compact")' .claude/settings.json >/dev/null
+jq -e '.hooks.SessionStart[] | select(.matcher == "startup|resume|compact")' .codex/hooks.json >/dev/null
+jq -e '."eagle-governance".PreInvocation[0].command | contains("EAGLE_GOVERNANCE_EVENT=PreInvocation")' .agents/hooks.json >/dev/null
+jq -e '."eagle-governance".Stop[0].command | contains("EAGLE_GOVERNANCE_EVENT=Stop")' .agents/hooks.json >/dev/null
 
 status_output="$(PATH="$fakebin:$PATH" EAGLE_MEM_FAKE_LOG="$TMP/eagle-mem-status.log" EAGLE_MEM_FAKE_PENDING=2 EAGLE_SKILLS_SOURCE_DIR="$ROOT" "$ROOT/bin/eagle-skills" govern status --target all)"
 printf '%s\n' "$status_output" | grep -q "Eagle Mem bridge: available"
@@ -94,6 +99,13 @@ transcript="$TMP/transcript.jsonl"
 printf '%s\n' "large transcript" > "$transcript"
 read_handoff_output="$(printf '%s\n' '{"hook_event_name":"PostToolUse","cwd":"'"$repo"'","transcript_path":"'"$transcript"'","tool_input":{"command":"rg generationRuns packages/db/src/schema"}}' | .claude/hooks/eagle-governance.sh)"
 echo "$read_handoff_output" | jq -e '(.decision // "") != "block" and (.hookSpecificOutput.additionalContext | contains("Continue read-only triage"))' >/dev/null
+session_start_output="$(printf '%s\n' '{"hook_event_name":"SessionStart","source":"startup","cwd":"'"$repo"'"}' | .claude/hooks/eagle-governance.sh)"
+echo "$session_start_output" | jq -e '.hookSpecificOutput.additionalContext | contains("handoff.md")' >/dev/null
+post_compact_output="$(printf '%s\n' '{"hook_event_name":"PostCompact","trigger":"manual","cwd":"'"$repo"'","compact_summary":"Compacted summary from Claude."}' | .claude/hooks/eagle-governance.sh)"
+[ -z "$post_compact_output" ]
+[ -f .eagle-governance/restore-receipt.md ]
+compact_start_output="$(printf '%s\n' '{"hook_event_name":"SessionStart","source":"compact","cwd":"'"$repo"'"}' | .claude/hooks/eagle-governance.sh)"
+echo "$compact_start_output" | jq -e '.hookSpecificOutput.additionalContext | contains("restore-receipt.md")' >/dev/null
 pre_write_handoff_output="$(printf '%s\n' '{"hook_event_name":"PreToolUse","cwd":"'"$repo"'","transcript_path":"'"$transcript"'","tool_input":{"command":"touch local-change.txt"}}' | .claude/hooks/eagle-governance.sh)"
 echo "$pre_write_handoff_output" | jq -e '.decision == "block" and (.reason | contains("write-like tool use"))' >/dev/null
 post_write_handoff_output="$(printf '%s\n' '{"hook_event_name":"PostToolUse","cwd":"'"$repo"'","transcript_path":"'"$transcript"'","tool_input":{"command":"echo x > local-change.txt"}}' | .claude/hooks/eagle-governance.sh)"
@@ -101,6 +113,13 @@ echo "$post_write_handoff_output" | jq -e '.decision == "block" and (.reason | c
 handoff_output="$(printf '%s\n' '{"hook_event_name":"Stop","cwd":"'"$repo"'","transcript_path":"'"$transcript"'"}' | .claude/hooks/eagle-governance.sh)"
 echo "$handoff_output" | jq -e '.decision == "block"' >/dev/null
 [ -f .eagle-governance/handoff.md ]
+
+antigravity_pre_output="$(printf '%s\n' '{"toolCall":{"name":"run_command","args":{"CommandLine":"rm -rf /","Cwd":"'"$repo"'"}},"workspacePaths":["'"$repo"'"],"transcriptPath":"'"$transcript"'"}' | EAGLE_GOVERNANCE_PROVIDER=antigravity EAGLE_GOVERNANCE_EVENT=PreToolUse .agents/hooks/eagle-governance.sh)"
+echo "$antigravity_pre_output" | jq -e '.decision == "deny"' >/dev/null
+antigravity_invocation_output="$(printf '%s\n' '{"workspacePaths":["'"$repo"'"],"transcriptPath":"'"$transcript"'","invocationNum":3,"initialNumSteps":10}' | EAGLE_GOVERNANCE_PROVIDER=antigravity EAGLE_GOVERNANCE_EVENT=PreInvocation .agents/hooks/eagle-governance.sh)"
+echo "$antigravity_invocation_output" | jq -e '.injectSteps[0].ephemeralMessage | contains("context risk is high")' >/dev/null
+antigravity_stop_output="$(printf '%s\n' '{"workspacePaths":["'"$repo"'"],"transcriptPath":"'"$transcript"'","executionNum":1,"terminationReason":"model_stop","fullyIdle":true}' | EAGLE_GOVERNANCE_PROVIDER=antigravity EAGLE_GOVERNANCE_EVENT=Stop .agents/hooks/eagle-governance.sh)"
+echo "$antigravity_stop_output" | jq -e '.decision == "continue"' >/dev/null
 
 rm -rf .eagle-governance
 printf '{"mode":"warn","gates":{"context_budget":true},"context_budget":{"warn_bytes":1,"handoff_bytes":1,"max_changed_files":99},"eagle_mem":{"enabled":"auto","handoff_mirror":true}}\n' > .eagle-governance.json

@@ -16,7 +16,7 @@ Install a project-local governance runtime that keeps instruction files small an
 1. Adds a small governance policy file: `.eagle-governance.json`
 2. Installs hook scripts for Claude Code and Codex when those targets are selected
 3. Adds small managed routing blocks to `AGENTS.md` and/or `CLAUDE.md`
-4. Reports Grok Build and Antigravity as advisory-only unless their hook surfaces are available
+4. Configures Grok Build through its Claude Code compatibility layer and Antigravity through `.agents/hooks.json`
 5. Verifies hook scripts, JSON wiring, and instruction shims
 6. Partners with Eagle Mem when available for durable handoff mirroring and feature-verification visibility
 7. Ships an optional Eagle Eval governance scenario pack for regression checks
@@ -65,14 +65,15 @@ Eagle Governance:
   Codex: hooks installed and wired; trust review may be required
   Eagle Mem: bridge available; handoff mirror enabled
   Eagle Eval: governance pack available; CLI optional
-  Grok Build: advisory shim installed
-  Antigravity: advisory shim installed
+  Grok Build: Claude-compatible hooks installed and wired
+  Antigravity: hooks installed and wired
 ```
 
 ## Principles
 
 - Hooks are control; instruction files are routing context
 - Keep injected context tiny
+- Treat each provider's hook output contract separately
 - Let Eagle Mem own durable recall, orchestration lanes, and release-boundary feature verification
 - Let Eagle Eval test governance behavior outside the live hook path
 - Prefer warn-first adoption, then tighten gates once the project trusts the workflow

@@ -1,6 +1,7 @@
 .playwright-mcp/
 .claude/
 .codex/
+.agents/
 .eagle-governance/
 .eagle-governance.json
 /AGENTS.md

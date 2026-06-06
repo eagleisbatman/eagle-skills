@@ -57,7 +57,9 @@ npx eagle-skills govern apply --target all --mode warn
 npx eagle-skills govern verify --target all
 ```
 
-Claude Code and Codex get project-local hooks. Grok Build and Antigravity get advisory instruction shims in v1.
+Claude Code and Codex get project-local hooks. Grok Build uses its documented Claude Code compatibility layer, so governance installs the Claude-compatible hook surface for Grok projects. Antigravity gets its documented project `.agents/hooks.json` surface.
+
+After applying governance, restart or resume the active agent session so the host reloads project hooks. Codex and Antigravity may also require their hook trust or extension views to be refreshed before newly written hooks appear.
 
 If Eagle Mem is installed, Governance automatically uses it as a durable partner:
 

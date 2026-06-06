@@ -8,8 +8,16 @@ jq_value() {
   jq -r "$expr" <<<"$input" 2>/dev/null || true
 }
 
-event="$(jq_value '.hook_event_name // empty')"
-cwd="$(jq_value '.cwd // empty')"
+provider="${EAGLE_GOVERNANCE_PROVIDER:-}"
+if [ -z "$provider" ] && jq -e 'has("toolCall") or has("workspacePaths") or has("transcriptPath")' <<<"$input" >/dev/null 2>&1; then
+  provider="antigravity"
+fi
+[ -n "$provider" ] || provider="default"
+
+event="$(jq_value '.hook_event_name // .hookEventName // empty')"
+[ -n "$event" ] || event="${EAGLE_GOVERNANCE_EVENT:-${GROK_HOOK_EVENT:-}}"
+
+cwd="$(jq_value '.cwd // .toolCall.args.Cwd // .workspacePaths[0] // empty')"
 [ -n "$cwd" ] || cwd="$(pwd)"
 
 if root="$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null)"; then
@@ -22,6 +30,7 @@ config="$root/.eagle-governance.json"
 state_dir="$root/.eagle-governance"
 state_file="$state_dir/state.json"
 handoff_file="$state_dir/handoff.md"
+restore_file="$state_dir/restore-receipt.md"
 
 config_string() {
   local expr="$1"
@@ -73,6 +82,23 @@ should_block_warning() {
 
 json_context() {
   local message="$1"
+  if [ "$provider" = "antigravity" ]; then
+    case "$event" in
+      PreInvocation|PostInvocation)
+        jq -n --arg message "$message" '{injectSteps: [{ephemeralMessage: $message}]}'
+        ;;
+      PreToolUse|PermissionRequest)
+        jq -n --arg reason "$message" '{decision: "force_ask", reason: $reason}'
+        ;;
+      Stop|TaskCompleted|SubagentStop)
+        jq -n --arg reason "$message" '{decision: "", reason: $reason}'
+        ;;
+      *)
+        jq -n '{}'
+        ;;
+    esac
+    return
+  fi
   jq -n --arg event "$event" --arg message "$message" '{
     hookSpecificOutput: {
       hookEventName: $event,
@@ -83,6 +109,23 @@ json_context() {
 
 json_block() {
   local reason="$1"
+  if [ "$provider" = "antigravity" ]; then
+    case "$event" in
+      PreToolUse|PermissionRequest)
+        jq -n --arg reason "$reason" '{decision: "deny", reason: $reason}'
+        ;;
+      Stop|TaskCompleted|SubagentStop)
+        jq -n --arg reason "$reason" '{decision: "continue", reason: $reason}'
+        ;;
+      PostInvocation)
+        jq -n --arg reason "$reason" '{injectSteps: [{ephemeralMessage: $reason}], terminationBehavior: "force_continue"}'
+        ;;
+      *)
+        jq -n --arg reason "$reason" '{decision: "deny", reason: $reason}'
+        ;;
+    esac
+    return
+  fi
   if [ "$event" = "PreToolUse" ]; then
     jq -n --arg event "$event" --arg reason "$reason" '{
       decision: "block",
@@ -151,6 +194,28 @@ write_handoff() {
   mirror_handoff_to_eagle_mem
 }
 
+write_restore_receipt() {
+  ensure_state_dir
+  local trigger compact_summary
+  trigger="$(jq_value '.trigger // empty')"
+  compact_summary="$(jq_value '.compact_summary // .compactSummary // empty')"
+  {
+    printf '# Eagle Governance Restore Receipt\n\n'
+    printf 'Generated: %s\n\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    printf 'Project: %s\n\n' "$root"
+    printf 'Event: %s\n\n' "${event:-unknown}"
+    [ -n "$trigger" ] && printf 'Trigger: %s\n\n' "$trigger"
+    if [ -n "$compact_summary" ]; then
+      printf '## Compact Summary\n\n'
+      printf '%s\n\n' "$compact_summary" | sed -n '1,80p'
+    fi
+    printf '## Restore Guidance\n\n'
+    printf -- '- Load .eagle-governance/handoff.md if it exists.\n'
+    printf -- '- Inspect the current git diff before editing.\n'
+    printf -- '- Continue with one scoped task and keep context small.\n'
+  } > "$restore_file"
+}
+
 mirror_handoff_to_eagle_mem() {
   eagle_mem_setting_enabled "handoff_mirror" "true" || return 0
   eagle_mem_enabled || return 0
@@ -177,7 +242,7 @@ Next step: start a fresh session or compact-resume, read the handoff, inspect gi
 
 context_risk() {
   local transcript_path size warn_bytes handoff_bytes max_changed changed
-  transcript_path="$(jq_value '.transcript_path // empty')"
+  transcript_path="$(jq_value '.transcript_path // .transcriptPath // empty')"
   warn_bytes="$(config_num '.context_budget.warn_bytes' 500000)"
   handoff_bytes="$(config_num '.context_budget.handoff_bytes' 900000)"
   max_changed="$(config_num '.context_budget.max_changed_files' 25)"
@@ -199,14 +264,24 @@ context_risk() {
 }
 
 tool_text() {
-  jq -r '(.tool_input.command // (.tool_input | tostring) // "")' <<<"$input" 2>/dev/null || true
+  jq -r '
+    .tool_input.command //
+    .tool_input.file_path //
+    .toolCall.args.CommandLine //
+    .toolCall.args.TargetFile //
+    .toolCall.args.TargetContent //
+    .toolCall.args.ReplacementContent //
+    (if (.tool_input? | type) == "object" then (.tool_input | to_entries | map(.value | tostring) | join(" ")) else empty end) //
+    (if (.toolCall.args? | type) == "object" then (.toolCall.args | to_entries | map(.value | tostring) | join(" ")) else empty end) //
+    ""
+  ' <<<"$input" 2>/dev/null || true
 }
 
 is_write_like_tool_or_command() {
   local text="$1"
   local tool_name
-  tool_name="$(jq_value '.tool_name // empty')"
-  [[ "$tool_name" =~ ^(Edit|Write|apply_patch)$ ]] && return 0
+  tool_name="$(jq_value '.tool_name // .toolCall.name // empty')"
+  [[ "$tool_name" =~ ^(Edit|Write|apply_patch|write_to_file|replace_file_content|multi_replace_file_content)$ ]] && return 0
   [[ "$text" =~ (^|[[:space:];])(cp|mv|rm|mkdir|touch|tee|chmod|chown|cat[[:space:]].*[>]|printf[[:space:]].*[>]|echo[[:space:]].*[>])([[:space:]]|$) ]] && return 0
   [[ "$text" =~ [\>\<] ]] && return 0
   return 1
@@ -290,6 +365,19 @@ eagle_mem_recent_test_hint() {
     elif type == "object" then ((.results // .sessions // .items // []) | length) > 0
     else false end
   ' >/dev/null 2>&1
+}
+
+restore_context_message() {
+  local message=""
+  if [ -f "$handoff_file" ]; then
+    message="Eagle Governance restore receipt: read .eagle-governance/handoff.md before further implementation. "
+  fi
+  if [ -f "$restore_file" ]; then
+    message="${message}A compact restore receipt exists at .eagle-governance/restore-receipt.md. "
+  fi
+  if [ -n "$message" ]; then
+    printf '%s\n' "${message}Keep injected context small and verify git diff before editing."
+  fi
 }
 
 handle_user_prompt_submit() {
@@ -419,8 +507,28 @@ handle_stop() {
 }
 
 handle_compact_restore() {
-  if [ -f "$handoff_file" ]; then
-    json_context "Eagle Governance restore receipt: read .eagle-governance/handoff.md before further implementation. Keep injected context small and verify git diff before editing."
+  local message
+  message="$(restore_context_message)"
+  if [ -n "$message" ]; then
+    json_context "$message"
+  fi
+}
+
+handle_pre_invocation() {
+  local risk status size changed message
+  risk="$(context_risk)"
+  status="${risk%%:*}"
+  size="${risk#*:}"
+  size="${size%%:*}"
+  changed="${risk##*:}"
+  if [ "$status" = "handoff" ] && [ "$(gate_enabled context_budget)" = "true" ]; then
+    write_handoff
+    json_context "Eagle Governance context risk is high (transcript bytes: $size, changed files: $changed). Continue read-only triage only; start a fresh agent conversation before implementation."
+    return
+  fi
+  message="$(restore_context_message)"
+  if [ -n "$message" ]; then
+    json_context "$message"
   fi
 }
 
@@ -441,11 +549,14 @@ case "$event" in
     write_handoff
     ;;
   PostCompact)
-    handle_compact_restore
+    write_restore_receipt
+    ;;
+  PreInvocation|PostInvocation)
+    handle_pre_invocation
     ;;
   SessionStart)
     source_value="$(jq_value '.source // empty')"
-    if [ "$source_value" = "compact" ]; then
+    if [[ "$source_value" =~ ^(startup|resume|compact)$ ]]; then
       handle_compact_restore
     fi
     ;;

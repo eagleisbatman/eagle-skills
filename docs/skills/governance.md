@@ -24,8 +24,15 @@ Also triggers on: "govern this project", "install governance hooks", "agent gove
 
 1. Claude Code: project `.claude/settings.json` plus `.claude/hooks/eagle-governance.sh`
 2. Codex: project `.codex/hooks.json` plus `.codex/hooks/eagle-governance.sh`
-3. Grok Build: advisory `AGENTS.md` shim in v1
-4. Antigravity: advisory `AGENTS.md` shim in v1
+3. Grok Build: enforced through Grok's documented Claude Code compatibility layer (`.claude/settings.json`, `.claude/hooks/`, and `CLAUDE.md`)
+4. Antigravity: project `.agents/hooks.json` plus `.agents/hooks/eagle-governance.sh`
+
+## Provider notes
+
+- Claude Code compact hooks run only when Claude triggers compaction manually with `/compact` or automatically at the context limit. Eagle Governance cannot force Claude to run `/compact`; it writes a handoff and re-injects the restore receipt on `SessionStart` for `startup`, `resume`, and `compact`.
+- Codex project hooks require the project `.codex/` layer and hook definition to be trusted through `/hooks`.
+- Grok Build reads Claude Code hooks, skills, agents, and instruction files, so Eagle Governance installs the Claude-compatible hook surface for Grok.
+- Antigravity uses its own hook schema. Governance maps blocks to `deny` for `PreToolUse`, `continue` for `Stop`, and transient `injectSteps` for invocation context.
 
 ## Gates
 
@@ -36,6 +43,7 @@ Also triggers on: "govern this project", "install governance hooks", "agent gove
 - Diff-budget warnings
 - Missing-test warnings
 - Context-bloat handoff blocking
+- Fresh-session restore on startup, resume, and compact
 - Eagle Mem pending-feature visibility
 - Eagle Mem handoff mirroring
 
