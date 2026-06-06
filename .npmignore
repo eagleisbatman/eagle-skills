@@ -6,3 +6,5 @@
 .git/
 .remember/
 wiki/
+__pycache__/
+*.pyc

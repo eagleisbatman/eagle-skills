@@ -1,0 +1,102 @@
+{
+  "name": "eagle-governance-runtime",
+  "version": 1,
+  "description": "Optional Eagle Eval scenario pack for regression-testing Eagle Governance hook behavior.",
+  "runtime": "hook-json",
+  "cases": [
+    {
+      "id": "destructive_command_blocked",
+      "description": "A destructive shell command is denied before execution.",
+      "event": "PreToolUse",
+      "input": {
+        "hook_event_name": "PreToolUse",
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "rm -rf /"
+        }
+      },
+      "expected": {
+        "decision": "block",
+        "reason_contains": "destructive command"
+      }
+    },
+    {
+      "id": "outside_root_write_blocked",
+      "description": "A structured write outside the project root is denied before execution.",
+      "event": "PreToolUse",
+      "input": {
+        "hook_event_name": "PreToolUse",
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "/tmp/outside-root.txt",
+          "content": "x"
+        }
+      },
+      "expected": {
+        "decision": "block",
+        "reason_contains": "outside the project root"
+      }
+    },
+    {
+      "id": "dependency_schema_diff_warn",
+      "description": "Dependency, schema, and diff-budget changes produce governance context in warn mode.",
+      "event": "PostToolUse",
+      "fixture": {
+        "changed_files": [
+          "package.json",
+          "db/schema.sql"
+        ],
+        "policy_overrides": {
+          "diff_budget": {
+            "files": 1,
+            "lines": 0
+          }
+        }
+      },
+      "expected": {
+        "additional_context_contains": [
+          "database/schema",
+          "dependency manifest",
+          "diff budget"
+        ]
+      }
+    },
+    {
+      "id": "context_handoff_blocked_and_mirrored",
+      "description": "High context risk writes a handoff, blocks completion, and mirrors to Eagle Mem when available.",
+      "event": "Stop",
+      "fixture": {
+        "transcript_bytes": 32,
+        "policy_overrides": {
+          "context_budget": {
+            "warn_bytes": 1,
+            "handoff_bytes": 1,
+            "max_changed_files": 99
+          },
+          "eagle_mem": {
+            "enabled": "auto",
+            "handoff_mirror": true
+          }
+        }
+      },
+      "expected": {
+        "decision": "block",
+        "handoff_file": ".eagle-governance/handoff.md",
+        "eagle_mem_command_contains": "tasks add"
+      }
+    },
+    {
+      "id": "pending_feature_warning",
+      "description": "Pending Eagle Mem feature verification is surfaced as a completion warning.",
+      "event": "Stop",
+      "fixture": {
+        "eagle_mem_feature_pending_count": 2
+      },
+      "expected": {
+        "additional_context_contains": [
+          "pending feature verification"
+        ]
+      }
+    }
+  ]
+}

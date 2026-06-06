@@ -1,0 +1,17 @@
+{
+  "title": "FarmerChat Agentic — UI Components",
+  "timescale": "week",
+  "statuses": ["Not started", "In progress", "Blocked", "On hold", "Done"],
+  "tasks": [
+    {"task": "Agent response (SSE stream)", "group": "Response", "owner": "Barry", "status": "In progress", "start": "2026-06-04", "end": "2026-06-20", "percent": 30},
+    {"task": "Clarification component", "group": "Response", "owner": "Barry", "status": "In progress", "start": "2026-06-04", "end": "2026-06-12", "percent": 50},
+    {"task": "Escalation component", "group": "Response", "owner": "Barry", "status": "Not started", "start": "2026-06-10", "end": "2026-06-18", "percent": 0},
+    {"task": "MCP tool call display", "group": "Response", "owner": "Barry", "status": "Not started", "start": "2026-06-12", "end": "2026-06-20", "percent": 0},
+    {"task": "Markdown streaming renderer", "group": "Markdown", "owner": "Barry", "status": "In progress", "start": "2026-06-06", "end": "2026-06-16", "percent": 40},
+    {"task": "Streaming error states", "group": "States", "owner": "Barry", "status": "Blocked", "start": "2026-06-14", "end": "2026-06-20", "percent": 0},
+    {"task": "Integrate into Compose app + PostHog", "group": "Integration", "owner": "Barry", "status": "Not started", "start": "2026-06-16", "end": "2026-06-20", "percent": 0},
+    {"task": "Field testing", "group": "Test", "owner": "Namitha", "status": "Not started", "start": "2026-06-22", "end": "2026-06-26", "percent": 0},
+    {"task": "Handover to engineering", "group": "Handover", "owner": "Barry", "status": "Milestone", "start": "2026-06-27", "end": "2026-06-27", "percent": 0},
+    {"task": "Main release (FC Compose)", "group": "Release", "owner": "Engineering", "status": "Not started", "start": "2026-06-30", "end": "2026-07-17", "percent": 0}
+  ]
+}

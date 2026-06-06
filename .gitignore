@@ -1,3 +1,5 @@
 node_modules/
 .env
 email-draft.md
+__pycache__/
+*.pyc

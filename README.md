@@ -7,7 +7,7 @@
 ╚══════╝╚═╝░░╚═╝░╚═════╝░╚══════╝╚══════╝  ╚═════╝░╚═╝░░╚═╝╚═╝╚══════╝╚══════╝╚═════╝
 ```
 
-**13 skills + 13 agents for Claude Code, Codex, Grok Build, and Google Antigravity.** Skills give agents domain expertise via slash commands or automatic invocation. Agent files power autonomous reviewers in Claude Code and Grok Build.
+**15 skills + 13 agents for Claude Code, Codex, Grok Build, and Google Antigravity.** Skills give agents domain expertise via slash commands or automatic invocation. Agent files power autonomous reviewers in Claude Code and Grok Build.
 
 ### Token saver
 
@@ -57,9 +57,11 @@ Invoked via slash commands or automatic skill matching in supported agent surfac
 | [Multi-Stack Scaffolder](docs/skills/multi-stack-scaffolder.md) | `/eagle-multi-stack-scaffolder` | Research-driven project scaffolding for 13+ stacks |
 | [CLAUDE.md](docs/skills/claude-md.md) | `/eagle-claude-md` | Lean project CLAUDE.md + LLM Wiki + Obsidian vault integration |
 | [Bootstrap](docs/skills/bootstrap.md) | `/eagle-bootstrap` | One-time global setup: behavioral rules, hooks, vault config |
+| [Governance](docs/skills/governance.md) | `/eagle-governance` | Hook-based engineering governance: policy gates, context handoff, instruction shims |
 | [Feature Flow](docs/skills/feature-flow.md) | `/eagle-feature-flow` | Structured dev workflow: plan, build, test, review, anti-slop, commit |
 | [Spectral Review](docs/skills/spectral-review.md) | `/eagle-spectral-review` | Route broad Spectral review requests to the right specialist agents |
 | [Compact Add](docs/skills/compact-add.md) | `/eagle-compact-add` | Review and add new rules to the compact token saver |
+| [Tracker](docs/skills/tracker.md) | `/eagle-tracker` | Project trackers + Gantt charts as .xlsx for Excel and Google Sheets |
 
 ## Agents
 
@@ -89,6 +91,7 @@ eagle-skills update --target all       # Pull latest and verify symlinks
 eagle-skills status --target all       # Show installed items, check for updates
 eagle-skills usage --target all        # Show inputs, outputs, and examples
 eagle-skills uninstall --target all    # Remove Eagle symlinks
+eagle-skills govern apply --target all # Install hook-based project governance
 ```
 
 ## Docs
@@ -97,6 +100,7 @@ eagle-skills uninstall --target all    # Remove Eagle symlinks
 |-------|------|
 | Installation guide | [docs/installation.md](docs/installation.md) |
 | All agents reference | [docs/agents.md](docs/agents.md) |
+| Hook-based governance | [docs/skills/governance.md](docs/skills/governance.md) |
 | Compact hook system (token saver) | [docs/compact-hook.md](docs/compact-hook.md) |
 | The three-skill pipeline | [docs/pipeline.md](docs/pipeline.md) |
 | UX Review methodology | [docs/ux-review-methodology.md](docs/ux-review-methodology.md) |

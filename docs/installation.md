@@ -46,6 +46,31 @@ npx eagle-skills usage --target all       # Show how to use each installed item
 npx eagle-skills uninstall --target all   # Remove symlinks and optionally the repo
 ```
 
+## Project governance
+
+After installing skills, add hook-based engineering governance to a project:
+
+```bash
+npx eagle-skills govern status --target all
+npx eagle-skills govern apply --target all --mode warn --dry-run
+npx eagle-skills govern apply --target all --mode warn
+npx eagle-skills govern verify --target all
+```
+
+Claude Code and Codex get project-local hooks. Grok Build and Antigravity get advisory instruction shims in v1.
+
+If Eagle Mem is installed, Governance automatically uses it as a durable partner:
+
+- handoffs are mirrored into Eagle Mem task state
+- pending feature verification appears in governance status and completion checks
+- prior test/lint history can be surfaced when a compacted session resumes
+
+If Eagle Eval is installed, the optional governance scenario pack is available at:
+
+```text
+eagle-governance/references/eagle-eval-governance-pack.json
+```
+
 ## Manual install
 
 ```bash

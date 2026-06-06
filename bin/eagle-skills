@@ -6,14 +6,21 @@ set -euo pipefail
 # https://github.com/eagleisbatman/eagle-skills
 # ─────────────────────────────────────────────────────────────
 
-VERSION="3.1.0"
+VERSION="3.2.0"
 REPO_URL="https://github.com/eagleisbatman/eagle-skills.git"
+SOURCE_FILE="${BASH_SOURCE[0]}"
+while [ -L "$SOURCE_FILE" ]; do
+  SOURCE_PARENT="$(cd -P "$(dirname "$SOURCE_FILE")" && pwd)"
+  SOURCE_FILE="$(readlink "$SOURCE_FILE")"
+  [[ "$SOURCE_FILE" != /* ]] && SOURCE_FILE="$SOURCE_PARENT/$SOURCE_FILE"
+done
+SOURCE_DIR="${EAGLE_SKILLS_SOURCE_DIR:-$(cd "$(dirname "$SOURCE_FILE")/.." && pwd)}"
 INSTALL_DIR="${EAGLE_SKILLS_DIR:-$HOME/.eagle-skills}"
 TARGET_SELECTION="${EAGLE_SKILLS_TARGET:-claude}"
 
 # ─── Available skills (directory → display) ─────────────────
-declare -a SKILL_DIRS=("eagle-ux-review" "eagle-product-diagnostics" "eagle-ad-review" "eagle-anti-slop" "eagle-human-writing" "eagle-clean-doc" "eagle-clean-sheet" "eagle-multi-stack-scaffolder" "eagle-claude-md" "eagle-bootstrap" "eagle-feature-flow" "eagle-spectral-review" "eagle-compact-add")
-declare -a SKILL_NAMES=("Eagle UX Review" "Eagle Product Diagnostics" "Eagle Ad Review" "Eagle Anti-Slop" "Eagle Human Writing" "Eagle Clean Doc" "Eagle Clean Sheet" "Eagle Multi-Stack Scaffolder" "Eagle CLAUDE.md" "Eagle Bootstrap" "Eagle Feature Flow" "Eagle Spectral Review" "Eagle Compact Add")
+declare -a SKILL_DIRS=("eagle-ux-review" "eagle-product-diagnostics" "eagle-ad-review" "eagle-anti-slop" "eagle-human-writing" "eagle-clean-doc" "eagle-clean-sheet" "eagle-multi-stack-scaffolder" "eagle-claude-md" "eagle-bootstrap" "eagle-governance" "eagle-feature-flow" "eagle-spectral-review" "eagle-compact-add" "eagle-tracker")
+declare -a SKILL_NAMES=("Eagle UX Review" "Eagle Product Diagnostics" "Eagle Ad Review" "Eagle Anti-Slop" "Eagle Human Writing" "Eagle Clean Doc" "Eagle Clean Sheet" "Eagle Multi-Stack Scaffolder" "Eagle CLAUDE.md" "Eagle Bootstrap" "Eagle Governance" "Eagle Feature Flow" "Eagle Spectral Review" "Eagle Compact Add" "Eagle Tracker")
 declare -a SKILL_DESCS=(
   "Expert-level UX audits grounded in 65+ UX laws"
   "Three-layer data validation: design intent + behavior + outcomes"
@@ -25,11 +32,13 @@ declare -a SKILL_DESCS=(
   "Research-driven project scaffolding for 13+ technology stacks"
   "Full project onboarding — lean CLAUDE.md, LLM Wiki, Obsidian vault, eagle-skills install"
   "One-time global environment setup — behavioral rules, hooks, vault, plugin checks"
+  "Hook-based engineering governance — policy gates, context handoff, instruction shims"
   "Structured dev workflow — plan, build, test, spectral review, anti-slop, commit"
   "Routes Spectral review requests to the right specialist agents"
   "Add new rules to compact-rules.json for verbose commands"
+  "Project trackers + Gantt charts as .xlsx that open in Excel and import to Google Sheets"
 )
-declare -a SKILL_COMMANDS=("/eagle-ux-review" "/eagle-product-diagnostics" "/eagle-ad-review" "/eagle-anti-slop" "/eagle-human-writing" "/eagle-clean-doc" "/eagle-clean-sheet" "/eagle-multi-stack-scaffolder" "/eagle-claude-md" "/eagle-bootstrap" "/eagle-feature-flow" "/eagle-spectral-review" "/eagle-compact-add")
+declare -a SKILL_COMMANDS=("/eagle-ux-review" "/eagle-product-diagnostics" "/eagle-ad-review" "/eagle-anti-slop" "/eagle-human-writing" "/eagle-clean-doc" "/eagle-clean-sheet" "/eagle-multi-stack-scaffolder" "/eagle-claude-md" "/eagle-bootstrap" "/eagle-governance" "/eagle-feature-flow" "/eagle-spectral-review" "/eagle-compact-add" "/eagle-tracker")
 declare -a SKILL_TRIGGERS=(
   "ux review, ux audit, usability review, heuristic evaluation, critique this design, what's wrong with this UI"
   "validate these findings, product diagnostics, funnel analysis, why isn't this metric moving, triangulate UX and data"
@@ -41,9 +50,11 @@ declare -a SKILL_TRIGGERS=(
   "scaffold, new project, create app, bootstrap, set up project, initialize codebase, start new application, project structure"
   "init claude, setup claude md, create claude.md, project init, eagle init, onboard this project, add claude.md"
   "eagle bootstrap, setup my environment, first time setup, configure claude globally, install eagle environment"
+  "govern this project, install governance hooks, agent governance, context bloat guard, hook-based engineering governance"
   "feature flow, build this feature, implement this, dev workflow, eagle flow, start feature, build and ship, full dev cycle, plan and build"
   "spectral agents, spectral review, full spectrum review, run review specialists, triage review agents"
   "compact-add, add compact rules, this command is too verbose, compact this command"
+  "project tracker, task tracker, gantt chart, project plan, roadmap, timeline, sprint board, raid log, track tasks with owners and dates"
 )
 declare -a SKILL_INPUTS=(
   "North star metric|Target user profile (demographics, tech literacy, device/connectivity)|2-3 reference apps the target user opens daily|App identity (chat, marketplace, tool, social, etc.)|Output format: HTML, Word, or both|Screen recording (video) or a folder of screenshots|Optional: PRD or hypothesis document|Optional: User personas, analytics data, competitive screenshots"
@@ -56,9 +67,11 @@ declare -a SKILL_INPUTS=(
   "What you're building (app type, features, platforms)|Optional: technology preferences|Optional: existing backend/services to integrate with"
   "A project directory (runs in current directory by default)|Optional: Obsidian vault path (auto-detected if configured)"
   "No inputs required (auto-detects what's already configured)"
+  "A project directory|Optional: target agents with --target|Optional: enforcement mode warn, block-risky, or strict"
   "Feature description (what to build and why)|Project must have a test suite or instructions to create one"
   "Review scope: changed files, whole project, a PR, or specific paths|Optional: focus area such as security, API, UX, accessibility, database, data integrity, performance, architecture, or quality"
   "Command to compact, or describe which commands are too verbose"
+  "A list of tasks with owners, start/end dates, and status (prose, CSV, JSON, or a JSON spec)|Optional: timescale (day/week/month)"
 )
 declare -a SKILL_OUTPUTS=(
   "HTML and/or Word report with severity-rated findings, embedded evidence, before/after mockups, priority matrix, UX law citations"
@@ -71,9 +84,11 @@ declare -a SKILL_OUTPUTS=(
   "Scaffolded project with docs (RESEARCH.md, DEPENDENCIES.md, STRUCTURE.md, SETUP.md), config files, and boilerplate code"
   "Lean CLAUDE.md, raw/ and wiki/ directories, Obsidian vault symlink"
   "Enriched global CLAUDE.md, compact.sh hook, Obsidian vault config, plugin/agent verification report"
+  "Project-local governance hooks, policy config, instruction shims, and PM-readable status"
   "Committed, tested, reviewed code with clean git history"
   "A routed review plan naming the exact Spectral specialists to run"
   "New rules appended to compact-rules.json"
+  "A styled .xlsx with Tracker (status dropdowns, % data bars), a conditional-formatting Gantt with today marker, and a dashboard — opens in Excel and imports to Google Sheets"
 )
 declare -a SKILL_EXAMPLES=(
   "UX review this app — here's a screen recording of the onboarding flow"
@@ -86,9 +101,11 @@ declare -a SKILL_EXAMPLES=(
   "Scaffold a fitness tracking app for iOS and Android with a Python backend"
   "Set up this project for Claude — create a CLAUDE.md and wiki structure"
   "Run eagle bootstrap to set up my global Claude environment"
+  "Govern this project with hooks so agents cannot skip DB, dependency, test, or context gates"
   "Build a rate-limiting middleware for the auth routes"
   "Use Spectral Agents to review this PR and pick the right specialists"
   "That terraform plan output was way too long, compact it"
+  "Turn this list of tasks, owners, and dates into a project tracker with a Gantt chart for Google Sheets"
 )
 
 # ─── Available agents (filename without .md → display) ──────
@@ -944,6 +961,13 @@ cmd_usage() {
   echo ""
 }
 
+cmd_govern() {
+  local targets
+  local IFS=","
+  targets="${TARGETS[*]}"
+  EAGLE_SKILLS_SOURCE_DIR="$SOURCE_DIR" EAGLE_SKILLS_TARGETS="$targets" bash "$SOURCE_DIR/scripts/govern.sh" "${POSITIONAL_ARGS[@]+"${POSITIONAL_ARGS[@]}"}"
+}
+
 cmd_help() {
   banner
   echo -e "  ${BOLD}Eagle Skills${RESET} v${VERSION}"
@@ -958,11 +982,13 @@ cmd_help() {
   echo "  status      Show installed skills/agents and check for updates"
   echo "  usage       Show how to use installed items (inputs, outputs, examples)"
   echo "  uninstall   Remove installed skills and agents"
+  echo "  govern      Install and verify hook-based project governance"
   echo "  help        Show this help message"
   echo ""
   echo -e "${BOLD}Quick start:${RESET}"
   echo "  npx eagle-skills install"
   echo "  npx eagle-skills install --target all"
+  echo "  npx eagle-skills govern apply --target all --mode warn"
   echo ""
   echo -e "${BOLD}Alternative (without npm):${RESET}"
   echo "  curl -fsSL https://raw.githubusercontent.com/eagleisbatman/eagle-skills/main/install.sh | bash"
@@ -1000,6 +1026,7 @@ main() {
     status)    cmd_status ;;
     usage)     cmd_usage "${POSITIONAL_ARGS[0]:-}" ;;
     uninstall) cmd_uninstall ;;
+    govern)    cmd_govern ;;
     help|--help|-h) cmd_help ;;
     version|--version|-v) echo "eagle-skills v${VERSION}" ;;
     *)
