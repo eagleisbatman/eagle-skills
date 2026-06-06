@@ -114,6 +114,8 @@ echo "$post_write_handoff_output" | jq -e '.decision == "block" and (.reason | c
 handoff_output="$(printf '%s\n' '{"hook_event_name":"Stop","cwd":"'"$repo"'","transcript_path":"'"$transcript"'"}' | .claude/hooks/eagle-governance.sh)"
 echo "$handoff_output" | jq -e '.decision == "block"' >/dev/null
 echo "$handoff_output" | jq -e 'has("hookSpecificOutput") | not' >/dev/null
+recursive_stop_output="$(printf '%s\n' '{"hook_event_name":"Stop","stop_hook_active":true,"cwd":"'"$repo"'","transcript_path":"'"$transcript"'"}' | .claude/hooks/eagle-governance.sh)"
+[ -z "$recursive_stop_output" ]
 [ -f .eagle-governance/handoff.md ]
 
 antigravity_pre_output="$(printf '%s\n' '{"toolCall":{"name":"run_command","args":{"CommandLine":"rm -rf /","Cwd":"'"$repo"'"}},"workspacePaths":["'"$repo"'"],"transcriptPath":"'"$transcript"'"}' | EAGLE_GOVERNANCE_PROVIDER=antigravity EAGLE_GOVERNANCE_EVENT=PreToolUse .agents/hooks/eagle-governance.sh)"

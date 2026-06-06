@@ -481,6 +481,10 @@ handle_post_tool_use() {
 
 handle_stop() {
   local risk status size changed message pending_features
+  if [ "$(jq_value '.stop_hook_active // false')" = "true" ]; then
+    exit 0
+  fi
+
   risk="$(context_risk)"
   status="${risk%%:*}"
   size="${risk#*:}"
