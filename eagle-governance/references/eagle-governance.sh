@@ -29,6 +29,7 @@ fi
 config="$root/.eagle-governance.json"
 state_dir="$root/.eagle-governance"
 state_file="$state_dir/state.json"
+context_state_file="$state_dir/context-state.json"
 handoff_file="$state_dir/handoff.md"
 restore_file="$state_dir/restore-receipt.md"
 
@@ -41,7 +42,7 @@ config_string() {
 config_bool() {
   local expr="$1"
   local fallback="$2"
-  jq -r "$expr // $fallback" "$config" 2>/dev/null || printf '%s\n' "$fallback"
+  jq -r "if ($expr) == null then $fallback else $expr end" "$config" 2>/dev/null || printf '%s\n' "$fallback"
 }
 
 config_num() {
@@ -248,12 +249,20 @@ Next step: start a fresh session or compact-resume, read the handoff, inspect gi
 }
 
 context_risk() {
-  local transcript_path size warn_bytes handoff_bytes max_changed changed
+  local transcript_path size changed status detail
+  local suggest_percent handoff_percent suggest_turns handoff_turns transcript_warn_bytes transcript_handoff_bytes
+  local pct turn_signal turn_count turn_max
   transcript_path="$(jq_value '.transcript_path // .transcriptPath // empty')"
-  warn_bytes="$(config_num '.context_budget.warn_bytes' 500000)"
-  handoff_bytes="$(config_num '.context_budget.handoff_bytes' 900000)"
-  max_changed="$(config_num '.context_budget.max_changed_files' 25)"
   changed="$(changed_files_count)"
+  status="ok"
+  detail="context signal below configured thresholds"
+
+  suggest_percent="$(config_num '.context_budget.suggest_percent // .context_budget.warn_percent' 70)"
+  handoff_percent="$(config_num '.context_budget.handoff_percent' 85)"
+  suggest_turns="$(config_num '.context_budget.suggest_turns' 24)"
+  handoff_turns="$(config_num '.context_budget.handoff_turns' 30)"
+  transcript_warn_bytes="$(config_num '.context_budget.transcript_warn_bytes // .context_budget.warn_bytes' 5000000)"
+  transcript_handoff_bytes="$(config_num '.context_budget.transcript_handoff_bytes' 0)"
 
   if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
     size="$(wc -c < "$transcript_path" | tr -d ' ')"
@@ -261,12 +270,100 @@ context_risk() {
     size=0
   fi
 
-  if [ "$size" -ge "$handoff_bytes" ] || [ "$changed" -ge "$max_changed" ]; then
-    printf 'handoff:%s:%s\n' "$size" "$changed"
-  elif [ "$size" -ge "$warn_bytes" ]; then
-    printf 'warn:%s:%s\n' "$size" "$changed"
-  else
-    printf 'ok:%s:%s\n' "$size" "$changed"
+  pct="$(context_percent_signal)"
+  if is_number "$pct"; then
+    if number_ge "$pct" "$handoff_percent"; then
+      status="handoff"
+      detail="Claude context ${pct}% >= ${handoff_percent}%"
+    elif number_ge "$pct" "$suggest_percent"; then
+      status="warn"
+      detail="Claude context ${pct}% >= ${suggest_percent}%"
+    fi
+  fi
+
+  turn_signal="$(eagle_mem_turn_signal)"
+  if [ -n "$turn_signal" ] && [ "$status" != "handoff" ]; then
+    turn_count="${turn_signal%%:*}"
+    turn_max="${turn_signal#*:}"
+    [ "$turn_max" != "$turn_signal" ] || turn_max="$handoff_turns"
+    if is_integer "$turn_count" && is_integer "$turn_max"; then
+      if [ "$turn_count" -ge "$turn_max" ] || [ "$turn_count" -ge "$handoff_turns" ]; then
+        status="handoff"
+        detail="Eagle Mem turn ${turn_count}/${turn_max} reached handoff threshold"
+      elif [ "$status" = "ok" ] && [ "$turn_count" -ge "$suggest_turns" ]; then
+        status="warn"
+        detail="Eagle Mem turn ${turn_count}/${turn_max} >= ${suggest_turns}"
+      fi
+    fi
+  fi
+
+  if [ "$status" != "handoff" ] && is_integer "$transcript_handoff_bytes" && [ "$transcript_handoff_bytes" -gt 0 ] && [ "$size" -ge "$transcript_handoff_bytes" ]; then
+    status="handoff"
+    detail="transcript bytes ${size} >= configured hard threshold ${transcript_handoff_bytes}"
+  elif [ "$status" = "ok" ] && is_integer "$transcript_warn_bytes" && [ "$transcript_warn_bytes" -gt 0 ] && [ "$size" -ge "$transcript_warn_bytes" ]; then
+    status="warn"
+    detail="transcript bytes ${size} >= warning threshold ${transcript_warn_bytes}"
+  fi
+
+  printf '%s|%s|%s|%s\n' "$status" "$size" "$changed" "$detail"
+}
+
+is_integer() {
+  [[ "${1:-}" =~ ^[0-9]+$ ]]
+}
+
+is_number() {
+  [[ "${1:-}" =~ ^[0-9]+([.][0-9]+)?$ ]]
+}
+
+number_ge() {
+  awk -v a="${1:-0}" -v b="${2:-0}" 'BEGIN { exit !((a + 0) >= (b + 0)) }'
+}
+
+context_percent_signal() {
+  local pct
+  pct="$(jq -r '
+    .context_window.used_percentage //
+    .contextWindow.usedPercentage //
+    .context_window.usedPercent //
+    .contextWindow.used_percent //
+    .context.percent //
+    empty
+  ' <<<"$input" 2>/dev/null | awk 'NR == 1 && $0 != "null" { print }')"
+  if is_number "$pct"; then
+    printf '%s\n' "$pct"
+    return
+  fi
+
+  if [ -f "$context_state_file" ]; then
+    pct="$(jq -r '
+      .context_window.used_percentage //
+      .contextWindow.usedPercentage //
+      .used_percentage //
+      .context_percent //
+      .contextPercent //
+      empty
+    ' "$context_state_file" 2>/dev/null | awk 'NR == 1 && $0 != "null" { print }')"
+    if is_number "$pct"; then
+      printf '%s\n' "$pct"
+    fi
+  fi
+}
+
+eagle_mem_turn_signal() {
+  eagle_mem_enabled || return 0
+
+  local output clean turn_text turn_count turn_max
+  output="$(cd "$root" && EAGLE_MEM_DISABLE_HOOKS=1 eagle-mem statusline 2>/dev/null || true)"
+  [ -n "$output" ] || return 0
+  clean="$(printf '%s\n' "$output" | sed $'s/\x1b\\[[0-9;]*[A-Za-z]//g')"
+  turn_text="$(printf '%s\n' "$clean" | grep -Eo 'turn[[:space:]]+[0-9]+([[:space:]]*/[[:space:]]*[0-9]+)?' | tail -n 1 || true)"
+  [ -n "$turn_text" ] || return 0
+  turn_count="$(printf '%s\n' "$turn_text" | grep -Eo '[0-9]+' | awk 'NR == 1 { print }')"
+  turn_max="$(printf '%s\n' "$turn_text" | grep -Eo '[0-9]+' | awk 'NR == 2 { print }')"
+  [ -n "$turn_max" ] || turn_max="$(config_num '.context_budget.handoff_turns' 30)"
+  if is_integer "$turn_count" && is_integer "$turn_max"; then
+    printf '%s:%s\n' "$turn_count" "$turn_max"
   fi
 }
 
@@ -415,15 +512,12 @@ handle_pre_tool_use() {
   fi
 
   if [ "$(gate_enabled context_budget)" = "true" ] && is_write_like_tool_or_command "$text"; then
-    local risk status size changed
+    local risk status size changed detail
     risk="$(context_risk)"
-    status="${risk%%:*}"
-    size="${risk#*:}"
-    size="${size%%:*}"
-    changed="${risk##*:}"
+    IFS='|' read -r status size changed detail <<<"$risk"
     if [ "$status" = "handoff" ]; then
       write_handoff
-      json_block "Eagle Governance requires a fresh-session handoff before write-like tool use. Handoff written to .eagle-governance/handoff.md (transcript bytes: $size, changed files: $changed)."
+      json_block "Eagle Governance requires a fresh-session handoff before write-like tool use. Handoff written to .eagle-governance/handoff.md (signal: $detail; transcript bytes: $size; changed files: $changed)."
       return
     fi
   fi
@@ -434,33 +528,32 @@ handle_pre_tool_use() {
 }
 
 handle_post_tool_use() {
-  local text risk status size changed files_limit lines_limit files lines message
+  local text risk status size changed detail files_limit lines_limit files lines message
   text="$(tool_text)"
   if is_test_command "$text"; then
     write_state_test_run
   fi
 
   risk="$(context_risk)"
-  status="${risk%%:*}"
-  size="${risk#*:}"
-  size="${size%%:*}"
-  changed="${risk##*:}"
+  IFS='|' read -r status size changed detail <<<"$risk"
 
   if [ "$status" = "handoff" ] && [ "$(gate_enabled context_budget)" = "true" ]; then
     write_handoff
     if is_write_like_tool_or_command "$text"; then
-      json_block "Eagle Governance requires a fresh-session handoff before further write-like implementation. Handoff written to .eagle-governance/handoff.md (transcript bytes: $size, changed files: $changed)."
+      json_block "Eagle Governance requires a fresh-session handoff before further write-like implementation. Handoff written to .eagle-governance/handoff.md (signal: $detail; transcript bytes: $size; changed files: $changed)."
     else
-      json_context "Eagle Governance wrote a fresh-session handoff to .eagle-governance/handoff.md (transcript bytes: $size, changed files: $changed). Continue read-only triage if needed, but start fresh or compact-resume before implementation."
+      json_context "Eagle Governance wrote a fresh-session handoff to .eagle-governance/handoff.md (signal: $detail; transcript bytes: $size; changed files: $changed). Continue read-only triage if needed, but start fresh or compact-resume before implementation."
     fi
     return
+  elif [ "$status" = "warn" ] && [ "$(gate_enabled context_budget)" = "true" ]; then
+    message="Eagle Governance: context budget warning ($detail; transcript bytes: $size; changed files: $changed). "
   fi
 
   files="$(changed_files_count)"
   lines="$(diff_line_count)"
   files_limit="$(config_num '.diff_budget.files' 12)"
   lines_limit="$(config_num '.diff_budget.lines' 600)"
-  message=""
+  message="${message:-}"
 
   if [ "$(gate_enabled db_change)" = "true" ] && git -C "$root" status --porcelain --untracked-files=all 2>/dev/null | grep -E '(migration|migrations|schema|prisma|drizzle|sequelize|typeorm)' >/dev/null; then
     message="${message}Eagle Governance: database/schema files changed; run database/data-integrity review. "
@@ -480,24 +573,25 @@ handle_post_tool_use() {
 }
 
 handle_stop() {
-  local risk status size changed message pending_features
+  local risk status size changed detail message pending_features
   if [ "$(jq_value '.stop_hook_active // false')" = "true" ]; then
     exit 0
   fi
 
   risk="$(context_risk)"
-  status="${risk%%:*}"
-  size="${risk#*:}"
-  size="${size%%:*}"
-  changed="${risk##*:}"
+  IFS='|' read -r status size changed detail <<<"$risk"
 
   if [ "$status" = "handoff" ] && [ "$(gate_enabled context_budget)" = "true" ]; then
     write_handoff
-    json_block "Eagle Governance requires a fresh-session handoff before completion. Handoff written to .eagle-governance/handoff.md (transcript bytes: $size, changed files: $changed)."
+    json_block "Eagle Governance requires a fresh-session handoff before completion. Handoff written to .eagle-governance/handoff.md (signal: $detail; transcript bytes: $size; changed files: $changed)."
     return
   fi
 
   message=""
+
+  if [ "$status" = "warn" ] && [ "$(gate_enabled context_budget)" = "true" ]; then
+    message="${message}Eagle Governance: context budget warning ($detail; transcript bytes: $size; changed files: $changed). "
+  fi
 
   pending_features="$(eagle_mem_pending_feature_count)"
   if [ "${pending_features:-0}" -gt 0 ] 2>/dev/null; then
@@ -526,15 +620,12 @@ handle_compact_restore() {
 }
 
 handle_pre_invocation() {
-  local risk status size changed message
+  local risk status size changed detail message
   risk="$(context_risk)"
-  status="${risk%%:*}"
-  size="${risk#*:}"
-  size="${size%%:*}"
-  changed="${risk##*:}"
+  IFS='|' read -r status size changed detail <<<"$risk"
   if [ "$status" = "handoff" ] && [ "$(gate_enabled context_budget)" = "true" ]; then
     write_handoff
-    json_context "Eagle Governance context risk is high (transcript bytes: $size, changed files: $changed). Continue read-only triage only; start a fresh agent conversation before implementation."
+    json_context "Eagle Governance context risk is high (signal: $detail; transcript bytes: $size; changed files: $changed). Continue read-only triage only; start a fresh agent conversation before implementation."
     return
   fi
   message="$(restore_context_message)"

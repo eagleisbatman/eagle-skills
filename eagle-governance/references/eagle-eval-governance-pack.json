@@ -63,15 +63,20 @@
     },
     {
       "id": "context_handoff_blocked_and_mirrored",
-      "description": "High context risk writes a handoff, blocks completion, and mirrors to Eagle Mem when available.",
+      "description": "High real context pressure writes a handoff, blocks completion, and mirrors to Eagle Mem when available.",
       "event": "Stop",
       "fixture": {
-        "transcript_bytes": 32,
+        "context_state": {
+          "context_window": {
+            "used_percentage": 90
+          }
+        },
         "policy_overrides": {
           "context_budget": {
-            "warn_bytes": 1,
-            "handoff_bytes": 1,
-            "max_changed_files": 99
+            "suggest_percent": 70,
+            "handoff_percent": 85,
+            "transcript_warn_bytes": 1,
+            "transcript_handoff_bytes": 0
           },
           "eagle_mem": {
             "enabled": "auto",
@@ -83,6 +88,30 @@
         "decision": "block",
         "handoff_file": ".eagle-governance/handoff.md",
         "eagle_mem_command_contains": "tasks add"
+      }
+    },
+    {
+      "id": "transcript_bloat_warns_without_handoff",
+      "description": "Large transcript files warn by default but do not force handoff without a real context or turn-budget signal.",
+      "event": "PostToolUse",
+      "fixture": {
+        "transcript_bytes": 32,
+        "policy_overrides": {
+          "context_budget": {
+            "transcript_warn_bytes": 1,
+            "transcript_handoff_bytes": 0
+          },
+          "eagle_mem": {
+            "enabled": "off"
+          }
+        }
+      },
+      "expected": {
+        "decision_not": "block",
+        "additional_context_contains": [
+          "context budget warning",
+          "transcript bytes"
+        ]
       }
     },
     {

@@ -39,7 +39,8 @@ eagle-skills govern apply --target all --mode warn --dry-run
 
 - Default mode is `warn`
 - Hard blocks remain active for destructive commands, secret-file writes, outside-root writes, and high-risk context handoff
-- Context bloat produces `.eagle-governance/handoff.md` and blocks further implementation at high risk
+- Context bloat uses Claude's real context percentage when available, then Eagle Mem turn budget, then optional transcript thresholds. High risk produces `.eagle-governance/handoff.md` and blocks further implementation
+- Transcript size and changed-file count are warnings by default; they do not force handoff unless configured
 - Eagle Mem bridge defaults to `auto`: Governance works without Eagle Mem, but mirrors handoffs and surfaces pending feature verification when Eagle Mem is installed
 - Eagle Eval is optional and never runs inside hooks; use the governance pack when you want regression tests for hook behavior
 - `AGENTS.md` and `CLAUDE.md` remain shims; do not duplicate the full policy there
@@ -51,7 +52,7 @@ eagle-skills govern apply --target all --mode warn --dry-run
 3. Run `eagle-skills govern apply --target all --mode warn`
 4. Run `eagle-skills govern verify --target all`
 5. For Codex, open `/hooks` and trust the new project hooks when prompted
-6. For Claude Code, restart or resume the project session so new hooks load
+6. For Claude Code, restart or resume the project session so new hooks and the context statusline load
 7. If Eagle Mem is installed, confirm `govern status` reports the bridge as available
 
 ## Output

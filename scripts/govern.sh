@@ -143,6 +143,22 @@ copy_hook() {
   fi
 }
 
+copy_statusline() {
+  local target_path="$1"
+  local src="$SOURCE_DIR/eagle-governance/references/eagle-governance-statusline.sh"
+  if [ ! -f "$src" ]; then
+    err "Missing governance statusline template: $src"
+    exit 1
+  fi
+  if [ "$DRY_RUN" = true ]; then
+    echo -e "  ${DIM}would copy:${RESET} $src -> $target_path"
+  else
+    mkdir -p "$(dirname "$target_path")"
+    cp "$src" "$target_path"
+    chmod +x "$target_path"
+  fi
+}
+
 default_policy_json() {
   cat <<'JSON'
 {
@@ -160,9 +176,12 @@ default_policy_json() {
     "lines": 600
   },
   "context_budget": {
-    "warn_bytes": 500000,
-    "handoff_bytes": 900000,
-    "max_changed_files": 25
+    "suggest_percent": 70,
+    "handoff_percent": 85,
+    "suggest_turns": 24,
+    "handoff_turns": 30,
+    "transcript_warn_bytes": 5000000,
+    "transcript_handoff_bytes": 0
   },
   "eagle_mem": {
     "enabled": "auto",
@@ -230,9 +249,15 @@ settings_contains_governance() {
   [ -f "$file" ] && grep -q "eagle-governance.sh" "$file"
 }
 
+settings_contains_statusline() {
+  local file="$1"
+  [ -f "$file" ] && grep -q "eagle-governance-statusline.sh" "$file"
+}
+
 merge_claude_settings() {
   local file="$PROJECT_DIR/.claude/settings.json"
   local cmd='"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/hooks/eagle-governance.sh"'
+  local status_cmd='"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/hooks/eagle-governance-statusline.sh"'
   if [ "$DRY_RUN" = true ]; then
     echo -e "  ${DIM}would merge Claude hook wiring:${RESET} $file"
     return
@@ -241,7 +266,7 @@ merge_claude_settings() {
   [ -f "$file" ] || printf '{}\n' > "$file"
   local tmp
   tmp="$(mktemp)"
-  jq --arg cmd "$cmd" '
+  jq --arg cmd "$cmd" --arg status_cmd "$status_cmd" '
     def strip_governance:
       map(
         .hooks = ((.hooks // []) | map(select(((.command // "") | contains("eagle-governance.sh")) | not)))
@@ -261,7 +286,12 @@ merge_claude_settings() {
     .hooks.Stop = ((.hooks.Stop // []) + [{"hooks":[{"type":"command","command":$cmd,"statusMessage":"Eagle governance completion gate"}]}]) |
     .hooks.PreCompact = ((.hooks.PreCompact // []) + [{"matcher":"manual|auto","hooks":[{"type":"command","command":$cmd,"statusMessage":"Eagle governance handoff writer"}]}]) |
     .hooks.PostCompact = ((.hooks.PostCompact // []) + [{"matcher":"manual|auto","hooks":[{"type":"command","command":$cmd,"statusMessage":"Eagle governance compact receipt"}]}]) |
-    .hooks.SessionStart = ((.hooks.SessionStart // []) + [{"matcher":"startup|resume|compact","hooks":[{"type":"command","command":$cmd,"statusMessage":"Eagle governance restore receipt"}]}])
+    .hooks.SessionStart = ((.hooks.SessionStart // []) + [{"matcher":"startup|resume|compact","hooks":[{"type":"command","command":$cmd,"statusMessage":"Eagle governance restore receipt"}]}]) |
+    if ((.statusLine? | type) == "object") and (((.statusLine.command // "") | contains("eagle-governance-statusline.sh")) | not) then
+      .
+    else
+      .statusLine = {"type":"command","command":$status_cmd,"padding":1}
+    end
   ' "$file" > "$tmp"
   mv "$tmp" "$file"
 }
@@ -349,6 +379,7 @@ apply_target() {
   case "$target" in
     claude)
       copy_hook "$PROJECT_DIR/.claude/hooks/eagle-governance.sh"
+      copy_statusline "$PROJECT_DIR/.claude/hooks/eagle-governance-statusline.sh"
       merge_claude_settings
       append_managed_block "$PROJECT_DIR/CLAUDE.md" "Claude Code"
       ok "Claude Code governance configured"
@@ -361,6 +392,7 @@ apply_target() {
       ;;
     grok)
       copy_hook "$PROJECT_DIR/.claude/hooks/eagle-governance.sh"
+      copy_statusline "$PROJECT_DIR/.claude/hooks/eagle-governance-statusline.sh"
       merge_claude_settings
       append_managed_block "$PROJECT_DIR/AGENTS.md" "Grok Build and generic agents"
       append_managed_block "$PROJECT_DIR/CLAUDE.md" "Grok Build Claude-compatible hooks"
@@ -405,7 +437,7 @@ policy_value() {
   local fallback="$2"
   local policy="$PROJECT_DIR/.eagle-governance.json"
   if [ -f "$policy" ] && command -v jq >/dev/null; then
-    jq -r "$expr // \"$fallback\"" "$policy" 2>/dev/null || printf '%s\n' "$fallback"
+    jq -r "if ($expr) == null then \"$fallback\" else ($expr | tostring) end" "$policy" 2>/dev/null || printf '%s\n' "$fallback"
   else
     printf '%s\n' "$fallback"
   fi
@@ -480,7 +512,9 @@ cmd_status() {
     case "$target" in
       claude)
         status_line "Claude hook" "installed" "missing" "$PROJECT_DIR/.claude/hooks/eagle-governance.sh"
+        status_line "Claude context statusline" "installed" "missing" "$PROJECT_DIR/.claude/hooks/eagle-governance-statusline.sh"
         if settings_contains_governance "$PROJECT_DIR/.claude/settings.json"; then ok "Claude settings: wired"; else warn "Claude settings: not wired"; fi
+        if settings_contains_statusline "$PROJECT_DIR/.claude/settings.json"; then ok "Claude context signal: wired"; else warn "Claude context signal: not wired (existing statusLine preserved or not configured)"; fi
         ;;
       codex)
         status_line "Codex hook" "installed" "missing" "$PROJECT_DIR/.codex/hooks/eagle-governance.sh"
@@ -488,7 +522,9 @@ cmd_status() {
         ;;
       grok)
         status_line "Grok hook" "Claude-compatible hook installed" "missing Claude-compatible hook" "$PROJECT_DIR/.claude/hooks/eagle-governance.sh"
+        status_line "Grok context statusline" "Claude-compatible statusline installed" "missing Claude-compatible statusline" "$PROJECT_DIR/.claude/hooks/eagle-governance-statusline.sh"
         if settings_contains_governance "$PROJECT_DIR/.claude/settings.json"; then ok "Grok hook compatibility: wired via .claude/settings.json"; else warn "Grok hook compatibility: not wired"; fi
+        if settings_contains_statusline "$PROJECT_DIR/.claude/settings.json"; then ok "Grok context signal: wired via .claude/settings.json"; else warn "Grok context signal: not wired (existing statusLine preserved or not configured)"; fi
         ;;
       antigravity)
         status_line "Antigravity hook" "installed" "missing" "$PROJECT_DIR/.agents/hooks/eagle-governance.sh"
@@ -502,8 +538,10 @@ cmd_verify() {
   command -v jq >/dev/null || { err "jq is required for govern verify"; exit 1; }
   local failed=0
   local template="$SOURCE_DIR/eagle-governance/references/eagle-governance.sh"
+  local statusline_template="$SOURCE_DIR/eagle-governance/references/eagle-governance-statusline.sh"
   local eval_pack="$SOURCE_DIR/eagle-governance/references/eagle-eval-governance-pack.json"
   bash -n "$template" || failed=1
+  bash -n "$statusline_template" || failed=1
   [ -f "$eval_pack" ] && jq empty "$eval_pack" || failed=1
   if [ "$DRY_RUN" = true ]; then
     ok "Governance templates validated"
@@ -515,6 +553,7 @@ cmd_verify() {
     case "$target" in
       claude)
         [ -x "$PROJECT_DIR/.claude/hooks/eagle-governance.sh" ] || failed=1
+        [ -x "$PROJECT_DIR/.claude/hooks/eagle-governance-statusline.sh" ] || failed=1
         settings_contains_governance "$PROJECT_DIR/.claude/settings.json" || failed=1
         [ -f "$PROJECT_DIR/CLAUDE.md" ] && grep -q "eagle-governance:start" "$PROJECT_DIR/CLAUDE.md" || failed=1
         ;;
@@ -525,6 +564,7 @@ cmd_verify() {
         ;;
       grok)
         [ -x "$PROJECT_DIR/.claude/hooks/eagle-governance.sh" ] || failed=1
+        [ -x "$PROJECT_DIR/.claude/hooks/eagle-governance-statusline.sh" ] || failed=1
         settings_contains_governance "$PROJECT_DIR/.claude/settings.json" || failed=1
         [ -f "$PROJECT_DIR/AGENTS.md" ] && grep -q "eagle-governance:start" "$PROJECT_DIR/AGENTS.md" || failed=1
         ;;

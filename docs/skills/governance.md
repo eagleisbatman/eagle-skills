@@ -29,7 +29,8 @@ Also triggers on: "govern this project", "install governance hooks", "agent gove
 
 ## Provider notes
 
-- Claude Code compact hooks run only when Claude triggers compaction manually with `/compact` or automatically at the context limit. Eagle Governance cannot force Claude to run `/compact`; it writes a handoff and re-injects the restore receipt on `SessionStart` for `startup`, `resume`, and `compact`.
+- Claude Code compact hooks run only when Claude triggers compaction manually with `/compact` or automatically at the context limit. Eagle Governance cannot force Claude to run `/compact`; hooks are shell callbacks, not slash-command drivers. It writes a handoff before compaction and re-injects the restore receipt on `SessionStart` for `startup`, `resume`, and `compact`.
+- Claude Code also gets `.claude/hooks/eagle-governance-statusline.sh`. When wired as `statusLine`, it records Claude's real `context_window.used_percentage` into `.eagle-governance/context-state.json` so the governance hook can distinguish true context pressure from large transcripts or broad diffs.
 - Codex project hooks require the project `.codex/` layer and hook definition to be trusted through `/hooks`.
 - Grok Build reads Claude Code hooks, skills, agents, and instruction files, so Eagle Governance installs the Claude-compatible hook surface for Grok.
 - Antigravity uses its own hook schema. Governance maps blocks to `deny` for `PreToolUse`, `continue` for `Stop`, and transient `injectSteps` for invocation context.
@@ -46,6 +47,31 @@ Also triggers on: "govern this project", "install governance hooks", "agent gove
 - Fresh-session restore on startup, resume, and compact
 - Eagle Mem pending-feature visibility
 - Eagle Mem handoff mirroring
+
+## Context policy
+
+Context handoff uses real pressure signals first:
+
+1. Claude Code context percentage from the governance statusline
+2. Eagle Mem turn budget when Eagle Mem is available
+3. Optional transcript byte thresholds only when explicitly configured
+
+Defaults:
+
+```json
+{
+  "context_budget": {
+    "suggest_percent": 70,
+    "handoff_percent": 85,
+    "suggest_turns": 24,
+    "handoff_turns": 30,
+    "transcript_warn_bytes": 5000000,
+    "transcript_handoff_bytes": 0
+  }
+}
+```
+
+Changed-file count and diff size are scope signals, not context-window signals. They warn through the diff-budget gate, but they do not force a fresh-session handoff by default.
 
 ## Policy bridge
 

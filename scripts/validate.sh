@@ -9,6 +9,7 @@ bash -n install.sh
 bash -n scripts/govern.sh
 bash -n scripts/test-governance.sh
 bash -n eagle-governance/references/eagle-governance.sh
+bash -n eagle-governance/references/eagle-governance-statusline.sh
 
 source <(sed '/^main "\$@"/d' bin/eagle-skills)
 
