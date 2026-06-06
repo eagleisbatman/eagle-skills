@@ -6,7 +6,7 @@
     <title>Eagle Skills</title>
     <meta
       name="description"
-      content="Skills and agents for Claude Code — anti-slop detection, token saver, and 12 review agents."
+      content="Skills, review agents, and hook-based governance for Claude Code, Codex, Grok, and Antigravity workflows."
     />
     <style>
       :root {
@@ -261,8 +261,8 @@
         <p class="tagline">
           An open-source toolkit that extends
           <a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code</a>
-          with skills and review agents. Catch AI slop, save tokens
-          automatically, and ship cleaner code.
+          and Codex with skills, review agents, and project-local governance hooks.
+          Catch AI slop, control context drift, and ship cleaner code.
         </p>
         <div class="install-block">
           <span class="prefix">$ </span>npm install -g eagle-skills
@@ -279,23 +279,23 @@
       <div class="highlights">
         <div class="highlight">
           <h3>Skills</h3>
-          <span class="num">11</span>
-          <p>Domain expertise via slash commands</p>
+          <span class="num">15</span>
+          <p>Project workflows, reviews, governance, and tracking</p>
         </div>
         <div class="highlight">
           <h3>Agents</h3>
-          <span class="num">12</span>
-          <p>Autonomous code review specialists</p>
+          <span class="num">13</span>
+          <p>Review specialists and lifecycle operators</p>
         </div>
         <div class="highlight">
-          <h3>Rules</h3>
-          <span class="num">32</span>
-          <p>Token-saving compact rules</p>
+          <h3>Governance</h3>
+          <span class="num">6</span>
+          <p>Prompt, tool, stop, and compact hook gates</p>
         </div>
         <div class="highlight">
-          <h3>Filters</h3>
-          <span class="num">10</span>
-          <p>Output compression for test/build/logs</p>
+          <h3>Targets</h3>
+          <span class="num">4</span>
+          <p>Claude Code, Codex, Grok, and Antigravity</p>
         </div>
       </div>
 
@@ -314,22 +314,22 @@
           </ul>
         </div>
         <div class="feature">
-          <h3>// token-saver</h3>
+          <h3>// governance-hooks</h3>
           <p>
-            Claude Code burns tokens on verbose output. This hook system
-            compresses it automatically with 32 regex rules.
+            Large projects need more than long instruction files. Eagle Skills now installs
+            project-local hook gates that keep agents inside engineering guardrails.
           </p>
           <ul>
-            <li><strong>Flag rules</strong> — <code>git log</code> becomes <code>git log --oneline -20</code></li>
-            <li><strong>Pipe rules</strong> — test output compressed to failures + summary</li>
-            <li><strong>10 filters</strong> — pytest, cargo, Go, lint, tsc, Docker, k8s, generic</li>
-            <li><strong>Fail-safe</strong> — errors exit silently, sessions never break</li>
+            <li><strong>Routing shims</strong> — <code>AGENTS.md</code> and <code>CLAUDE.md</code> stay compact</li>
+            <li><strong>PreToolUse gates</strong> — risky commands are warned or blocked before execution</li>
+            <li><strong>Stop gates</strong> — missing checks and high context risk block premature "done"</li>
+            <li><strong>Context handoff</strong> — large sessions write restore receipts instead of drifting</li>
           </ul>
         </div>
         <div class="feature">
           <h3>// spectral-agents</h3>
           <p>
-            12 agents that analyze your code through specialized lenses.
+            13 agents that analyze your code through specialized lenses.
             Run one at a time or ask Claude to dispatch multiple in parallel.
           </p>
           <ul>
@@ -345,10 +345,10 @@
             Every skill installs as a symlink — lightweight, always up to date.
           </p>
           <ul>
+            <li><strong>Governance</strong> — hook-backed engineering gates for large projects</li>
+            <li><strong>Tracker</strong> — project-local work tracking and status hygiene</li>
             <li><strong>UX Review</strong> — structured user experience audit</li>
-            <li><strong>Ad Review</strong> — ad copy and creative analysis</li>
             <li><strong>Product Diagnostics</strong> — validate product decisions</li>
-            <li><strong>Multi-Stack Scaffolder</strong> — research-driven project setup</li>
             <li><strong>CLAUDE.md Generator</strong> — project onboarding files</li>
             <li><strong>Bootstrap</strong> — one-time global environment setup</li>
           </ul>
