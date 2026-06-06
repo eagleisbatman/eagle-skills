@@ -199,14 +199,35 @@ JSON
 
 ensure_policy() {
   local path="$PROJECT_DIR/.eagle-governance.json"
+  local content tmp
+  content="$(default_policy_json | jq --arg mode "$MODE" '.mode = $mode')"
   if [ -f "$path" ]; then
     if [ "$DRY_RUN" = true ]; then
-      echo -e "  ${DIM}would keep existing:${RESET} $path"
+      echo -e "  ${DIM}would refresh existing policy:${RESET} $path"
+    else
+      tmp="$(mktemp)"
+      jq --argjson defaults "$content" '
+        def old_default_warn_bytes: 500000;
+        ($defaults * .)
+        | .context_budget = (.context_budget // {})
+        | .context_budget.suggest_percent = (.context_budget.suggest_percent // .context_budget.warn_percent // $defaults.context_budget.suggest_percent)
+        | .context_budget.handoff_percent = (.context_budget.handoff_percent // $defaults.context_budget.handoff_percent)
+        | .context_budget.suggest_turns = (.context_budget.suggest_turns // $defaults.context_budget.suggest_turns)
+        | .context_budget.handoff_turns = (.context_budget.handoff_turns // $defaults.context_budget.handoff_turns)
+        | .context_budget.transcript_warn_bytes = (
+            .context_budget.transcript_warn_bytes //
+            (if (.context_budget.warn_bytes // null) == old_default_warn_bytes
+             then $defaults.context_budget.transcript_warn_bytes
+             else (.context_budget.warn_bytes // $defaults.context_budget.transcript_warn_bytes)
+             end)
+          )
+        | .context_budget.transcript_handoff_bytes = (.context_budget.transcript_handoff_bytes // $defaults.context_budget.transcript_handoff_bytes)
+        | del(.context_budget.warn_bytes, .context_budget.handoff_bytes, .context_budget.max_changed_files, .context_budget.warn_percent)
+      ' "$path" > "$tmp"
+      mv "$tmp" "$path"
     fi
     return 0
   fi
-  local content
-  content="$(default_policy_json | jq --arg mode "$MODE" '.mode = $mode')"
   write_file "$path" "$content"
 }
 

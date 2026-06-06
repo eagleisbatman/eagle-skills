@@ -28,6 +28,20 @@ cat > .claude/settings.json <<'JSON'
 JSON
 
 printf '# Existing instructions\n' > AGENTS.md
+cat > .eagle-governance.json <<'JSON'
+{
+  "mode": "warn",
+  "gates": {
+    "tests_required": false,
+    "context_budget": true
+  },
+  "context_budget": {
+    "warn_bytes": 500000,
+    "handoff_bytes": 900000,
+    "max_changed_files": 25
+  }
+}
+JSON
 
 fakebin="$TMP/fakebin"
 mkdir -p "$fakebin"
@@ -71,7 +85,19 @@ grep -q "echo existing" .claude/settings.json
 jq empty .claude/settings.json
 jq empty .codex/hooks.json
 jq empty .agents/hooks.json
-jq -e '.eagle_mem.enabled == "auto" and .eagle_mem.handoff_mirror == true and .eagle_eval.governance_pack == true' .eagle-governance.json >/dev/null
+jq -e '
+  .eagle_mem.enabled == "auto" and
+  .eagle_mem.handoff_mirror == true and
+  .eagle_eval.governance_pack == true and
+  .gates.tests_required == false and
+  .context_budget.suggest_percent == 70 and
+  .context_budget.handoff_percent == 85 and
+  .context_budget.transcript_warn_bytes == 5000000 and
+  .context_budget.transcript_handoff_bytes == 0 and
+  (.context_budget | has("warn_bytes") | not) and
+  (.context_budget | has("handoff_bytes") | not) and
+  (.context_budget | has("max_changed_files") | not)
+' .eagle-governance.json >/dev/null
 grep -q "exec_command" .codex/hooks.json
 jq -e '.hooks.SessionStart[] | select(.matcher == "startup|resume|compact")' .claude/settings.json >/dev/null
 jq -e '.statusLine.command | contains("eagle-governance-statusline.sh")' .claude/settings.json >/dev/null
