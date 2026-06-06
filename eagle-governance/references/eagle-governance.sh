@@ -319,6 +319,20 @@ handle_pre_tool_use() {
     return
   fi
 
+  if [ "$(gate_enabled context_budget)" = "true" ] && is_write_like_tool_or_command "$text"; then
+    local risk status size changed
+    risk="$(context_risk)"
+    status="${risk%%:*}"
+    size="${risk#*:}"
+    size="${size%%:*}"
+    changed="${risk##*:}"
+    if [ "$status" = "handoff" ]; then
+      write_handoff
+      json_block "Eagle Governance requires a fresh-session handoff before write-like tool use. Handoff written to .eagle-governance/handoff.md (transcript bytes: $size, changed files: $changed)."
+      return
+    fi
+  fi
+
   if [ "$(gate_enabled dependency_change)" = "true" ] && [[ "$text" =~ (^|[[:space:];])(npm|pnpm|yarn|bun)[[:space:]]+(add|install|i)[[:space:]]+[^[:space:]-] ]]; then
     warn_or_block "Eagle Governance: dependency change detected. Justify why existing dependencies are insufficient and verify package impact."
   fi
@@ -339,7 +353,11 @@ handle_post_tool_use() {
 
   if [ "$status" = "handoff" ] && [ "$(gate_enabled context_budget)" = "true" ]; then
     write_handoff
-    json_block "Eagle Governance requires a fresh-session handoff before further implementation. Handoff written to .eagle-governance/handoff.md (transcript bytes: $size, changed files: $changed)."
+    if is_write_like_tool_or_command "$text"; then
+      json_block "Eagle Governance requires a fresh-session handoff before further write-like implementation. Handoff written to .eagle-governance/handoff.md (transcript bytes: $size, changed files: $changed)."
+    else
+      json_context "Eagle Governance wrote a fresh-session handoff to .eagle-governance/handoff.md (transcript bytes: $size, changed files: $changed). Continue read-only triage if needed, but start fresh or compact-resume before implementation."
+    fi
     return
   fi
 

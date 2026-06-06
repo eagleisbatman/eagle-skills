@@ -92,6 +92,12 @@ echo "$warn_output" | jq -e '.hookSpecificOutput.additionalContext | contains("d
 printf '{"mode":"warn","gates":{"context_budget":true},"context_budget":{"warn_bytes":1,"handoff_bytes":1,"max_changed_files":99},"eagle_mem":{"enabled":"off"}}\n' > .eagle-governance.json
 transcript="$TMP/transcript.jsonl"
 printf '%s\n' "large transcript" > "$transcript"
+read_handoff_output="$(printf '%s\n' '{"hook_event_name":"PostToolUse","cwd":"'"$repo"'","transcript_path":"'"$transcript"'","tool_input":{"command":"rg generationRuns packages/db/src/schema"}}' | .claude/hooks/eagle-governance.sh)"
+echo "$read_handoff_output" | jq -e '(.decision // "") != "block" and (.hookSpecificOutput.additionalContext | contains("Continue read-only triage"))' >/dev/null
+pre_write_handoff_output="$(printf '%s\n' '{"hook_event_name":"PreToolUse","cwd":"'"$repo"'","transcript_path":"'"$transcript"'","tool_input":{"command":"touch local-change.txt"}}' | .claude/hooks/eagle-governance.sh)"
+echo "$pre_write_handoff_output" | jq -e '.decision == "block" and (.reason | contains("write-like tool use"))' >/dev/null
+post_write_handoff_output="$(printf '%s\n' '{"hook_event_name":"PostToolUse","cwd":"'"$repo"'","transcript_path":"'"$transcript"'","tool_input":{"command":"echo x > local-change.txt"}}' | .claude/hooks/eagle-governance.sh)"
+echo "$post_write_handoff_output" | jq -e '.decision == "block" and (.reason | contains("write-like implementation"))' >/dev/null
 handoff_output="$(printf '%s\n' '{"hook_event_name":"Stop","cwd":"'"$repo"'","transcript_path":"'"$transcript"'"}' | .claude/hooks/eagle-governance.sh)"
 echo "$handoff_output" | jq -e '.decision == "block"' >/dev/null
 [ -f .eagle-governance/handoff.md ]

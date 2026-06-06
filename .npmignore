@@ -1,6 +1,11 @@
 .playwright-mcp/
 .claude/
+.codex/
+.eagle-governance/
+.eagle-governance.json
 /AGENTS.md
+/CLAUDE.md
+.DS_Store
 *.png
 *.jpg
 .git/
