@@ -6,7 +6,7 @@ set -euo pipefail
 # https://github.com/eagleisbatman/eagle-skills
 # ─────────────────────────────────────────────────────────────
 
-VERSION="3.4.1"
+VERSION="3.5.0"
 REPO_URL="https://github.com/eagleisbatman/eagle-skills.git"
 SOURCE_FILE="${BASH_SOURCE[0]}"
 while [ -L "$SOURCE_FILE" ]; do
@@ -19,8 +19,8 @@ INSTALL_DIR="${EAGLE_SKILLS_DIR:-$HOME/.eagle-skills}"
 TARGET_SELECTION="${EAGLE_SKILLS_TARGET:-claude}"
 
 # ─── Available skills (directory → display) ─────────────────
-declare -a SKILL_DIRS=("eagle-ux-review" "eagle-product-diagnostics" "eagle-ad-review" "eagle-anti-slop" "eagle-human-writing" "eagle-clean-doc" "eagle-clean-sheet" "eagle-multi-stack-scaffolder" "eagle-claude-md" "eagle-bootstrap" "eagle-governance" "eagle-feature-flow" "eagle-spectral-review" "eagle-compact-add" "eagle-tracker")
-declare -a SKILL_NAMES=("Eagle UX Review" "Eagle Product Diagnostics" "Eagle Ad Review" "Eagle Anti-Slop" "Eagle Human Writing" "Eagle Clean Doc" "Eagle Clean Sheet" "Eagle Multi-Stack Scaffolder" "Eagle CLAUDE.md" "Eagle Bootstrap" "Eagle Governance" "Eagle Feature Flow" "Eagle Spectral Review" "Eagle Compact Add" "Eagle Tracker")
+declare -a SKILL_DIRS=("eagle-ux-review" "eagle-product-diagnostics" "eagle-ad-review" "eagle-anti-slop" "eagle-human-writing" "eagle-clean-doc" "eagle-clean-sheet" "eagle-multi-stack-scaffolder" "eagle-claude-md" "eagle-bootstrap" "eagle-governance" "eagle-feature-flow" "eagle-spectral-review" "eagle-compact-add" "eagle-tracker" "eagle-maintainable-code")
+declare -a SKILL_NAMES=("Eagle UX Review" "Eagle Product Diagnostics" "Eagle Ad Review" "Eagle Anti-Slop" "Eagle Human Writing" "Eagle Clean Doc" "Eagle Clean Sheet" "Eagle Multi-Stack Scaffolder" "Eagle CLAUDE.md" "Eagle Bootstrap" "Eagle Governance" "Eagle Feature Flow" "Eagle Spectral Review" "Eagle Compact Add" "Eagle Tracker" "Eagle Maintainable Code")
 declare -a SKILL_DESCS=(
   "Expert-level UX audits grounded in 65+ UX laws"
   "Three-layer data validation: design intent + behavior + outcomes"
@@ -37,8 +37,9 @@ declare -a SKILL_DESCS=(
   "Routes Spectral review requests to the right specialist agents"
   "Add new rules to compact-rules.json for verbose commands"
   "Project trackers + Gantt charts as .xlsx that open in Excel and import to Google Sheets"
+  "Human-grade code in any language — minimal, direct, first-principles, test-driven, no over-engineering"
 )
-declare -a SKILL_COMMANDS=("/eagle-ux-review" "/eagle-product-diagnostics" "/eagle-ad-review" "/eagle-anti-slop" "/eagle-human-writing" "/eagle-clean-doc" "/eagle-clean-sheet" "/eagle-multi-stack-scaffolder" "/eagle-claude-md" "/eagle-bootstrap" "/eagle-governance" "/eagle-feature-flow" "/eagle-spectral-review" "/eagle-compact-add" "/eagle-tracker")
+declare -a SKILL_COMMANDS=("/eagle-ux-review" "/eagle-product-diagnostics" "/eagle-ad-review" "/eagle-anti-slop" "/eagle-human-writing" "/eagle-clean-doc" "/eagle-clean-sheet" "/eagle-multi-stack-scaffolder" "/eagle-claude-md" "/eagle-bootstrap" "/eagle-governance" "/eagle-feature-flow" "/eagle-spectral-review" "/eagle-compact-add" "/eagle-tracker" "/eagle-maintainable-code")
 declare -a SKILL_TRIGGERS=(
   "ux review, ux audit, usability review, heuristic evaluation, critique this design, what's wrong with this UI"
   "validate these findings, product diagnostics, funnel analysis, why isn't this metric moving, triangulate UX and data"
@@ -55,6 +56,7 @@ declare -a SKILL_TRIGGERS=(
   "spectral agents, spectral review, full spectrum review, run review specialists, triage review agents"
   "compact-add, add compact rules, this command is too verbose, compact this command"
   "project tracker, task tracker, gantt chart, project plan, roadmap, timeline, sprint board, raid log, track tasks with owners and dates"
+  "maintainable code, clean code, keep it simple, don't over-engineer, production code, like a human wrote it, write this properly, too bloated, over-abstracted"
 )
 declare -a SKILL_INPUTS=(
   "North star metric|Target user profile (demographics, tech literacy, device/connectivity)|2-3 reference apps the target user opens daily|App identity (chat, marketplace, tool, social, etc.)|Output format: HTML, Word, or both|Screen recording (video) or a folder of screenshots|Optional: PRD or hypothesis document|Optional: User personas, analytics data, competitive screenshots"
@@ -72,6 +74,7 @@ declare -a SKILL_INPUTS=(
   "Review scope: changed files, whole project, a PR, or specific paths|Optional: focus area such as security, API, UX, accessibility, database, data integrity, performance, architecture, or quality"
   "Command to compact, or describe which commands are too verbose"
   "A list of tasks with owners, start/end dates, and status (prose, CSV, JSON, or a JSON spec)|Optional: timescale (day/week/month)"
+  "A code writing, refactoring, or review task in any language|Optional: the repo for stack detection (lockfiles, lint config, existing conventions)"
 )
 declare -a SKILL_OUTPUTS=(
   "HTML and/or Word report with severity-rated findings, embedded evidence, before/after mockups, priority matrix, UX law citations"
@@ -89,6 +92,7 @@ declare -a SKILL_OUTPUTS=(
   "A routed review plan naming the exact Spectral specialists to run"
   "New rules appended to compact-rules.json"
   "A styled .xlsx with Tracker (status dropdowns, % data bars), a conditional-formatting Gantt with today marker, and a dashboard — opens in Excel and imports to Google Sheets"
+  "Minimal, direct code matching the repo's existing idioms — test-first, verified with real checks, self-reviewed for slop"
 )
 declare -a SKILL_EXAMPLES=(
   "UX review this app — here's a screen recording of the onboarding flow"
@@ -106,6 +110,7 @@ declare -a SKILL_EXAMPLES=(
   "Use Spectral Agents to review this PR and pick the right specialists"
   "That terraform plan output was way too long, compact it"
   "Turn this list of tasks, owners, and dates into a project tracker with a Gantt chart for Google Sheets"
+  "Add a retry helper to this API client — keep it simple, no over-engineering"
 )
 
 # ─── Available agents (filename without .md → display) ──────

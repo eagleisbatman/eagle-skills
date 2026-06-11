@@ -1,7 +1,7 @@
 {
   "name": "eagle-skills",
-  "version": "3.4.1",
-  "description": "Portable skills and agents for Claude Code, Codex, Grok Build, and Antigravity — 15 skills + 13 agents",
+  "version": "3.5.0",
+  "description": "Portable skills and agents for Claude Code, Codex, Grok Build, and Antigravity — 16 skills + 13 agents",
   "scripts": {
     "validate": "bash scripts/validate.sh"
   },

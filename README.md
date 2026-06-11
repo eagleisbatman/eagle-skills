@@ -62,6 +62,7 @@ Invoked via slash commands or automatic skill matching in supported agent surfac
 | [Spectral Review](docs/skills/spectral-review.md) | `/eagle-spectral-review` | Route broad Spectral review requests to the right specialist agents |
 | [Compact Add](docs/skills/compact-add.md) | `/eagle-compact-add` | Review and add new rules to the compact token saver |
 | [Tracker](docs/skills/tracker.md) | `/eagle-tracker` | Project trackers + Gantt charts as .xlsx for Excel and Google Sheets |
+| [Maintainable Code](docs/skills/maintainable-code.md) | `/eagle-maintainable-code` | Human-grade code in any language — minimal, direct, test-driven, no over-engineering |
 
 ## Agents
 
